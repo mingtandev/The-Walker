@@ -6,4 +6,4 @@ const port = process.env.PORT
 
 const server = http.createServer(app)
 
-server.listen(port, () => `Server listening at port: ${port}`)
+server.listen(port, () => `Server is listening at port: ${port}`)

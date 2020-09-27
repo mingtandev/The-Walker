@@ -4,43 +4,27 @@ const cors = require('cors')
 
 require('dotenv').config()
 
+// DB
 const connectDB = require('./api/config/db')
 
-// models
-const User = require('./api/models/user')
+// Routes
+const userRoutes = require('./api/routes/users')
 
 const app = express()
 
+// Connect DB
 connectDB()
 
+// Middleware
 app.use(morgan('dev'))
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
 app.use(cors())
 
-// test route
-app.post('/users', (req, res, next) => {
-    const {name, email, password} = req.body
+// Routes
+app.use('/users', userRoutes)
 
-    const user = new User({
-        name,
-        email,
-        password,
-    })
-
-    user.save()
-    .then(user => {
-        res.status(200).json({
-            status: 'success',
-            user
-        })
-    })
-    .catch(error => {
-        next(error)
-    })
-})
-
-// Handling errors
+// Handling server errors
 app.use((req, res, next) => {
     const error = new Error('Not found!')
     error.status = 404

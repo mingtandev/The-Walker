@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const slug = require('mongoose-slug-generator')
 
 const userScheme = mongoose.Schema({
     name: {
@@ -12,22 +13,34 @@ const userScheme = mongoose.Schema({
         match: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     },
     roles: {
-        type: Array,
-        default: []
+        type: String,
+        default: 'guest'
     },
     isVerified: {
         type: Boolean,
         default: false
     },
-    password: {type: String,  required: true},
-    passwordResetToken: {type: String, default: "hello"},
-    passwordResetExpires: {type: Date, default: Date.now},
-    createdAt: {
+    password: {
+        type: String,
+        required: true
+    },
+    passwordResetToken: {
+        type: String,
+        default: "hello"
+    },
+    passwordResetExpires: {
         type: Date,
-        required: true,
-        default: Date.now,
-        expires: 43200
+        default: 42300
+    },
+    slug: {
+        type: String,
+        slug: 'name',
+        unique: true
     }
 })
+
+// Add plugins
+mongoose.plugin(slug)
+userScheme.set('timestamps', true)
 
 module.exports = mongoose.model('User', userScheme)
