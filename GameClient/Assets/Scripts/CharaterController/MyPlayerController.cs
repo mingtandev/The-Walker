@@ -80,8 +80,6 @@ public class MyPlayerController : MonoBehaviour
             int layerBit = LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("EnemyLayer");
             if (Physics.Raycast(camRay, out hit , 50f , layerBit))
             {   
-                        
-                        
 
                         endPosition = hit.point;
                         //set rotate
@@ -94,12 +92,12 @@ public class MyPlayerController : MonoBehaviour
                        {
                             MyGun.muzzle.Play();
                             //HANDLE Damage 
-                        // if(1 << hit.transform.gameObject.layer == LayerMask.GetMask("EnemyLayer"))
-                        // {
-                        //     GameObject blood = Instantiate(MyGun.blood , hit.point , Quaternion.LookRotation(hit.normal));
-                        //     hit.transform.gameObject.GetComponent<Enemy>().heath-=MyGun.damage;
-                        //     Destroy(blood,1f);
-                        // }
+                        if(1 << hit.transform.gameObject.layer == LayerMask.GetMask("EnemyLayer"))
+                        {
+                            GameObject blood = Instantiate(MyGun.blood , hit.point , Quaternion.LookRotation(hit.normal));
+                            hit.transform.gameObject.GetComponent<Enemy>().heath-=MyGun.damage;
+                            Destroy(blood,1f);
+                        }
                             MyGun.ResetTimeBullet();
                        }
                         
