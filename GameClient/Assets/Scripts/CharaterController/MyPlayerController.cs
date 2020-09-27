@@ -66,7 +66,7 @@ public class MyPlayerController : MonoBehaviour
 
         if(!MyGun.canShot)
         {
-            //MyGun.muzzle.Stop();
+            MyGun.muzzle.Stop();
         }
         
         if (Input.GetMouseButton(0) && isGround == true)
@@ -78,10 +78,10 @@ public class MyPlayerController : MonoBehaviour
             Vector3 endPosition = Vector3.zero;
             isAiming = true;
             int layerBit = LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("EnemyLayer");
-            if (Physics.Raycast(camRay, out hit , 50f , layerBit) && MyGun.canShot)
+            if (Physics.Raycast(camRay, out hit , 50f , layerBit))
             {   
                         
-                        //MyGun.muzzle.Play();
+                        
 
                         endPosition = hit.point;
                         //set rotate
@@ -90,14 +90,19 @@ public class MyPlayerController : MonoBehaviour
                         rot = Quaternion.LookRotation(rotateDir);
 
                        
-                        //HANDLE Damage 
+                       if(MyGun.canShot)
+                       {
+                            MyGun.muzzle.Play();
+                            //HANDLE Damage 
                         // if(1 << hit.transform.gameObject.layer == LayerMask.GetMask("EnemyLayer"))
                         // {
                         //     GameObject blood = Instantiate(MyGun.blood , hit.point , Quaternion.LookRotation(hit.normal));
                         //     hit.transform.gameObject.GetComponent<Enemy>().heath-=MyGun.damage;
                         //     Destroy(blood,1f);
                         // }
-                        MyGun.ResetTimeBullet();
+                            MyGun.ResetTimeBullet();
+                       }
+                        
 
 
                 // Do something with the object that was hit by the raycast.
@@ -106,7 +111,7 @@ public class MyPlayerController : MonoBehaviour
 
         if(Input.GetMouseButtonUp(0))
         {
-            //MyGun.muzzle.Stop();
+            MyGun.muzzle.Stop();
             isAiming = false;
         }
 
