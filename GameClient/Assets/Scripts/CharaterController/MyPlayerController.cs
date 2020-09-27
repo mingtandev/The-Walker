@@ -116,24 +116,33 @@ public class MyPlayerController : MonoBehaviour
         anim.SetBool("Aimming" , isAiming);
     }
 
+
+    void AddForceToMove(Vector3 moveDirection)
+    {
+           
+
+            rid.velocity = new Vector3((moveSpeed * moveDirection.normalized).x, rid.velocity.y, (moveSpeed * moveDirection.normalized).z);
+    }
+
     void Movement()
     {
 
-    
+        float h = Input.GetAxis("Horizontal");
+        float v = Input.GetAxis("Vertical");
+        moveDir.x = h;
+        moveDir.z = v;
+
+        
         //walk handle
         if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) && !isAiming)
         {
-            float h = Input.GetAxis("Horizontal");
-            float v = Input.GetAxis("Vertical");
-
-            moveDir.x = h;
-            moveDir.z = v;
-
+            anim.SetInteger("Speed", 1);
+            AddForceToMove(moveDir);
             rotateDir = moveDir;
             rotateDir.y = 0;
-            rid.velocity = new Vector3((moveSpeed * moveDir.normalized).x, rid.velocity.y, (moveSpeed * moveDir.normalized).z);
             rot = Quaternion.LookRotation(rotateDir);
-            anim.SetInteger("Speed", 1);
+
+            
         }
         else
         {
@@ -149,12 +158,39 @@ public class MyPlayerController : MonoBehaviour
             anim.SetInteger("Speed", 2);
 
         }
-        
         if(Input.GetKeyUp(KeyCode.LeftShift))
         {
             moveSpeed = 2f;
             anim.SetInteger("Speed", 1);
         }
+
+
+
+        
+        Vector3 direcMoveBackward = moveDir;
+        //Aimming movement
+        if((transform.eulerAngles.y>=0 && transform.eulerAngles.y<=90) || (transform.eulerAngles.y>=270 && transform.eulerAngles.y<=360))
+        {
+            direcMoveBackward = new Vector3(moveDir.x,moveDir.y,-moveDir.z);
+        }
+        else
+        {
+            direcMoveBackward = moveDir;
+        }
+
+
+         if(Input.GetKey(KeyCode.S) && isAiming)
+         {
+            anim.SetBool("AimWalkBackward",true);
+            AddForceToMove(direcMoveBackward);
+         }
+         else
+         {
+             anim.SetBool("AimWalkBackward",false);
+         }
+
+        
+
 
         transform.rotation = rot;
     }

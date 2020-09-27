@@ -30,6 +30,7 @@ GameClient/Assets/PlayerPrefabs
 GameClient/Assets/PolygonApocalypse
 GameClient/Assets/Prefabs
 GameClient/Assets/Models
+GameClient/Assets/Textures
 
 # Unity3D generated meta files
 GameClient/*.pidb.meta
