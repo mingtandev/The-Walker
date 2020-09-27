@@ -349,6 +349,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: MyPlayer
       objectReference: {fileID: 0}
+    - target: {fileID: 5140981331722631062, guid: db58c2baa2a930741af63b66a2ddb4f1,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 48f4cac31a1e6ea4b8e93b86c153275c, type: 2}
+    - target: {fileID: 5140981331722631062, guid: db58c2baa2a930741af63b66a2ddb4f1,
+        type: 3}
+      propertyPath: m_WarningMessage
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5140981331722631062, guid: db58c2baa2a930741af63b66a2ddb4f1,
+        type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5140981331722631062, guid: db58c2baa2a930741af63b66a2ddb4f1,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: db58c2baa2a930741af63b66a2ddb4f1, type: 3}
 --- !u!1 &1620956423
