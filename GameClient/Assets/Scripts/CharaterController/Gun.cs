@@ -18,7 +18,7 @@ public class Gun : MonoBehaviour
     [HideInInspector]
     public bool canShot;
     private void Awake() {
-        muzzle.Stop();
+        //muzzle.Stop();
     }
 
     void Start()

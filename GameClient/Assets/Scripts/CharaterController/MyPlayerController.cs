@@ -45,13 +45,13 @@ public class MyPlayerController : MonoBehaviour
 
     void Start()
     {
-        //MyGun = GameObject.FindGameObjectWithTag("Gun").GetComponent<Gun>();
+        MyGun = GameObject.FindGameObjectWithTag("Gun").GetComponent<Gun>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        //Aimming();
+        Aimming();
     }
 
     private void FixedUpdate()
@@ -61,57 +61,57 @@ public class MyPlayerController : MonoBehaviour
 
     }
 
-    // void Aimming()
-    // {
+    void Aimming()
+    {
 
-    //     if(!MyGun.canShot)
-    //     {
-    //         MyGun.muzzle.Stop();
-    //     }
+        if(!MyGun.canShot)
+        {
+            //MyGun.muzzle.Stop();
+        }
         
-    //     if (Input.GetMouseButton(0) && isGround == true)
-    //     {
+        if (Input.GetMouseButton(0) && isGround == true)
+        {
             
-    //         RaycastHit hit;
-    //         Ray camRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            Ray camRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-    //         Vector3 endPosition = Vector3.zero;
-    //         isAiming = true;
-    //         int layerBit = LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("EnemyLayer");
-    //         if (Physics.Raycast(camRay, out hit , 50f , layerBit) && MyGun.canShot)
-    //         {   
+            Vector3 endPosition = Vector3.zero;
+            isAiming = true;
+            int layerBit = LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("EnemyLayer");
+            if (Physics.Raycast(camRay, out hit , 50f , layerBit) && MyGun.canShot)
+            {   
                         
-    //                     MyGun.muzzle.Play();
+                        //MyGun.muzzle.Play();
 
-    //                     endPosition = hit.point;
-    //                     //set rotate
-    //                     rotateDir = endPosition - transform.position;
-    //                     rotateDir.y=0;
-    //                     rot = Quaternion.LookRotation(rotateDir);
+                        endPosition = hit.point;
+                        //set rotate
+                        rotateDir = endPosition - transform.position;
+                        rotateDir.y=0;
+                        rot = Quaternion.LookRotation(rotateDir);
 
                        
-    //                     //HANDLE Damage 
-    //                     if(1 << hit.transform.gameObject.layer == LayerMask.GetMask("EnemyLayer"))
-    //                     {
-    //                         GameObject blood = Instantiate(MyGun.blood , hit.point , Quaternion.LookRotation(hit.normal));
-    //                         hit.transform.gameObject.GetComponent<Enemy>().heath-=MyGun.damage;
-    //                         Destroy(blood,1f);
-    //                     }
-    //                     MyGun.ResetTimeBullet();
+                        //HANDLE Damage 
+                        // if(1 << hit.transform.gameObject.layer == LayerMask.GetMask("EnemyLayer"))
+                        // {
+                        //     GameObject blood = Instantiate(MyGun.blood , hit.point , Quaternion.LookRotation(hit.normal));
+                        //     hit.transform.gameObject.GetComponent<Enemy>().heath-=MyGun.damage;
+                        //     Destroy(blood,1f);
+                        // }
+                        MyGun.ResetTimeBullet();
 
 
-    //             // Do something with the object that was hit by the raycast.
-    //         }
-    //     }
+                // Do something with the object that was hit by the raycast.
+            }
+        }
 
-    //     if(Input.GetMouseButtonUp(0))
-    //     {
-    //         MyGun.muzzle.Stop();
-    //         isAiming = false;
-    //     }
+        if(Input.GetMouseButtonUp(0))
+        {
+            //MyGun.muzzle.Stop();
+            isAiming = false;
+        }
 
-    //     anim.SetBool("Aimming" , isAiming);
-    // }
+        anim.SetBool("Aimming" , isAiming);
+    }
 
     void Movement()
     {
