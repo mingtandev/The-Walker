@@ -10,13 +10,13 @@ public class MyPlayerController : MonoBehaviour
     CharacterController controller;
     Animator anim;
     Rigidbody rid;
-    
+
 
     //Shoot
     bool isAiming = false;
     Gun MyGun;
+    RaycastHit hit;
 
-    
 
 
 
@@ -35,7 +35,7 @@ public class MyPlayerController : MonoBehaviour
 
     private void Awake()
     {
-      
+
         ground = LayerMask.GetMask("GroundLayer");
 
         rid = GetComponent<Rigidbody>();
@@ -64,64 +64,64 @@ public class MyPlayerController : MonoBehaviour
     void Aimming()
     {
 
-        if(!MyGun.canShot)
+        if (!MyGun.canShot)
         {
             MyGun.muzzle.Stop();
         }
-        
+
         if (Input.GetMouseButton(0) && isGround == true)
         {
-            
-            RaycastHit hit;
+
+
             Ray camRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             Vector3 endPosition = Vector3.zero;
             isAiming = true;
             int layerBit = LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("EnemyLayer");
-            if (Physics.Raycast(camRay, out hit , 50f , layerBit))
-            {   
+            if (Physics.Raycast(camRay, out hit, 50f, layerBit))
+            {
 
-                        endPosition = hit.point;
-                        //set rotate
-                        rotateDir = endPosition - transform.position;
-                        rotateDir.y=0;
-                        rot = Quaternion.LookRotation(rotateDir);
+                endPosition = hit.point;
+                //set rotate
+                rotateDir = endPosition - transform.position;
+                rotateDir.y = 0;
+                rot = Quaternion.LookRotation(rotateDir);
 
-                       
-                       if(MyGun.canShot)
-                       {
-                            MyGun.muzzle.Play();
-                            //HANDLE Damage 
-                        if(1 << hit.transform.gameObject.layer == LayerMask.GetMask("EnemyLayer"))
-                        {
-                            GameObject blood = Instantiate(MyGun.blood , hit.point , Quaternion.LookRotation(hit.normal));
-                            hit.transform.gameObject.GetComponent<Enemy>().heath-=MyGun.damage;
-                            Destroy(blood,1f);
-                        }
-                            MyGun.ResetTimeBullet();
-                       }
-                        
+
+                if (MyGun.canShot)
+                {
+                    MyGun.muzzle.Play();
+                    //HANDLE Damage 
+                    if (1 << hit.transform.gameObject.layer == LayerMask.GetMask("EnemyLayer"))
+                    {
+                        GameObject blood = Instantiate(MyGun.blood, hit.point, Quaternion.LookRotation(hit.normal));
+                        hit.transform.gameObject.GetComponent<Enemy>().heath -= MyGun.damage;
+                        Destroy(blood, 1f);
+                    }
+                    MyGun.ResetTimeBullet();
+                }
+
 
 
                 // Do something with the object that was hit by the raycast.
             }
         }
 
-        if(Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(0))
         {
             MyGun.muzzle.Stop();
             isAiming = false;
         }
 
-        anim.SetBool("Aimming" , isAiming);
+        anim.SetBool("Aimming", isAiming);
     }
 
 
     void AddForceToMove(Vector3 moveDirection)
     {
-           
 
-            rid.velocity = new Vector3((moveSpeed * moveDirection.normalized).x, rid.velocity.y, (moveSpeed * moveDirection.normalized).z);
+
+        rid.velocity = new Vector3((moveSpeed * moveDirection.normalized).x, rid.velocity.y, (moveSpeed * moveDirection.normalized).z);
     }
 
     void Movement()
@@ -132,7 +132,7 @@ public class MyPlayerController : MonoBehaviour
         moveDir.x = h;
         moveDir.z = v;
 
-        
+
         //walk handle
         if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) && !isAiming)
         {
@@ -142,7 +142,7 @@ public class MyPlayerController : MonoBehaviour
             rotateDir.y = 0;
             rot = Quaternion.LookRotation(rotateDir);
 
-            
+
         }
         else
         {
@@ -152,13 +152,13 @@ public class MyPlayerController : MonoBehaviour
         }
 
         //Run handle
-        if(Input.GetKey(KeyCode.LeftShift) && anim.GetInteger("Speed")==1)
+        if (Input.GetKey(KeyCode.LeftShift) && anim.GetInteger("Speed") == 1)
         {
             moveSpeed = 4.5f;
             anim.SetInteger("Speed", 2);
 
         }
-        if(Input.GetKeyUp(KeyCode.LeftShift))
+        if (Input.GetKeyUp(KeyCode.LeftShift))
         {
             moveSpeed = 2f;
             anim.SetInteger("Speed", 1);
@@ -166,30 +166,21 @@ public class MyPlayerController : MonoBehaviour
 
 
 
-        
-        Vector3 direcMoveBackward = moveDir;
-        //Aimming movement
-        if((transform.eulerAngles.y>=0 && transform.eulerAngles.y<=90) || (transform.eulerAngles.y>=270 && transform.eulerAngles.y<=360))
+
+        Vector3 PointToHit = hit.point - transform.position;
+        Vector3 direcMoveBackward = -PointToHit;
+        if (Input.GetKey(KeyCode.S) && isAiming)
         {
-            direcMoveBackward = new Vector3(moveDir.x,moveDir.y,-moveDir.z);
+            anim.SetBool("AimWalkBackward", true);
+            AddForceToMove(direcMoveBackward);
+            moveSpeed = 2f;
         }
         else
         {
-            direcMoveBackward = moveDir;
+            anim.SetBool("AimWalkBackward", false);
         }
 
 
-         if(Input.GetKey(KeyCode.S) && isAiming)
-         {
-            anim.SetBool("AimWalkBackward",true);
-            AddForceToMove(direcMoveBackward);
-         }
-         else
-         {
-             anim.SetBool("AimWalkBackward",false);
-         }
-
-        
 
 
         transform.rotation = rot;
