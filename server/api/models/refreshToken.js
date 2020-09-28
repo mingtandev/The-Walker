@@ -6,16 +6,15 @@ const tokenSchema = mongoose.Schema({
         required: true,
         ref: 'User'
     },
-    token: {
+    refreshToken: {
         type: String,
         required: true
     },
     createdAt: {
         type: Date,
-        required: true,
         default: Date.now,
-        expires: 43200
+        expires: 86400
     }
 })
 
-module.exports = mongoose.model('Token', tokenSchema)
+module.exports = mongoose.model('RefreshToken', tokenSchema)

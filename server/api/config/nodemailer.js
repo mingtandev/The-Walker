@@ -2,7 +2,7 @@ const nodemailer = require("nodemailer")
 
 const user = process.env.HOST_MAIL
 const pass = process.env.HOST_PASSWORD
-const baseUrl = process.env.BASE_URL || 'http://localhost:8080'
+const baseUrl = process.env.BASE_URL
 
 // create reusable transporter object using the default SMTP transport
 exports.sendMail = (receiver, token) => {

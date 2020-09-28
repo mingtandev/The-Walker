@@ -30,9 +30,9 @@ const userScheme = mongoose.Schema({
     },
     passwordResetExpires: {
         type: Date,
-        default: 42300
+        default: 86400
     },
-    slug: {
+    slugName: {
         type: String,
         slug: 'name',
         unique: true
