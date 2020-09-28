@@ -8,6 +8,8 @@ const VerifyToken = require('../models/verifyToken')
 const RefreshToken = require('../models/refreshToken')
 
 const { sendMail } =  require('./../config/nodemailer')
+const { json } = require('express')
+const { decode } = require('punycode')
 
 const tokenLife = process.env.TOKEN_LIFE
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE
@@ -38,10 +40,12 @@ exports.signup =  (req, res, next) => {
                     })
 
                 }else{
+                    const passwordResetToken = crypto.randomBytes(16).toString('hex')
                     const user = new User({
                         name,
                         email,
-                        password: encryptedPassword
+                        password: encryptedPassword,
+                        passwordResetToken
                     })
 
                     user.save()
@@ -217,8 +221,8 @@ exports.login = (req, res, next) => {
 
                 }else{
                     if(matched){
-                        const { email, _id, isVerified, slugName } = user[0]
-                        const payloadToken = { _id, slugName, email }
+                        const { email, _id, isVerified, slugName, roles } = user[0]
+                        const payloadToken = { _id, roles, slugName, email }
                         const token = jwt.sign( payloadToken, jwtKey, {
                             expiresIn: tokenLife
                         })
@@ -268,13 +272,81 @@ exports.login = (req, res, next) => {
     })
 }
 
+exports.refresh = (req, res, next) => {
+    const {refreshToken} = req.body
+
+    if(!refreshToken){
+        return res.status(404).json({
+            msg: 'RefreshToken is required!'
+        })
+    }
+
+    RefreshToken.findOne({refreshToken})
+    .then(result => {
+        if(result){
+            jwt.verify(refreshToken, jwtKey, (error, decoded) => {
+                if(error){
+                    return res.status(500).json({
+                        msg: 'Server error!',
+                        error
+                    })
+                }
+
+                const {_id, slugName, email, roles} = decoded
+                const token = jwt.sign({_id, roles, slugName, email}, jwtKey, {
+                    expiresIn: tokenLife,
+                })
+
+                res.status(200).json({
+                    msg: 'success',
+                    token
+                })
+            })
+
+        }else{
+            res.status(404).json({
+                msg: 'RefreshToken not found!'
+            })
+        }
+    })
+    .catch(error => {
+        res.status(500).json({
+            msg: 'Server error!',
+            error
+        })
+    })
+}
+
 exports.change = (req, res, next) => {
+
 }
 
 exports.reset = (req, res, next) => {
 }
 
 exports.information = (req, res, next) => {
+    const _id = req.userData._id
+
+    User.findById(_id)
+    .select('name email roles isVerified')
+    .then(user => {
+        if(!user){
+            return res.status(404).json({
+                msg: 'User not found!'
+            })
+        }
+
+        res.status(200).json({
+            msg: 'success',
+            user
+        })
+    })
+    .catch(error => {
+        res.status(500).json({
+            msg: 'Server error!',
+            error
+        })
+    })
 }
 
 exports.delete =  (req, res, next) => {

@@ -14,7 +14,7 @@ const userScheme = mongoose.Schema({
     },
     roles: {
         type: String,
-        default: 'guest'
+        default: 'user'
     },
     isVerified: {
         type: Boolean,
