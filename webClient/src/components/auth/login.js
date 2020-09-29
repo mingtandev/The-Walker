@@ -1,23 +1,34 @@
 import React, { useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 import { useDispatch } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { signIn } from "../actions/authAction";
+import { signIn } from "../../actions/authAction";
 import "./form.scss";
 
 function Login() {
+  const [input, setInput] = useState({ username: "", password: "" });
+  const recaptchaRef = React.createRef();
   let history = useHistory();
   let dispatch = useDispatch();
 
-  const [input, setInput] = useState({ username: "", password: "" });
-
   const onInputChange = (e) => {
-    setInput({ ...input, [e.target.name]: e.target.value });
+    // setInput((prev) => ({
+    //   input: { ...prev, [e.target.name]: e.target.value },
+    // }));
+    // console.log(input);
+    // let { fieldName, value } = e.target;
+    let name = e.target.name;
+    let val = e.target.value;
+    console.log(name, val);
   };
 
   const login = (e) => {
     e.preventDefault();
-    console.log(input.username, " ", input.password);
-    let { username, password } = { ...input };
+    // let { username, password } = { ...input };
+    let { username, password } = e.target;
+    console.log("e", username.value, password.value);
+    username = username.value;
+    password = password.value;
     dispatch(signIn({ username, password }));
     history.push("/");
   };
@@ -31,16 +42,23 @@ function Login() {
           type="text"
           name="username"
           onChange={onInputChange}
-          value={input.username}
+          // value={input.username}
           placeholder="Username..."
         />
         <input
           type="password"
           name="password"
           onChange={onInputChange}
-          value={input.password}
+          // value={input.password}
           placeholder="Your password"
         />
+        <div className="recaptcha">
+          <ReCAPTCHA
+            ref={recaptchaRef}
+            sitekey="6LdBUdEZAAAAALoB9_fO6bxb-iiC39gHsKXxH4iW"
+            onChange={console.log(1)}
+          />
+        </div>
         <input type="submit" value="LOG IN" />
       </form>
     </div>

@@ -7,6 +7,8 @@ import {
   Route,
   Redirect,
 } from "react-router-dom";
+// import MessengerCustomerChat from "react-messenger-customer-chat";
+
 import { useSelector } from "react-redux";
 
 import Login from "./components/auth/login";
@@ -25,8 +27,16 @@ function App() {
     <div className="App">
       <Router>
         <Navbar />
-        <Route path="/" exact component={Home} />
+        {/* <div>
+          <MessengerCustomerChat
+            pageId="112316627123947"
+            appId="360081571862674"
+            htmlRef="<REF_STRING>"
+          />
+        </div> */}
+
         <Switch>
+          <Route path="/" exact component={Home} />
           <Route path="/sign-in">
             <Login />
           </Route>
