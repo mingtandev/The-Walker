@@ -1,15 +1,11 @@
-const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 
 const User = require('./../models/user')
 const VerifyToken = require('../models/verifyToken')
-const RefreshToken = require('../models/refreshToken')
 
 const { sendMail } =  require('./../config/nodemailer')
-// const { json } = require('express')
-// const { decode } = require('punycode')
 
 const tokenLife = process.env.TOKEN_LIFE
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE
@@ -228,10 +224,6 @@ exports.login = (req, res, next) => {
                         const refreshToken = jwt.sign(payloadToken, jwtKey, {
                             expiresIn: refreshTokenLife
                         })
-                        const refreshTokenObj = new RefreshToken({
-                            userID: _id,
-                            refreshToken
-                        })
 
                         if(!isVerified) {
                             return res.status(401).json({
@@ -239,19 +231,10 @@ exports.login = (req, res, next) => {
                             })
                         }
 
-                        refreshTokenObj.save()
-                        .then(result => {
-                            res.status(200).json({
-                                msg: 'success',
-                                token,
-                                refreshToken
-                            })
-                        })
-                        .catch(error => {
-                            res.status(500).json({
-                                msg: 'Server error!',
-                                error
-                            })
+                        res.status(200).json({
+                            msg: 'success',
+                            token,
+                            refreshToken
                         })
 
                     }else{
@@ -272,7 +255,7 @@ exports.login = (req, res, next) => {
 }
 
 exports.refresh = (req, res, next) => {
-    const {refreshToken} = req.body
+    const { refreshToken } = req.body
 
     if(!refreshToken){
         return res.status(404).json({
@@ -280,40 +263,25 @@ exports.refresh = (req, res, next) => {
         })
     }
 
-    RefreshToken.findOne({refreshToken})
-    .then(result => {
-        if(result){
-            jwt.verify(refreshToken, jwtKey, (error, decoded) => {
-                if(error){
-                    return res.status(500).json({
-                        msg: 'Server error!',
-                        error
-                    })
-                }
+    try {
+        const decoded = jwt.verify(refreshToken, jwtKey)
+        const { _id, roles, slugName, email} = decoded
+        const user = {_id, roles, slugName, email}
 
-                const {_id, slugName, email, roles} = decoded
-                const token = jwt.sign({_id, roles, slugName, email}, jwtKey, {
-                    expiresIn: tokenLife,
-                })
-
-                res.status(200).json({
-                    msg: 'success',
-                    token
-                })
-            })
-
-        }else{
-            res.status(404).json({
-                msg: 'RefreshToken not found!'
-            })
-        }
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
+        const token = jwt.sign(user, jwtKey, {
+            expiresIn: tokenLife,
         })
-    })
+
+        res.status(200).json({
+            msg: 'success',
+            token
+        })
+
+    } catch (error) {
+        res.status(401).json({
+            msg: 'Refresh token expires. Please login!'
+        })
+    }
 }
 
 exports.change = (req, res, next) => {
@@ -380,7 +348,7 @@ exports.recovery = (req, res, next) => {
         bcrypt.hash(email, 10)
         .then(hashed => {
             user.passwordResetToken = hashed
-            user.passwordResetExpires = Date.now() + 43200
+            user.passwordResetExpires = Date.now() + 7200000 // 2h
 
             user.save()
             .then(newUser => {
@@ -416,7 +384,10 @@ exports.forgot = (req, res, next)  => {
     }
 
     User.findOne({
-        passwordResetToken
+        passwordResetToken,
+        passwordResetExpires: {
+            $gt: Date.now()
+        }
     })
     .then(user => {
         if(!user){
