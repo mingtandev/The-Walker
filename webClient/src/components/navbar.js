@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { signOut } from "./actions/authAction";
+import { signOut } from "../actions/authAction";
 import "./navbar.scss";
 
 function Navbar() {
@@ -17,29 +17,43 @@ function Navbar() {
       <Link to="/">
         <img
           className="nav__logo"
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/1200px-Instagram_logo_2016.svg.png"
+          src={require("../img/logo.png")}
           alt="Home"
         />
       </Link>
       <ul className="nav__links">
         <li className="nav__link">
-          <Link to="/">Home</Link>
+          <Link to="/">
+            <i class="fas fa-home"></i> Home
+          </Link>
         </li>
         <li className="nav__link">
-          <Link to="/blog">Blog and News</Link>
+          <Link to="/blog">
+            <i class="fab fa-blogger"></i> Blog and News
+          </Link>
         </li>
         {user.user === null && (
-          <li className="nav__link">
-            <Link to="/sign-in">Sign In</Link>
-          </li>
+          <>
+            <li className="nav__link">
+              <Link to="/sign-in">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+              </Link>
+            </li>
+            <li className="nav__link">
+              <Link to="/sign-up">
+                <i class="fas fa-user-plus"></i> Register
+              </Link>
+            </li>
+          </>
         )}
-        {user.user === null && (
-          <li className="nav__link">
-            <Link to="/sign-up">Register</Link>
-          </li>
+        {user.user && (
+          <>
+            <li>{user.user.username}</li>
+            <li className="nav__link--logout" onClick={logOut}>
+              Log Out <i class="fas fa-sign-out-alt"></i>
+            </li>
+          </>
         )}
-        {user.user && <li>{user.user.username}</li>}
-        {user.user && <li onClick={logOut}>Log Out</li>}
       </ul>
     </nav>
   );

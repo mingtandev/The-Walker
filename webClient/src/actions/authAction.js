@@ -5,10 +5,10 @@ export const signIn = ({ username, password }) => {
   };
 };
 
-export const signup = ({ email, password, username }) => {
+export const signup = ({ email, password, username, avatar }) => {
   return {
     type: "REGISTER_SUCCESS",
-    payload: { email, password, username },
+    payload: { email, password, username, avatar },
   };
 };
 

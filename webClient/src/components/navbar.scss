@@ -1,12 +1,12 @@
 .nav {
   padding-top: 2rem;
-  padding-bottom: 2rem;
   display: flex;
   justify-content: space-around;
   align-items: center;
   font-size: 2rem;
+  background-color: rgba($color: #9bd7ff, $alpha: 0.5);
   &__logo {
-    width: 5rem;
+    width: 10rem;
   }
   &__links {
     display: flex;
@@ -14,5 +14,9 @@
   }
   &__link {
     margin-right: 2rem;
+    &--logout {
+      margin-left: 2rem;
+      cursor: pointer;
+    }
   }
 }
