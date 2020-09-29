@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const async = require('async')
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
@@ -30,46 +31,35 @@ exports.signup =  (req, res, next) => {
             return res.status(409).json({
                 msg: "Email has been used!"
             })
+        }
 
-        }else{
-            bcrypt.hash(password, 10, (error, encryptedPassword) => {
-                if(error){
-                    return res.status(500).json({
-                        msg: 'Server error!',
-                        error
+        bcrypt.hash(password, 10, (error, encryptedPassword) => {
+            if(error){
+                return res.status(500).json({
+                    msg: 'Server error!',
+                    error
+                })
+
+            }else{
+                const passwordResetToken = crypto.randomBytes(16).toString('hex')
+                const user = new User({
+                    name,
+                    email,
+                    password: encryptedPassword,
+                    passwordResetToken
+                })
+
+                user.save()
+                .then(newUser => {
+                    const token = crypto.randomBytes(16).toString('hex')
+                    const tokenObj = new VerifyToken({
+                        userID: newUser._id,
+                        token
                     })
 
-                }else{
-                    const passwordResetToken = crypto.randomBytes(16).toString('hex')
-                    const user = new User({
-                        name,
-                        email,
-                        password: encryptedPassword,
-                        passwordResetToken
-                    })
-
-                    user.save()
-                    .then(newUser => {
-                        const token = crypto.randomBytes(16).toString('hex')
-                        const tokenObj = new VerifyToken({
-                            userID: newUser._id,
-                            token
-                        })
-
-                        tokenObj.save()
-                        .then(userReg => {
-                            sendMail(newUser.email, userReg.token)
-                        })
-                        .catch(error => {
-                            res.status(500).json({
-                                msg: 'Server error!',
-                                error
-                            })
-                        })
-
-                        res.status(201).json({
-                            msg: "success"
-                        })
+                    tokenObj.save()
+                    .then(userReg => {
+                        sendMail(newUser.email, userReg.token, 'confirmation')
                     })
                     .catch(error => {
                         res.status(500).json({
@@ -77,9 +67,19 @@ exports.signup =  (req, res, next) => {
                             error
                         })
                     })
-                }
-            })
-        }
+
+                    res.status(201).json({
+                        msg: "success"
+                    })
+                })
+                .catch(error => {
+                    res.status(500).json({
+                        msg: 'Server error!',
+                        error
+                    })
+                })
+            }
+        })
     })
     .catch(error => {
         res.status(500).json({
@@ -153,8 +153,8 @@ exports.resend = (req, res, next) => {
         })
     }
 
-    User.findOne({email}).
-    then(user => {
+    User.findOne({email})
+    .then(user => {
         if(!user) {
             return res.status(404).json({
                 msg: 'Email not found!'
@@ -175,7 +175,7 @@ exports.resend = (req, res, next) => {
 
         tokenObj.save()
         .then(userReg => {
-            sendMail(email, userReg.token)
+            sendMail(email, userReg.token, 'confirmation')
 
             res.status(200).json({
                 msg: 'success'
@@ -318,10 +318,158 @@ exports.refresh = (req, res, next) => {
 }
 
 exports.change = (req, res, next) => {
+    const {_id} = req.userData
+    const {newPassword} = req.body
 
+    User.findById({ _id})
+    .then(user => {
+        if(!user){
+            return res.status(500).json({
+                msg: 'User not found!'
+            })
+        }
+
+        bcrypt.hash(newPassword, 10, (error, encryptedPassword) => {
+            if(error){
+                return res.status(500).json({
+                    msg: 'Server error!',
+                    error
+                })
+
+            }
+
+            user.password = encryptedPassword
+            user.save()
+            .then(newUser => {
+                res.status(200).json({
+                    msg: 'success'
+                })
+            })
+            .catch(error => {
+                res.status(500).json({
+                    msg: 'Server error!',
+                    error
+                })
+            })
+        })
+    })
+    .catch(error => {
+        res.status(500).json({
+            msg: 'Server error!',
+            error
+        })
+    })
 }
 
-exports.reset = (req, res, next) => {
+exports.recovery = (req, res, next) => {
+    const {email} = req.body
+
+    if(!email) {
+        return res.status(404).json({
+            msg: 'Email is required!'
+        })
+    }
+
+    User.findOne({email})
+    .then(user => {
+        if(!user) {
+            return res.status(404).json({
+                msg: 'Email not found!'
+            })
+        }
+
+        bcrypt.hash(email, 10, (error, encryptedEmail) => {
+            if(error){
+                return res.status(500).json({
+                    msg: 'Server error!',
+                    error
+                })
+
+            }else{
+                const verifyToken = new VerifyToken({
+                    userID: user._id,
+                    token: encryptedEmail
+                })
+
+                verifyToken.save()
+                .then(veri => {
+                    const token = crypto.randomBytes(16).toString('hex')
+                    const tokenObj = new VerifyToken({
+                        userID: newUser._id,
+                        token
+                    })
+
+                    tokenObj.save()
+                    .then(userReg => {
+                        sendMail(newUser.email, userReg.token, 'confirmation')
+                    })
+                    .catch(error => {
+                        res.status(500).json({
+                            msg: 'Server error!',
+                            error
+                        })
+                    })
+
+                    res.status(201).json({
+                        msg: "success"
+                    })
+                })
+                .catch(error => {
+                    res.status(500).json({
+                        msg: 'Server error!',
+                        error
+                    })
+                })
+            }
+        })
+    })
+    .catch(error => {
+        res.status(500).json({
+            msg: 'Server error!',
+            error
+        })
+    })
+}
+exports.forgot = (req, res, next)  => {
+    async.waterfall([
+        function(done) {
+            crypto.randomBytes(20, (err, buf) => {
+                const token = buf.toString('hex')
+                done(err, token)
+            })
+        },
+        function(token, done) {
+            User.findOne({ email: req.body.email }, (err, user) => {
+                if (!user) {
+                    return res.status(404).json({
+                        msg: 'Email not found!'
+                    })
+                }
+
+                user.passwordResetToken = token
+                user.passwordResetExpires = Date.now() + 3600000 // 1 hour
+
+                user.save(function(err) {
+                    done(err, token, user);
+                })
+            })
+        },
+        function(token, user, done) {
+            sendMail(user.email, token, 'recovery')
+        }],
+        function(err) {
+            res.status(500).json({
+                msg: 'Server error!'
+            })
+        }
+    )
+
+    res.status(200).json({
+        msg: 'success'
+    })
+}
+
+exports.postReset = (req, res, next) => {
 }
 
 exports.information = (req, res, next) => {
@@ -350,4 +498,26 @@ exports.information = (req, res, next) => {
 }
 
 exports.delete =  (req, res, next) => {
+    const {roles} = req.userData
+    const {userID} = req.params
+
+    if(roles != 'admin'){
+        return res.status(403).json({
+            msg: `You don't have permission!`
+        })
+
+    }
+
+    User.deleteOne({_id: userID})
+    .then(result => {
+        res.status(200).json({
+            msg: 'success'
+        })
+    })
+    .catch(error => {
+        res.status(500).json({
+            msg: 'Server error!',
+            error
+        })
+    })
 }

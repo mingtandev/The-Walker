@@ -16,15 +16,17 @@ router.post('/signup/resend', UsersController.resend)
 router.post('/login', UsersController.login)
 // User token refresh
 router.post('/login/refresh', UsersController.refresh)
-// Reset password
-router.get('/reset/:verifyToken', UsersController.reset)
-// Reset password
-router.post('/reset', UsersController.reset)
+// // Reset password
+// router.post('/recovery', UsersController.recovery)
+// // Forgot password
+// router.get('/forgot/:verifyToken', UsersController.reset)
+// Forgot password
+router.post('/forgot', UsersController.forgot)
 // Change password
-router.patch('/information/change', UsersController.change)
+router.post('/information', checkAuth, UsersController.change)
 // Query user information
 router.get('/information', checkAuth, UsersController.information)
 // Delete user
-router.delete('/:userID', UsersController.delete)
+router.delete('/:userID', checkAuth, UsersController.delete)
 
 module.exports = router
