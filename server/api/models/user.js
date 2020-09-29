@@ -25,12 +25,13 @@ const userScheme = mongoose.Schema({
         required: true
     },
     passwordResetToken: {
-        type: String
+        type: String,
+        default: 'randomStringHere'
     },
     passwordResetExpires: {
         type: Date,
         default: Date.now(),
-        expires: 86400
+        expires: 43200
     },
     slugName: {
         type: String,

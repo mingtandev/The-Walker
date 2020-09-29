@@ -26,17 +26,16 @@ exports.sendMail = (receiver, token, type) => {
         from: '"The Walker ✔ "<bathanggayk18@gmail.com>', // sender address
         to: receiver, // list of receivers
         subject: "Verify you account", // Subject line
-        text: "Become to me. Welcome to the new life!", // plain text body
-        html: `<b>Click this link: </b> <hr> <a href=${urlConfirmation}>${urlConfirmation}</a>`, // html body
+        text: "Come with me. Welcome to the new life! \n\n Please click on the below link to verify your account\n", // plain text body
+        html: `<b>Link: </b> <hr> <a href=${urlConfirmation}>${urlConfirmation}</a>`, // html body
     }
 
     const mailOptionsRecovery = {
         from: '"The Walker ✔ "<bathanggayk18@gmail.com>', // sender address
         to: receiver, // list of receivers
         subject: "Recovery password", // Subject line
-        text: `Please click on the below link to reset your password. \n\n
-        If you did not request this, please ignore this email and your password will remain unchanged.\n`, // plain text body
-        html: `<b>Link: </b> <hr> <a href=${urlRecovery}>${urlRecovery}</a>`, // html body
+        text: `Your token here. Please copy! \n\n`, // plain text body
+        html: `<b>Token: </b> <hr> ${token}`, // html body
     }
 
     // send mail with defined transport object

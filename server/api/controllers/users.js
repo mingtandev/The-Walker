@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const async = require('async')
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
@@ -9,8 +8,8 @@ const VerifyToken = require('../models/verifyToken')
 const RefreshToken = require('../models/refreshToken')
 
 const { sendMail } =  require('./../config/nodemailer')
-const { json } = require('express')
-const { decode } = require('punycode')
+// const { json } = require('express')
+// const { decode } = require('punycode')
 
 const tokenLife = process.env.TOKEN_LIFE
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE
@@ -378,49 +377,25 @@ exports.recovery = (req, res, next) => {
             })
         }
 
-        bcrypt.hash(email, 10, (error, encryptedEmail) => {
-            if(error){
-                return res.status(500).json({
+        bcrypt.hash(email, 10)
+        .then(hashed => {
+            user.passwordResetToken = hashed
+            user.passwordResetExpires = Date.now() + 43200
+
+            user.save()
+            .then(newUser => {
+                sendMail(newUser.email, newUser.passwordResetToken, 'recovery')
+
+                res.status(200).json({
+                    msg: 'success'
+                })
+            })
+            .catch(error => {
+                res.status(500).json({
                     msg: 'Server error!',
                     error
                 })
-
-            }else{
-                const verifyToken = new VerifyToken({
-                    userID: user._id,
-                    token: encryptedEmail
-                })
-
-                verifyToken.save()
-                .then(veri => {
-                    const token = crypto.randomBytes(16).toString('hex')
-                    const tokenObj = new VerifyToken({
-                        userID: newUser._id,
-                        token
-                    })
-
-                    tokenObj.save()
-                    .then(userReg => {
-                        sendMail(newUser.email, userReg.token, 'confirmation')
-                    })
-                    .catch(error => {
-                        res.status(500).json({
-                            msg: 'Server error!',
-                            error
-                        })
-                    })
-
-                    res.status(201).json({
-                        msg: "success"
-                    })
-                })
-                .catch(error => {
-                    res.status(500).json({
-                        msg: 'Server error!',
-                        error
-                    })
-                })
-            }
+            })
         })
     })
     .catch(error => {
@@ -430,46 +405,52 @@ exports.recovery = (req, res, next) => {
         })
     })
 }
+
 exports.forgot = (req, res, next)  => {
-    async.waterfall([
-        function(done) {
-            crypto.randomBytes(20, (err, buf) => {
-                const token = buf.toString('hex')
-                done(err, token)
-            })
-        },
-        function(token, done) {
-            User.findOne({ email: req.body.email }, (err, user) => {
-                if (!user) {
-                    return res.status(404).json({
-                        msg: 'Email not found!'
-                    })
-                }
+    const {newPassword, passwordResetToken} = req.body
 
-                user.passwordResetToken = token
-                user.passwordResetExpires = Date.now() + 3600000 // 1 hour
+    if(!newPassword || ! passwordResetToken){
+        return res.status(404).json({
+            msg: 'newPassword and passwordResetToken are required!'
+        })
+    }
 
-                user.save(function(err) {
-                    done(err, token, user);
-                })
-            })
-        },
-        function(token, user, done) {
-            sendMail(user.email, token, 'recovery')
-        }],
-        function(err) {
-            res.status(500).json({
-                msg: 'Server error!'
+    User.findOne({
+        passwordResetToken
+    })
+    .then(user => {
+        if(!user){
+            return res.status(404).json({
+                msg: 'User not found or password reset token expires!'
             })
         }
-    )
 
-    res.status(200).json({
-        msg: 'success'
+        bcrypt.hash(newPassword, 10)
+        .then(hashed => {
+            user.password = hashed
+            user.passwordResetToken = ''
+            user.passwordResetExpires = Date.now()
+
+            user.save()
+            .then(user => {
+                res.status(200).json({
+                    msg: 'success'
+                })
+            })
+            .catch(error => {
+                res.status(500).json({
+                    msg: 'Server error!',
+                    error
+                })
+            })
+        })
     })
-}
-
-exports.postReset = (req, res, next) => {
+    .catch(error => {
+        res.status(500).json({
+            msg: 'Server error!',
+            error
+        })
+    })
 }
 
 exports.information = (req, res, next) => {
@@ -499,13 +480,19 @@ exports.information = (req, res, next) => {
 
 exports.delete =  (req, res, next) => {
     const {roles} = req.userData
-    const {userID} = req.params
+    const {userID} = req.body
 
     if(roles != 'admin'){
         return res.status(403).json({
             msg: `You don't have permission!`
         })
 
+    }
+
+    if(!userID){
+        return res.status(404).json({
+            msg: 'UserID is required!'
+        })
     }
 
     User.deleteOne({_id: userID})
