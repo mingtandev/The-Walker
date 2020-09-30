@@ -38,3 +38,7 @@ GameClient/*.pdb.meta
 
 # Unity3D Generated File On Crash Reports
 GameClient/sysinfo.txt
+
+# Server
+server/node_modules
+server/.env
