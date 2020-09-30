@@ -1,22 +1,41 @@
 .nav {
-  padding-top: 2rem;
-  display: flex;
-  justify-content: space-around;
+  margin-bottom: 5rem;
+  padding-top: 1rem;
+  display: grid;
+  grid-template-columns: 20% 60% 20%;
+  justify-items: center;
   align-items: center;
-  font-size: 2rem;
-  background-color: rgba($color: #9bd7ff, $alpha: 0.5);
+  background-color: rgba($color: whitesmoke, $alpha: 0.6);
+  box-shadow: 0 1px 13px darkgrey;
   &__logo {
     width: 10rem;
   }
   &__links {
-    display: flex;
-    list-style: none;
+    &--pages,
+    &--auth {
+      list-style: none;
+      display: flex;
+    }
   }
   &__link {
-    margin-right: 2rem;
+    margin-right: 5rem;
+    background-color: rgba($color: darkgray, $alpha: 0.1);
+    text-transform: uppercase;
+    a {
+      font-size: 1.7rem;
+    }
     &--logout {
       margin-left: 2rem;
+      background-color: rgba($color: powderblue, $alpha: 0.2);
+      color: slateblue;
+      text-transform: capitalize;
       cursor: pointer;
+    }
+    &:last-child {
+      margin-right: 0;
+    }
+    &:hover {
+      transform: scale(1.1);
     }
   }
 }

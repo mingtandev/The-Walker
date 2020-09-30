@@ -6,17 +6,11 @@ import { signIn } from "../../actions/authAction";
 import "./form.scss";
 
 function Login() {
-  const [input, setInput] = useState({ username: "", password: "" });
   const recaptchaRef = React.createRef();
   let history = useHistory();
   let dispatch = useDispatch();
 
   const onInputChange = (e) => {
-    // setInput((prev) => ({
-    //   input: { ...prev, [e.target.name]: e.target.value },
-    // }));
-    // console.log(input);
-    // let { fieldName, value } = e.target;
     let name = e.target.name;
     let val = e.target.value;
     console.log(name, val);
@@ -24,12 +18,20 @@ function Login() {
 
   const login = (e) => {
     e.preventDefault();
+
+    const recaptchaValue = recaptchaRef.current.getValue();
+    // if (!recaptchaValue) {
+    //   alert("dj");
+    //   setError({ ...error, captcha: "Captcha" });
+    //   return;
+    // }
+
     // let { username, password } = { ...input };
-    let { username, password } = e.target;
-    console.log("e", username.value, password.value);
-    username = username.value;
+    let { email, password } = e.target;
+    console.log("e", email.value, password.value);
+    email = email.value;
     password = password.value;
-    dispatch(signIn({ username, password }));
+    dispatch(signIn({ email, password }));
     history.push("/");
   };
 
@@ -38,20 +40,26 @@ function Login() {
       <Link to="/forgot">Forgot Password</Link>
       <Link to="/sign-up">Not have an account?</Link>
       <form onSubmit={login}>
-        <input
-          type="text"
-          name="username"
-          onChange={onInputChange}
-          // value={input.username}
-          placeholder="Username..."
-        />
-        <input
-          type="password"
-          name="password"
-          onChange={onInputChange}
-          // value={input.password}
-          placeholder="Your password"
-        />
+        <div className="form__input">
+          <input
+            type="email"
+            name="email"
+            onChange={onInputChange}
+            // value={input.username}
+            placeholder="Email..."
+          />
+          <span class="form__input--focus"></span>
+        </div>
+        <div className="form__input">
+          <input
+            type="password"
+            name="password"
+            onChange={onInputChange}
+            // value={input.password}
+            placeholder="Your password"
+          />
+          <span class="form__input--focus"></span>
+        </div>
         <div className="recaptcha">
           <ReCAPTCHA
             ref={recaptchaRef}

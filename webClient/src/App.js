@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 
 import {
@@ -19,22 +19,33 @@ import forgetPassword from "./components/auth/forgotPassword";
 import blogDetail from "./components/blog/blogDetail";
 import blogCreate from "./components/blog/blogCreate";
 import Navbar from "./components/navbar";
+import userApi from "./api/userApi";
 
 function App() {
   const user = useSelector((state) => state.auth);
-  console.log(user);
+  // const [users, setUsers] = useState([]);
+  // useEffect(() => {
+  //   const f = async () => {
+  //     try {
+  //       console.log(111);
+  //       const r = await userApi.get();
+  //       console.log(r);
+  //       setUsers(r);
+  //     } catch (error) {
+  //       console.log("fail");
+  //     }
+  //   };
+  //   f();
+  // }, []);
   return (
-    <div className="App">
+    <div className="app">
       <Router>
         <Navbar />
-        {/* <div>
-          <MessengerCustomerChat
-            pageId="112316627123947"
-            appId="360081571862674"
-            htmlRef="<REF_STRING>"
-          />
-        </div> */}
-
+        {/* <ul>
+          {users.map((u, key) => (
+            <li>{u}</li>
+          ))}
+        </ul> */}
         <Switch>
           <Route path="/" exact component={Home} />
           <Route path="/sign-in">
@@ -47,7 +58,6 @@ function App() {
             }
           />
           <Route path="/sign-up" component={register} />
-
           <Route path="/forgot" component={forgetPassword} />
           <Route path="/blog" exact component={Blog} />
           <Route path={`/blog/create`} component={blogCreate} />
