@@ -3,13 +3,36 @@ const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 
 const User = require('./../models/user')
-const VerifyToken = require('../models/verifyToken')
 
 const { sendMail } =  require('./../config/nodemailer')
 
 const tokenLife = process.env.TOKEN_LIFE
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE
 const jwtKey = process.env.JWT_KEY
+
+exports.getAll = (req, res, next) => {
+    if (req.userData.roles != 'admin'){
+        return res.status(403).json({
+            msg: `You don't have the permission!`
+        })
+    }
+
+    User.find({})
+    .select('name slugName email roles isVerified')
+    .then(users => {
+        res.status(200).json({
+            msg: 'success',
+            length: users.length,
+            users
+        })
+    })
+    .catch(error => {
+        res.status(500).json({
+            msg: 'Server error!',
+            error
+        })
+    })
+}
 
 exports.signup =  (req, res, next) => {
     const {name, email, password} = req.body
@@ -46,22 +69,11 @@ exports.signup =  (req, res, next) => {
 
                 user.save()
                 .then(newUser => {
-                    const token = crypto.randomBytes(16).toString('hex')
-                    const tokenObj = new VerifyToken({
-                        userID: newUser._id,
-                        token
+                    const token = jwt.sign( {_id: newUser._id}, jwtKey, {
+                        expiresIn: tokenLife
                     })
 
-                    tokenObj.save()
-                    .then(userReg => {
-                        sendMail(newUser.email, userReg.token, 'confirmation')
-                    })
-                    .catch(error => {
-                        res.status(500).json({
-                            msg: 'Server error!',
-                            error
-                        })
-                    })
+                    sendMail(req, newUser.email, token, 'confirmation')
 
                     res.status(201).json({
                         msg: "success"
@@ -87,19 +99,21 @@ exports.signup =  (req, res, next) => {
 exports.confirmation = (req, res, next) => {
     const {verifyToken: token} = req.params
 
-    VerifyToken.findOne({token})
-    .then(tokenObj => {
-        if(!tokenObj){
-            return res.status(404).json({
-                msg: 'Invalid token!'
-            })
-        }
+    if(!token){
+        return res.status(404).json({
+            msg: 'Invalid token!'
+        })
+    }
 
-        User.findOne({_id: tokenObj.userID})
+    try {
+        const decoded = jwt.verify(token, jwtKey)
+        const {_id} = decoded
+
+        User.findOne({_id})
         .then(user => {
             if(!user) {
                 return res.status(404).json({
-                    msg: 'Invalid token!'
+                    msg: 'User not found!'
                 })
             }
 
@@ -130,13 +144,12 @@ exports.confirmation = (req, res, next) => {
                 error
             })
         })
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
+
+    } catch (error) {
+        res.status(404).json({
+            msg: 'Token has expires. Please click resend confirmation email!'
         })
-    })
+    }
 }
 
 exports.resend = (req, res, next) => {
@@ -162,25 +175,14 @@ exports.resend = (req, res, next) => {
             })
         }
 
-        const token = crypto.randomBytes(16).toString('hex')
-        const tokenObj = new VerifyToken({
-            userID: user._id,
-            token
+        const token = jwt.sign( {_id: user._id}, jwtKey, {
+            expiresIn: tokenLife
         })
 
-        tokenObj.save()
-        .then(userReg => {
-            sendMail(email, userReg.token, 'confirmation')
+        sendMail(req, user.email, token, 'confirmation')
 
-            res.status(200).json({
-                msg: 'success'
-            })
-        })
-        .catch(error => {
-            res.status(500).json({
-                msg: 'Server error!',
-                error
-            })
+        res.status(201).json({
+            msg: "success"
         })
     })
     .catch(error => {
@@ -352,7 +354,7 @@ exports.recovery = (req, res, next) => {
 
             user.save()
             .then(newUser => {
-                sendMail(newUser.email, newUser.passwordResetToken, 'recovery')
+                sendMail(req, newUser.email, newUser.passwordResetToken, 'recovery')
 
                 res.status(200).json({
                     msg: 'success'
@@ -451,22 +453,42 @@ exports.information = (req, res, next) => {
 
 exports.delete =  (req, res, next) => {
     const {roles} = req.userData
-    const {userID} = req.body
+    const {_id} = req.body
 
     if(roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have permission!`
+            msg: `You don't have the permission!`
         })
-
     }
 
-    if(!userID){
+    if(!_id){
         return res.status(404).json({
             msg: 'UserID is required!'
         })
     }
 
-    User.deleteOne({_id: userID})
+    User.findById({_id})
+    .then(user => {
+        if(!user){
+            return res.status(404).json({
+                msg: 'User not found!'
+            })
+        }
+
+        if(user.roles === 'admin'){
+            return res.status(404).json({
+                msg: `You don't have the permission!`
+            })
+        }
+    })
+    .catch(error => {
+        res.status(500).json({
+            msg: 'Server error!',
+            error
+        })
+    })
+
+    User.deleteOne({_id})
     .then(result => {
         res.status(200).json({
             msg: 'success'

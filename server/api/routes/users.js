@@ -6,6 +6,8 @@ const checkAuth = require('./../middleware/checkAuth')
 
 const router = express.Router()
 
+// Get all user
+router.get('/', checkAuth, UsersController.getAll)
 // Signup new account
 router.post('/signup', UsersController.signup)
 // Email verify
