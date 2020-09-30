@@ -31,7 +31,6 @@ const userScheme = mongoose.Schema({
     passwordResetExpires: {
         type: Date,
         default: Date.now(),
-        expires: 43200
     },
     slugName: {
         type: String,

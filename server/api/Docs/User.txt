@@ -1,6 +1,20 @@
 
 Each req call api => Check res.msg. If 'success' => OK else FAIL
 
+// Get all user account
+Method: GET
+Auth: Yes
+Roles: Admin only
+Req.body: {}
+URL: http://localhost:8080/users
+If 'success' => {
+    msg: 'success'.
+    length: Number,
+    users: Array
+}
+
+----------------------------------------------------------------------------
+
 // Signup new account
 Method: POST
 Auth: No
@@ -16,10 +30,11 @@ If 'success' => Check email => Verify
 ----------------------------------------------------------------------------
 
 // Email verify
-Method: GET
+Method: GET (in email)
 Auth: No
+Req.body: {}
 URL: http://localhost:8080/users/confirmation/:verifyToken
-If 'success' => User can login
+If 'success' => Account verified and user can login
 
 ----------------------------------------------------------------------------
 
@@ -75,7 +90,7 @@ Req.body:
 	email: String
 }
 URL: http://localhost:8080/users/recovery
-If 'success' => Check email and copy passwordResetToken for // Forgot password
+If 'success' => Check email and copy passwordResetToken for api Forgot password
 
 ----------------------------------------------------------------------------
 
@@ -123,7 +138,7 @@ Auth: Yes
 Roles: 'admin' only
 Req.body:
 {
-    userID (get userId in JWT decode)
+    _id: ObjId
 }
 URL: http://localhost:8080/users/delete
 If 'success' => User has been deleted
@@ -133,10 +148,10 @@ If 'success' => User has been deleted
 Resources:
 
 Account admin roles:
-U: ylp06230@cuoly.com
-P: 12345
+U: bik56810@eoopy.com
+P: 12345678
 
-Token decode: https://jwt.io/
+Token decode test: https://jwt.io/
 
 Email garbage: https://10minutemail.net/
 
