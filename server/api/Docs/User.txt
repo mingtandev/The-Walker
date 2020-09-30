@@ -1,0 +1,146 @@
+
+Each req call api => Check res.msg. If 'success' => OK else FAIL
+
+// Signup new account
+Method: POST
+Auth: No
+Req.body:
+{
+	name: String
+	email: String
+	password: String
+}
+URL: http://localhost:8080/users/signup
+If 'success' => Check email => Verify
+
+----------------------------------------------------------------------------
+
+// Email verify
+Method: GET
+Auth: No
+URL: http://localhost:8080/users/confirmation/:verifyToken
+If 'success' => User can login
+
+----------------------------------------------------------------------------
+
+// Resend email verify
+Method: POST
+Auth: No
+Req.body:
+{
+	email: String
+}
+URL: http://localhost:8080/users/signup/confirmation/resend
+If 'success' => Check email => Verify
+
+----------------------------------------------------------------------------
+
+// User login
+Method: POST
+Auth: No
+Req.body:
+{
+	email: String,
+    password: String
+}
+URL: http://localhost:8080/users/login
+If 'success' => Obj {
+    msg: 'success',
+    token: String,
+    refreshToken: String
+}
+
+----------------------------------------------------------------------------
+
+// User refresh token
+Method: POST
+Auth: No
+Req.body:
+{
+	refreshToken: String
+}
+URL: http://localhost:8080/users/login/refresh
+If 'success' => Obj {
+    msg: 'success',
+    token: String
+}
+
+----------------------------------------------------------------------------
+
+// Reset password
+Method: POST
+Auth: No
+Req.body:
+{
+	email: String
+}
+URL: http://localhost:8080/users/recovery
+If 'success' => Check email and copy passwordResetToken for // Forgot password
+
+----------------------------------------------------------------------------
+
+// Forgot password
+Method: POST
+Auth: No
+Req.body:
+{
+    newPassword: String,
+	passwordResetToken: String (below)
+}
+URL: http://localhost:8080/users/forgot
+If 'success' => Password has been updated
+
+----------------------------------------------------------------------------
+
+// Change password
+Method: POST
+Auth: Yes
+Req.body:
+{
+    newPassword: String
+}
+URL: http://localhost:8080/users/information
+If 'success' => Password has been updated
+
+----------------------------------------------------------------------------
+
+// Query user information
+Method: GET
+Auth: Yes
+URL: http://localhost:8080/users/information
+If 'success' => {
+    name: String,
+    email: String,
+    roles: String,
+    isVerified: Boolean
+}
+
+----------------------------------------------------------------------------
+
+// Delete user
+Method: DELETE
+Auth: Yes
+Roles: 'admin' only
+Req.body:
+{
+    userID (get userId in JWT decode)
+}
+URL: http://localhost:8080/users/delete
+If 'success' => User has been deleted
+
+----------------------------------------------------------------------------
+
+Resources:
+
+Account admin roles:
+U: ylp06230@cuoly.com
+P: 12345
+
+Token decode: https://jwt.io/
+
+Email garbage: https://10minutemail.net/
+
+DB atlas: https://www.mongodb.com/cloud/atlas
+    - Sign in with account 'google blogger'
+    - DB name: The-Walker
+    - Choose on tab Collections
