@@ -1,7 +1,11 @@
-export const signIn = ({ username, password }) => {
+import userApi from "../api/userApi";
+
+export const signIn = ({ email, password }) => {
+  // let res = await userApi.post({ email, password });
+  // console.log(res);
   return {
     type: "LOGIN_SUCCESS",
-    payload: { username, password },
+    payload: { email, password },
   };
 };
 

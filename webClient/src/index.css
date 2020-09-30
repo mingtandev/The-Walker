@@ -15,10 +15,10 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
   background-image: url("../src/img/background.png");
   background-size: cover;
 }
-
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
@@ -32,6 +32,11 @@ a {
 
 a:hover {
   color: blue;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
 }
 
 form input {

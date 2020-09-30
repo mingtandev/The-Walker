@@ -2,7 +2,15 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "./form.scss";
 
-function forgetPassword() {
+function forgotPassword() {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // let { username, password } = { ...input };
+    let { email } = e.target;
+    console.log("e", email.value);
+    email = email.value;
+  };
+
   return (
     <div className="form forgetform">
       <Link className="forgetform__login" to="/sign-in">
@@ -11,13 +19,20 @@ function forgetPassword() {
       <Link className="forgetform__register" to="/sign-up">
         Register
       </Link>
-      <form>
-        <input type="text" placeholder="Username" />
-        <input type="email" placeholder="Email" />
+      <form onSubmit={handleSubmit}>
+        <div className="form__input">
+          <input
+            type="email"
+            name="email"
+            // value={input.password}
+            placeholder="Your Email..."
+          />
+          <span class="form__input--focus"></span>
+        </div>
         <input type="submit" value="Submit" />
       </form>
     </div>
   );
 }
 
-export default forgetPassword;
+export default forgotPassword;

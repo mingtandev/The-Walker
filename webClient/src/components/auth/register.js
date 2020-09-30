@@ -8,16 +8,23 @@ function Register() {
   const [input, setInput] = useState({
     email: "",
     password: "",
-    username: "",
+    name: "",
   });
   const [avatar, setAvatar] = useState(null);
   const recaptchaRef = React.createRef();
   const [error, setError] = useState({
     email: "",
     password: "",
-    username: "",
+    name: "",
     captcha: "",
   });
+
+  React.useEffect(
+    function effectFunction() {
+      console.log("er", error);
+    },
+    [error]
+  );
 
   let history = useHistory();
   let dispatch = useDispatch();
@@ -30,14 +37,14 @@ function Register() {
 
   const checkInputChange = (fieldName, val) => {
     switch (fieldName) {
-      case "username":
+      case "name":
         if (val.length < 5)
           setError((prevError) => {
-            return { ...prevError, username: "username length" };
+            return { ...prevError, name: "name length" };
           });
         else
           setError((prevError) => {
-            return { ...prevError, username: "" };
+            return { ...prevError, name: "" };
           });
         break;
       case "password":
@@ -45,9 +52,10 @@ function Register() {
           setError((prevError) => {
             return { ...prevError, password: "password length" };
           });
-        setError((prevError) => {
-          return { ...prevError, password: "" };
-        });
+        else
+          setError((prevError) => {
+            return { ...prevError, password: "" };
+          });
         break;
       default:
         break;
@@ -61,23 +69,40 @@ function Register() {
   const register = (e) => {
     e.preventDefault();
 
-    let { email, username, password } = e.target;
-    console.log("e", email.value, username.value, password.value);
+    let { email, name, password } = e.target;
+    console.log("e", email.value, name.value, password.value);
     const recaptchaValue = recaptchaRef.current.getValue();
 
     if (email.value.trim().length === 0) {
-      setError((prev) => ({ ...prev, email: "Email cannot be null" }));
-    } else setError((prev) => ({ ...prev, email: "" }));
-    console.log("e1", error);
+      setError((prev) => {
+        return { ...prev, email: "Email cannot be null" };
+      });
+    } else
+      setError((prev) => {
+        return { ...prev, email: "" };
+      });
 
-    if (username.value.length === 0) {
-      setError((prev) => ({ ...prev, username: "username cannot be null" }));
-    } else setError((prev) => ({ ...prev, username: "" }));
-    console.log("e2", error);
+    if (name.value.length < 5) {
+      setError((prev) => {
+        console.log("klfksldfkalkf");
+        return { ...prev, name: "name cannot be null" };
+      });
+    } else
+      setError((prev) => {
+        console.log("klfksldfkalkf");
+        return { ...prev, name: "" };
+      });
 
     if (password.value.trim().length < 7) {
-      setError((prev) => ({ ...prev, password: "password cannot be null" }));
-    } else setError((prev) => ({ ...prev, password: "" }));
+      setError((prev) => {
+        console.log("klfksldfkalkf");
+        return { ...prev, password: "pass cannot" };
+      });
+    } else
+      setError((prev) => {
+        console.log("klfksldfkalkf");
+        return { ...prev, password: "" };
+      });
     console.log("e3", error);
 
     for (const prop in error) {
@@ -87,50 +112,56 @@ function Register() {
 
     // if (!recaptchaValue) {
     //   alert("dj");
-    //   // setError({ ...error, captcha: "Username cannot be null" });
+    //   // setError({ ...error, captcha: "name cannot be null" });
     //   return;
     // }
 
     // avatar && console.log(avatar, " ", avatar.name);
-    // let { email, password, username } = input;
+    // let { email, password, name } = input;
     email = email.value;
-    username = username.value;
+    name = name.value;
     password = password.value;
-    dispatch(signup({ email, password, username, avatar }));
+    dispatch(signup({ email, password, name, avatar }));
     history.push("/");
   };
 
   return (
     <div className="form register">
       <form id="register" onSubmit={register}>
-        <Link to="/sign-in">Log In</Link>
-        <input
-          type="email"
-          name="email"
-          onChange={onInputChange}
-          // value={input.email}
-          placeholder="Your email..."
-        />
+        <Link to="/sign-in">I have an account</Link>
+        <div className="form__input">
+          <input
+            type="email"
+            name="email"
+            onChange={onInputChange}
+            placeholder="Email..."
+          />
+          <span class="form__input--focus"></span>
+        </div>
         {error.email && <small>{error.email}</small>}
 
-        <input
-          type="text"
-          name="username"
-          onChange={onInputChange}
-          // value={input.username}
-          placeholder="Username"
-        />
-        {error.username && <small>{error.username}</small>}
+        <div className="form__input">
+          <input
+            type="text"
+            name="name"
+            onChange={onInputChange}
+            placeholder="Username..."
+          />
+          <span class="form__input--focus"></span>
+        </div>
+        {error.name && <small>{error.name}</small>}
 
-        <input
-          type="password"
-          name="password"
-          onChange={onInputChange}
-          // value={input.password}
-          placeholder="Your password"
-        />
+        <div className="form__input">
+          <input
+            type="password"
+            name="password"
+            onChange={onInputChange}
+            // value={input.name}
+            placeholder="Password..."
+          />
+          <span class="form__input--focus"></span>
+        </div>
         {error.password && <small>{error.password}</small>}
-
         <input type="file" name="avatar" onChange={imgAvatarUpload} />
         <div className="recaptcha">
           <ReCAPTCHA
@@ -139,7 +170,7 @@ function Register() {
             onChange={console.log("captcha", 1)}
           />
         </div>
-        <input type="submit" value="Submit" />
+        <input type="submit" value="SIGN UP" />
       </form>
     </div>
   );
