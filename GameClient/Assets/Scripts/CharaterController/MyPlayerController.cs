@@ -7,13 +7,12 @@ using UnityEngine.Networking;
 public class MyPlayerController : MonoBehaviour
 {
     // Start is called before the first frame update
-    CharacterController controller;
     Animator anim;
     Rigidbody rid;
 
 
     //Shoot
-    bool isAiming = false;
+    public bool isAiming = false;
     Gun MyGun;
     RaycastHit hit;
 

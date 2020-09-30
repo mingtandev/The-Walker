@@ -12,12 +12,16 @@ public class Enemy : MonoBehaviour
         Runners,
     }
 
-    enum Status
-    {
-        Idle,
-        Chase,
-        Attack
-    }
+
+
+    //STATE PARTTERN
+    public AttackState attack = new AttackState();
+    public ChaseState chase = new ChaseState();
+    public IdleState idle = new IdleState();
+    public WanderState wander = new WanderState();
+
+
+    public IEnemyState currentState;
 
     public int heath;
     public GameObject attackPoint;
@@ -26,26 +30,34 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     TypeOfZombie ZombieType;
 
-    Animator anim;
-    MyPlayerController player;
-
+    public Animator anim;
+    public Player player;
+    private MyPlayerController playerController;
+    private float timeWalking = 0;
+    private float timeChangeDirec = 4f;
+    [HideInInspector]
+    public bool changeDirec = true;
 
 
 
     string Couroutine_PathFiding = "PathFinding";
-    private Status WalkerStatus = Status.Idle;
-    private float DistanceToChase = 10f;
+    //private Status WalkerStatus = Status.Idle;
+    public float DistanceToChase = 10f;
 
 
     private void Awake()
     {
         anim = GetComponent<Animator>();
-        player = GameObject.FindGameObjectWithTag("Player").GetComponent<MyPlayerController>();
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+        playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<MyPlayerController>();
+
+        currentState = idle;
     }
 
     void Start()
     {
         StartCoroutine(Couroutine_PathFiding);
+
     }
 
     // Update is called once per frame
@@ -59,6 +71,8 @@ public class Enemy : MonoBehaviour
             }
 
             Attack();
+            HearShootSound();
+            ChangeDirecWalk();
         }
     }
 
@@ -71,13 +85,37 @@ public class Enemy : MonoBehaviour
         {
             if (obj[0].tag == "Player")
             {
-                WalkerStatus = Status.Attack;
-                anim.SetBool("Attack", true);
+                currentState = attack;
             }
         }
         else
         {
             anim.SetBool("Attack", false);
+        }
+    }
+
+    void HearShootSound()
+    {
+        if(playerController.isAiming)
+        {
+            DistanceToChase = 20f;
+        }
+        else
+        {
+            DistanceToChase = 10f;
+        }
+    }
+
+    void StillAttackRange()   //this function add to key event
+    {
+        Collider[] obj = Physics.OverlapSphere(attackPoint.transform.position, 1f, LayerMask.GetMask("PlayerLayer"));
+        if (obj.Length > 0)
+        {
+            if (obj[0].tag == "Player")
+            {
+                player.Heal -= 10;
+                Debug.Log(player.Heal);
+            }
         }
     }
 
@@ -97,37 +135,43 @@ public class Enemy : MonoBehaviour
 
     }
 
+    void StopAction()
+    {
+        currentState = idle;
+    }
+
+
+    void ChangeDirecWalk()
+    {
+        if(timeWalking<=timeChangeDirec)
+        {
+            timeWalking+=Time.deltaTime;
+        }
+        else
+        {
+            timeWalking = 0;
+            changeDirec = true;
+            //currentState = idle;
+        }
+    }
     IEnumerator PathFinding()
     {
-        float dis = Vector3.Distance(transform.position, player.transform.position);
-        switch (WalkerStatus)
-        {
-            case Status.Idle:
-                agent.SetDestination(transform.position);
-                if (dis < DistanceToChase)
-                {
-                    WalkerStatus = Status.Chase;
-                    anim.SetBool("Chasing", true);
-                }
-                break;
-            case Status.Chase:
-                agent.SetDestination(player.transform.position);
-                if (dis > DistanceToChase)
-                {
-                    WalkerStatus = Status.Idle;
-                    anim.SetBool("Chasing", false);
-                }
-                break;
-            case Status.Attack:
-                agent.SetDestination(transform.position);
-                if (dis < DistanceToChase)   
-                {
-                    WalkerStatus = Status.Chase;   //Tai5 enum attack , tức là lúc attack phải set des tại chỗ để tấn công , sau đó set chase vì nhân vật chắc chắc k di chuyen quá xa
-                }
-                break;
-        }
 
-        yield return new WaitForSeconds(0.5f);
-        StartCoroutine(Couroutine_PathFiding);
+        if(!player.IsDeath)
+        {
+            
+            currentState = currentState.DoState(this , player);
+            yield return new WaitForSeconds(1f);
+            StartCoroutine(Couroutine_PathFiding);
+        }
+        else
+        {
+            anim.SetBool("Attack", false);
+            anim.SetBool("Chasing", false);
+        }
     }
+
+
+
+
 }
