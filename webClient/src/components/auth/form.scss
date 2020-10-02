@@ -3,26 +3,56 @@
   padding: 2rem 2rem;
   padding-bottom: 0;
   width: 40%;
-  background-color: bisque;
+  background-color: rgba($color: #f9f2cd, $alpha: 0.8);
   text-align: right;
+  border-radius: 20px;
   a:first-child {
     margin-right: 2rem;
+  }
+  &__input {
+    position: relative;
+    margin-top: 2rem;
+    width: 100%;
+    border: 0;
+    overflow: hidden;
+    input {
+      width: 100%;
+      max-width: 100%;
+      padding: 1rem;
+      border: 0;
+      outline: none;
+      background-color: transparent;
+      border-bottom: 1.5px solid black;
+    }
+    &--focus {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 3px;
+      background-color: #3399ff;
+      transition: 0.5s;
+    }
+    &--error {
+      font-style: italic;
+      color: red;
+      &::before {
+        content: "* ";
+      }
+    }
+    input:focus ~ .form__input--focus {
+      width: 100%;
+      transition: 0.4s;
+    }
   }
   form {
     display: flex;
     flex-direction: column;
-    input {
-      padding: 1rem 1rem;
-      border-radius: 20px;
-      outline: none;
-      border: 1px solid black;
-      margin-top: 2rem;
-    }
     input[type="submit"] {
       color: white;
-      padding: 1.5rem;
+      padding: 1.5rem 5rem;
       margin: 2rem auto;
-      width: 20rem;
+      width: fit-content;
       border-radius: 5rem;
       border: 0;
       outline: none;
@@ -32,4 +62,9 @@
       box-shadow: 0 10px 20px 0 rgba(123, 120, 248, 0.5);
     }
   }
+}
+
+.recaptcha {
+  margin: auto;
+  margin-top: 2rem;
 }
