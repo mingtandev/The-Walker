@@ -2,7 +2,6 @@ const nodemailer = require("nodemailer")
 
 const user = process.env.HOST_MAIL
 const pass = process.env.HOST_PASSWORD
-const port = process.env.PORT
 
 // create reusable transporter object using the default SMTP transport
 exports.sendMail = (req, receiver, token, type) => {
@@ -19,7 +18,7 @@ exports.sendMail = (req, receiver, token, type) => {
         }
     })
 
-    const urlConfirmation = `http://${req.hostname}:${port}/users/signup/confirmation/${token}`
+    const urlConfirmation = `http://${req.hostname}/users/signup/confirmation/${token}`
 
     const mailOptionsConfirmation = {
         from: '"The Walker ✔ "<bathanggayk18@gmail.com>', // sender address
