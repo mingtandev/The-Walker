@@ -3,13 +3,17 @@ import axios from "axios";
 const axiosClient = axios.create({
   baseURL: process.env.REACT_APP_BASE_URL,
   headers: {
-    "content-type": "application/json",
+    "Content-Type": "application/json",
   },
 });
+
 axiosClient.interceptors.request.use(async (config) => {
-  // Handle token here ...
+  const token = localStorage.getItem("token");
+  config.headers["Authorization"] = `Bearer ${token}`;
+  console.log("config", config);
   return config;
 });
+
 axiosClient.interceptors.response.use(
   (response) => {
     if (response && response.data) {
@@ -22,4 +26,5 @@ axiosClient.interceptors.response.use(
     throw error;
   }
 );
+
 export default axiosClient;

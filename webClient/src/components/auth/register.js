@@ -1,15 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
-import { useHistory, Link } from "react-router-dom";
-import { signup } from "../../actions/authAction";
+import { Link, Redirect } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { signUp } from "../../actions/authAction";
+import userApi from "../../api/userApi";
+import jwt_decode from "jwt-decode";
 
 function Register() {
-  const [input, setInput] = useState({
-    email: "",
-    password: "",
-    name: "",
-  });
+  // useEffect(() => {
+  //   async function () {
+  //   }
+  // }, [])
   const [avatar, setAvatar] = useState(null);
   const recaptchaRef = React.createRef();
   const [error, setError] = useState({
@@ -18,15 +19,6 @@ function Register() {
     name: "",
     captcha: "",
   });
-
-  React.useEffect(
-    function effectFunction() {
-      console.log("er", error);
-    },
-    [error]
-  );
-
-  let history = useHistory();
   let dispatch = useDispatch();
 
   const onInputChange = (e) => {
@@ -38,9 +30,12 @@ function Register() {
   const checkInputChange = (fieldName, val) => {
     switch (fieldName) {
       case "name":
-        if (val.length < 5)
+        if (val.length < 6 || val.length > 15)
           setError((prevError) => {
-            return { ...prevError, name: "name length" };
+            return {
+              ...prevError,
+              name: "Name length must be between 6 to 15 characters",
+            };
           });
         else
           setError((prevError) => {
@@ -48,9 +43,12 @@ function Register() {
           });
         break;
       case "password":
-        if (val.length < 5)
+        if (val.length < 6 || val.length > 20)
           setError((prevError) => {
-            return { ...prevError, password: "password length" };
+            return {
+              ...prevError,
+              password: "Password must be between 6 to 20 characters",
+            };
           });
         else
           setError((prevError) => {
@@ -63,16 +61,10 @@ function Register() {
   };
 
   const imgAvatarUpload = (e) => {
-    setAvatar(e.target.files[0]);
+    // setAvatar(e.target.files[0]);
   };
 
-  const register = (e) => {
-    e.preventDefault();
-
-    let { email, name, password } = e.target;
-    console.log("e", email.value, name.value, password.value);
-    const recaptchaValue = recaptchaRef.current.getValue();
-
+  const checkInputSubmit = (email, name, password) => {
     if (email.value.trim().length === 0) {
       setError((prev) => {
         return { ...prev, email: "Email cannot be null" };
@@ -84,45 +76,91 @@ function Register() {
 
     if (name.value.length < 5) {
       setError((prev) => {
-        console.log("klfksldfkalkf");
         return { ...prev, name: "name cannot be null" };
       });
     } else
       setError((prev) => {
-        console.log("klfksldfkalkf");
         return { ...prev, name: "" };
       });
 
     if (password.value.trim().length < 7) {
       setError((prev) => {
-        console.log("klfksldfkalkf");
         return { ...prev, password: "pass cannot" };
       });
     } else
       setError((prev) => {
-        console.log("klfksldfkalkf");
         return { ...prev, password: "" };
       });
-    console.log("e3", error);
+  };
 
-    for (const prop in error) {
-      if (error[prop]) return;
+  const register = async (e) => {
+    e.preventDefault();
+    let { email, name, password } = e.target;
+    console.log("e", email.value, name.value, password.value);
+    const recaptchaValue = recaptchaRef.current.getValue();
+
+    // checkInputSubmit(email, name, password);
+
+    if (!email.value) {
+      alert("Please Fill out email");
+      return;
     }
+
+    if (name.value.length < 6 || name.value.length > 15) {
+      alert("Username length must be from 6-15 characters");
+      return;
+    }
+
+    if (password.value.length < 6 || password.value.length > 20) {
+      alert("Password length must be from 6-20 characters");
+      return;
+    }
+
     console.log("after: ", error);
 
-    // if (!recaptchaValue) {
-    //   alert("dj");
-    //   // setError({ ...error, captcha: "name cannot be null" });
-    //   return;
-    // }
+    for (const prop in error) {
+      if (error[prop]) {
+        console.log("find e");
+        return;
+      }
+    }
 
-    // avatar && console.log(avatar, " ", avatar.name);
-    // let { email, password, name } = input;
+    if (!recaptchaValue) {
+      alert("Check reCaptcha!");
+      // setError({ ...error, captcha: "name cannot be null" });
+      return;
+    }
+
+    avatar && console.log(avatar, " ", avatar.name);
     email = email.value;
     name = name.value;
     password = password.value;
-    dispatch(signup({ email, password, name, avatar }));
-    history.push("/");
+
+    console.log("try");
+    try {
+      let res = await userApi.signUp({ name, email, password });
+      console.log(res);
+      if (res.msg === "Email has been used!") {
+        console.log("Email used");
+        return;
+      }
+      if (res.msg === "Server error!") {
+        console.log("server err");
+        return;
+      }
+      // localStorage.setItem("token", res.token);
+      // localStorage.setItem("refreshtoken", res.refreshToken);
+      alert("Check your email for validation");
+      if (res.token) {
+        let user = jwt_decode(res.token);
+        console.log(user);
+        dispatch(signUp(user));
+        return <Redirect to="/" />;
+      }
+    } catch (error) {
+      console.log(error);
+      return <Redirect to="/" />;
+    }
   };
 
   return (
@@ -138,7 +176,9 @@ function Register() {
           />
           <span class="form__input--focus"></span>
         </div>
-        {error.email && <small>{error.email}</small>}
+        {error.email && (
+          <small className="form__input--error">{error.email}</small>
+        )}
 
         <div className="form__input">
           <input
@@ -149,7 +189,9 @@ function Register() {
           />
           <span class="form__input--focus"></span>
         </div>
-        {error.name && <small>{error.name}</small>}
+        {error.name && (
+          <small className="form__input--error">{error.name}</small>
+        )}
 
         <div className="form__input">
           <input
@@ -161,8 +203,13 @@ function Register() {
           />
           <span class="form__input--focus"></span>
         </div>
-        {error.password && <small>{error.password}</small>}
-        <input type="file" name="avatar" onChange={imgAvatarUpload} />
+        {error.password && (
+          <small className="form__input--error">{error.password}</small>
+        )}
+
+        <div className="form__input">
+          <input type="file" name="avatar" onChange={imgAvatarUpload} />
+        </div>
         <div className="recaptcha">
           <ReCAPTCHA
             ref={recaptchaRef}
