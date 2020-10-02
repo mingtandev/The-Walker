@@ -1,8 +1,10 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import { signOut } from "../actions/authAction";
 import "./navbar.scss";
+// import userApi from "../api/userApi";
+// import jwt_decode from "jwt-decode";
 
 function Navbar() {
   const user = useSelector((state) => state.auth);
@@ -10,6 +12,7 @@ function Navbar() {
   const logOut = () => {
     console.log("out");
     dispatch(signOut());
+    return <Redirect to="/" />;
   };
 
   return (
@@ -37,7 +40,7 @@ function Navbar() {
       </div>
       <div className="nav__links">
         <ul className="nav__links--auth">
-          {user.user === null && (
+          {!localStorage.getItem("token") && (
             <>
               <li className="nav__link">
                 <Link to="/sign-in">
@@ -51,9 +54,11 @@ function Navbar() {
               </li>
             </>
           )}
-          {user.user && (
+          {localStorage.getItem("token") && (
             <>
-              <li class="nav__link nav__user">{user.user.username}</li>
+              {user.user && (
+                <li className="nav__link nav__link--user">{user.user.name}</li>
+              )}
               <li className="nav__link nav__link--logout" onClick={logOut}>
                 Log Out <i class="fas fa-sign-out-alt"></i>
               </li>

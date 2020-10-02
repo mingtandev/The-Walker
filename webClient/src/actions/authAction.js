@@ -1,23 +1,21 @@
-import userApi from "../api/userApi";
-
-export const signIn = ({ email, password }) => {
-  // let res = await userApi.post({ email, password });
-  // console.log(res);
+export const signIn = (user) => {
+  console.log("action: ", user);
   return {
     type: "LOGIN_SUCCESS",
-    payload: { email, password },
+    payload: user,
   };
 };
 
-export const signup = ({ email, password, username, avatar }) => {
+export const signUp = ({ email, password, username }) => {
   return {
     type: "REGISTER_SUCCESS",
-    payload: { email, password, username, avatar },
+    payload: { email, password, username },
   };
 };
 
 export const signOut = () => {
   return {
     type: "LOGOUT_SUCCESS",
+    payload: "",
   };
 };
