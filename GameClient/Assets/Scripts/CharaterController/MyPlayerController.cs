@@ -24,7 +24,6 @@ public class MyPlayerController : MonoBehaviour
     Vector3 rotateDir; //same above but y = 0 (not moving to sky)
     float moveSpeed = 1.5f;  // run is 4.5
     Quaternion rot;
-    float rotVel = 80f;
 
 
     //Jump

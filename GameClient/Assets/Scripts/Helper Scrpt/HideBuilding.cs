@@ -65,7 +65,7 @@ public class HideBuilding : MonoBehaviour
         MeshRenderer myRend = hit.transform.GetComponent<MeshRenderer>();
         Material[] materials = myRend.materials;
         materials[0].SetFloat("_Surface", (float)SurfaceType.Transparent);
-        materials[0].SetColor("_BaseColor", new Color(1, 1, 1, 0.5f));
+        materials[0].SetColor("_BaseColor", new Color(1, 1, 1, 0.3f));
         myRend.materials = materials;
         SetupMaterialBlendMode(materials[0]);
         AddToListBuilding(hit);
