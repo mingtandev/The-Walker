@@ -18,7 +18,7 @@ exports.getAll = (req, res, next) => {
     }
 
     User.find({})
-    .select('name slugName email roles isVerified')
+    .select('name slugName email cash roles isVerified')
     .then(users => {
         res.status(200).json({
             msg: 'success',
@@ -218,8 +218,8 @@ exports.login = (req, res, next) => {
 
                 }else{
                     if(matched){
-                        const { email, _id, isVerified, slugName, roles } = user[0]
-                        const payloadToken = { _id, roles, slugName, email }
+                        const { email, _id, isVerified, name, cash, slugName, roles } = user[0]
+                        const payloadToken = { _id, roles, name, cash, slugName, email }
                         const token = jwt.sign( payloadToken, jwtKey, {
                             expiresIn: tokenLife
                         })
@@ -267,8 +267,8 @@ exports.refresh = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(refreshToken, jwtKey)
-        const { _id, roles, slugName, email} = decoded
-        const user = {_id, roles, slugName, email}
+        const { _id, roles, name, cash, slugName, email} = decoded
+        const user = {_id, roles, name, cash, slugName, email}
 
         const token = jwt.sign(user, jwtKey, {
             expiresIn: tokenLife,
@@ -430,7 +430,7 @@ exports.information = (req, res, next) => {
     const _id = req.userData._id
 
     User.findById(_id)
-    .select('name email roles isVerified')
+    .select('name email roles cash isVerified')
     .then(user => {
         if(!user){
             return res.status(404).json({

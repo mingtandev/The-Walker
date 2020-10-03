@@ -20,6 +20,10 @@ const userScheme = mongoose.Schema({
         type: Boolean,
         default: false
     },
+    cash: {
+        type: Number,
+        default: 200000
+    },
     password: {
         type: String,
         required: true
