@@ -101,7 +101,7 @@ exports.create = (req, res, next) => {
     .then(newItem => {
         res.status(201).json({
             msg: "success",
-            product: {
+            item: {
                 _id: newItem._id,
                 name: newItem.name,
                 slugName: newItem.slugName,
