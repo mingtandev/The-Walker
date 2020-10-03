@@ -61,7 +61,7 @@ exports.getOne = (req, res, next) => {
                 price: item.price,
                 request: {
                     type: 'GET',
-                    url: req.hostname
+                    url: req.hostname + '/items'
                 }
             }
         })
@@ -94,7 +94,7 @@ exports.create = (req, res, next) => {
         name,
         type,
         price,
-        thumbnail: req.hostname + req.file.path.replace(/\\/g,'/').replace('..', '')
+        thumbnail: req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '')
     })
 
     item.save()
@@ -138,8 +138,6 @@ exports.update = (req, res, next) => {
     for (const ops of req.body) {
         item[ops.propName] = ops.value
     }
-
-    console.log(item)
 
     Item.updateOne({_id}, {$set: item})
     .then(result => {
