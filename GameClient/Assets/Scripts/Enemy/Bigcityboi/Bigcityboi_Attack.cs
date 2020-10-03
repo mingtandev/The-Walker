@@ -22,6 +22,7 @@ public class Bigcityboi_Attack : StateMachineBehaviour
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         animator.SetBool("Attack" + (curstep).ToString(), false);
+        boss.StopWhenPlayerDie();
 
     }
 

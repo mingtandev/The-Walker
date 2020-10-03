@@ -26,7 +26,6 @@ public class Bigcityboi : Enemy
     private void Update()
     {
         Die();
-        StopWhenPlayerDie();
     }
 
     public void TheAttackEnd()
@@ -48,7 +47,7 @@ public class Bigcityboi : Enemy
             }
         }
     }
-    void StopWhenPlayerDie()
+    public void StopWhenPlayerDie()
     {
         if (player.Heal <= 0)
         {
