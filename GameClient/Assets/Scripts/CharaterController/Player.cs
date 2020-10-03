@@ -7,6 +7,7 @@ public class Player : MonoBehaviour
     // field
     private int heal;
     private bool isDeath;
+    Animator anim;
     public int Heal
     {
         get
@@ -28,22 +29,29 @@ public class Player : MonoBehaviour
 
 
 
-
+    private void Awake()
+    {
+        anim = GetComponent<Animator>();
+    }
 
     void Start()
     {
         heal = 100;
     }
 
-    private void Update() {
+    private void Update()
+    {
         Die();
     }
 
     void Die()
     {
-        if(Heal<=0)
+        if (Heal <= 0)
         {
             isDeath = true;
+            anim.Play("Die");
+            GetComponent<MyPlayerController>().enabled=false;
+
         }
     }
 
