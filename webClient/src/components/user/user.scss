@@ -1,0 +1,13 @@
+.user {
+  max-width: 50%;
+  margin: 3rem auto;
+  background-color: whitesmoke;
+  border-radius: 20px;
+  &__info {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    justify-items: center;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}

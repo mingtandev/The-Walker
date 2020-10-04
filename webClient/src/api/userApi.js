@@ -21,9 +21,13 @@ const userApi = {
     const url = "/users/information";
     return axiosClient.post(url, body);
   },
+  forgot: (body) => {
+    const url = "/users/information";
+    return axiosClient.post(url, body);
+  },
   delete: (body) => {
     const url = "/users/delete";
-    return axiosClient.post(url, body);
+    return axiosClient.delete(url, body);
   },
 };
 export default userApi;
