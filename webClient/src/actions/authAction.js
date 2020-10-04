@@ -19,3 +19,10 @@ export const signOut = () => {
     payload: "",
   };
 };
+
+export const loadUser = (user) => {
+  return {
+    type: "USER_LOADED",
+    payload: user,
+  };
+};

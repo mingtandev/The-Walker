@@ -17,6 +17,9 @@
       display: flex;
     }
   }
+  &__userIcon {
+    display: inline-block;
+  }
   &__link {
     margin-right: 5rem;
     background-color: rgba($color: darkgray, $alpha: 0.1);
@@ -25,7 +28,23 @@
       font-size: 1.7rem;
     }
     &--user {
+      position: relative;
       margin-right: 2rem;
+      &dropdown {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        transform: translateX(-30%);
+        z-index: 1;
+      }
+      &:hover ~ .nav__link--userdropdown {
+        display: block;
+      }
+      &dropdown:hover {
+        display: block;
+      }
     }
     &--logout {
       margin-right: 2rem;
@@ -41,4 +60,28 @@
       transform: scale(1.1);
     }
   }
+}
+
+.userMenu {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 20rem;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  transform: translateX(-30%);
+  z-index: 1;
+  a {
+    margin-bottom: 0;
+    p {
+      padding: 1rem;
+      font-weight: bold;
+    }
+  }
+}
+
+.nav__link--user:hover ~ .userMenu {
+  display: block;
+}
+.userMenu:hover {
+  display: block;
 }
