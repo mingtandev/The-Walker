@@ -1,72 +1,79 @@
 
 Each req call api => Check res.msg. If 'success' => OK else FAIL
 
-// Get all item
+// Get all blog
 Method: GET
 Auth: No
 Req.body: {}
-URL: /items
+URL: /blogs
 If 'success' => {
     msg: 'success'.
     length: Number,
-    items: Array
+    blogs: Array
 }
 
 ----------------------------------------------------------------------------
 
-// Get one item
+// Get one blog
 Method: GET
-Auth: No
+Auth: No,
 Req.params: _id
-URL: /items/:_id
+URL: /blogs/:_id
 If 'success' => {
     msg: 'success',
-    item: {
+    blog: {
 
     }
 }
 
 ----------------------------------------------------------------------------
 
-// Create a new item
+// Create a new blog
 Method: POST
 Auth: Yes
 Roles: Admin only
-Req.body dạng form-data {
-    name: String,
-    type: String,
-    price: Number,
+Req.body form data {
+    writer: 'ObjectId',
+    title: 'String',
+    content: 'String',
     thumbnail: File (accepted: JPEG, JPG, PNG)
 }
-URL: /items
+URL: /blogs
 If 'success' => {
     msg: 'success',
-    item: {
+    blog: {
 
     }
 }
 
 ----------------------------------------------------------------------------
 
-// Update item (name, type, price, not thumbnail)
+// Update blog (title, content)
 Method: PATCH
 Auth: YES
 Roles: Admin only
 Req.body:
+[
+    {
+        "propName": "title",
+        "value": "new title"
+    },
+    ....
+]
 
-URL: /items/:_id
+URL: /blogs/:_id
 If 'success' => {
     msg: 'success'
 }
 
 ----------------------------------------------------------------------------
 
-// Delete item
+// Delete blog
 Method: DELETE
 Auth: Yes
 Roles: Admin only
 Req.params: _id
-URL: /items/:_id
+URL: /blogs/:_id
 If 'success' => Obj {
     msg: 'success'
 }

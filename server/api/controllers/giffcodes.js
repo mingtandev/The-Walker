@@ -27,7 +27,7 @@ exports.getAll = (req, res, next) => {
                     expiresTime: item.expiresTime,
                     request: {
                         type: 'GET',
-                        url: req.hostname + '/' + item._id
+                        url: req.hostname + '/giffcodes/' + item._id
                     }
                 }
             })
@@ -136,6 +136,7 @@ exports.create = (req, res, next) => {
     })
 }
 
+// Updating
 exports.use = (req, res, next) => {
     const {codeId} = req.params
     const {_id} = req.body

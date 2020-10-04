@@ -1,24 +1,24 @@
-const Item = require('../models/item')
+const Blog = require('../models/blog')
 
 exports.getAll = (req, res, next) => {
 
-    Item.find({})
-    .select('_id name slugName thumbnail type price')
-    .then(items => {
+    Blog.find({})
+    .select('_id date writer title content thumbnail')
+    .then(blogs => {
         const response = {
             msg: 'success',
-            length: items.length,
-            products: items.map(item => {
+            length: blogs.length,
+            blogs: blogs.map(blog => {
                 return {
-                    _id: item._id,
-                    name: item.name,
-                    slugName: item.slugName,
-                    thumbnail: item.thumbnail,
-                    type: item.type,
-                    price: item.price,
+                    _id: blog._id,
+                    date: blog.date,
+                    writer: blog.writer,
+                    title: blog.title,
+                    content: blog.content,
+                    thumbnail: blog.thumbnail,
                     request: {
                         type: 'GET',
-                        url: req.hostname + '/items/' + item._id
+                        url: req.hostname + '/blogs/' + blog._id
                     }
                 }
             })
@@ -36,30 +36,30 @@ exports.getAll = (req, res, next) => {
 }
 
 exports.getOne = (req, res, next) => {
-    const {itemId} = req.params
+    const {blogId} = req.params
 
-    Item.findById(itemId)
-    .select('_id name slugName thumbnail type price')
-    .then(item => {
+    Blog.findById(blogId)
+    .select('_id date writer title content thumbnail')
+    .then(blog => {
 
-        if(!item){
+        if(!blog){
             return res.status(404).json({
-                msg: 'Item not found!'
+                msg: 'Blog not found!'
             })
         }
 
         res.status(200).json({
-            msg: "success",
-            item: {
-                _id: item._id,
-                name: item.name,
-                slugName: item.slugName,
-                thumbnail: item.thumbnail,
-                type: item.type,
-                price: item.price,
+            msg: 'success',
+            blog: {
+                _id: blog._id,
+                date: blog.date,
+                writer: blog.writer,
+                title: blog.title,
+                content: blog.content,
+                thumbnail: blog.thumbnail,
                 request: {
                     type: 'GET',
-                    url: req.hostname + '/items'
+                    url: req.hostname + '/blogs'
                 }
             }
         })
@@ -74,11 +74,11 @@ exports.getOne = (req, res, next) => {
 }
 
 exports.create = (req, res, next) => {
-    const {name, type, price} = req.body
+    const {writer, title, content} = req.body
 
-    if(!name || !type || !price){
+    if(!writer || !title || !content){
         return res.status(400).json({
-            msg: 'Name, type, price are required!'
+            msg: 'Writer, title, content are required!'
         })
     }
 
@@ -88,27 +88,27 @@ exports.create = (req, res, next) => {
         })
     }
 
-    const item = new Item({
-        name,
-        type,
-        price,
+    const blog = new Blog({
+        writer,
+        title,
+        content,
         thumbnail: req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '')
     })
 
-    item.save()
-    .then(newItem => {
+    blog.save()
+    .then(blog => {
         res.status(201).json({
             msg: "success",
-            item: {
-                _id: newItem._id,
-                name: newItem.name,
-                slugName: newItem.slugName,
-                thumbnail: newItem.thumbnail,
-                type: newItem.type,
-                price: newItem.price,
+            blog: {
+                _id: blog._id,
+                date: blog.date,
+                writer: blog.writer,
+                title: blog.title,
+                content: blog.content,
+                thumbnail: blog.thumbnail,
                 request: {
                     type: 'GET',
-                    url: req.hostname + '/items/' + newItem._id
+                    url: req.hostname + '/blogs/' + blog._id
                 }
             }
         })
@@ -123,7 +123,7 @@ exports.create = (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-    const {itemId: _id} = req.params
+    const {blogId: _id} = req.params
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -131,19 +131,19 @@ exports.update = (req, res, next) => {
         })
     }
 
-    const item = {}
+    const blog = {}
 
     for (const ops of req.body) {
-        item[ops.propName] = ops.value
+        blog[ops.propName] = ops.value
     }
 
-    Item.updateOne({_id}, {$set: item})
+    Blog.updateOne({_id}, {$set: blog})
     .then(result => {
         res.status(200).json({
             msg: "success",
             request: {
                 type: 'GET',
-                url: req.hostname + '/items/' + _id
+                url: req.hostname + '/blogs/' + _id
             }
         })
     })
@@ -157,7 +157,7 @@ exports.update = (req, res, next) => {
 }
 
 exports.delete = (req, res, next) => {
-    const {productID: _id} = req.params
+    const {blogId: _id} = req.params
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -165,17 +165,17 @@ exports.delete = (req, res, next) => {
         })
     }
 
-    Item.deleteOne({_id})
+    Blog.deleteOne({_id})
     .then(result => {
         res.status(200).json({
             msg: 'success',
             request: {
                 type: 'POST',
-                url: req.hostname + '/items',
+                url: req.hostname + '/blogs',
                 body: {
-                    name: 'String',
-                    type: 'String',
-                    price: 'Number',
+                    writer: 'ObjectId',
+                    title: 'String',
+                    content: 'String',
                     thumbnail: 'File: .jpeg, .jpg, .png'
                 }
             }

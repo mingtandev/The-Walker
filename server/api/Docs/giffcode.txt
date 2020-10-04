@@ -1,27 +1,29 @@
 
 Each req call api => Check res.msg. If 'success' => OK else FAIL
 
-// Get all item
+// Get all giffcode
 Method: GET
-Auth: No
+Auth: Yes,
+Roles: Admin only
 Req.body: {}
 URL: /items
 If 'success' => {
     msg: 'success'.
     length: Number,
-    items: Array
+    giffcodes: Array
 }
 
 ----------------------------------------------------------------------------
 
-// Get one item
+// Get one giffcode
 Method: GET
-Auth: No
+Auth: Yes,
+Roles: Admin only
 Req.params: _id
-URL: /items/:_id
+URL: /giffcodes/:_id
 If 'success' => {
     msg: 'success',
-    item: {
+    code: {
 
     }
 }
@@ -32,41 +34,52 @@ If 'success' => {
 Method: POST
 Auth: Yes
 Roles: Admin only
-Req.body dạng form-data {
-    name: String,
-    type: String,
-    price: Number,
-    thumbnail: File (accepted: JPEG, JPG, PNG)
+Req.body {
+    code: 'String',
+    type: 'String',
+    items: 'Array of Item id',
+    expiresTime: 'Number (millisecond)'
 }
-URL: /items
+URL: /giffcodes
 If 'success' => {
     msg: 'success',
-    item: {
+    code: {
 
     }
 }
 
 ----------------------------------------------------------------------------
 
-// Update item (name, type, price, not thumbnail)
+// Update giffcode (name, type, price, not thumbnail)
 Method: PATCH
 Auth: YES
 Roles: Admin only
 Req.body:
+[
+    {
+        "propName": "code",
+        "value": "newValue"
+    },
+    {
+        "propName": "type",
+        "value": "newType"
+    },
+    ....
+]
 
-URL: /items/:_id
+URL: /giffcodes/:_id
 If 'success' => {
     msg: 'success'
 }
 
 ----------------------------------------------------------------------------
 
-// Delete item
+// Delete code
 Method: DELETE
 Auth: Yes
 Roles: Admin only
 Req.params: _id
-URL: /items/:_id
+URL: /giffcodes/:_id
 If 'success' => Obj {
     msg: 'success'
 }

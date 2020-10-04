@@ -11,6 +11,7 @@ const connectDB = require('./api/config/db')
 const userRoutes = require('./api/routes/users')
 const itemRoutes = require('./api/routes/items')
 const giffcodeRoutes = require('./api/routes/giffcodes')
+const blogRoutes = require('./api/routes/blogs')
 
 const app = express()
 
@@ -28,6 +29,7 @@ app.use('/uploads', express.static('./uploads'))
 app.use('/users', userRoutes)
 app.use('/items', itemRoutes)
 app.use('/giffcodes', giffcodeRoutes)
+app.use('/blogs', blogRoutes)
 
 // Handling server errors
 app.use((req, res, next) => {
