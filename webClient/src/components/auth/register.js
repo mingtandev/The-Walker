@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Link, Redirect } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -7,10 +7,6 @@ import userApi from "../../api/userApi";
 import jwt_decode from "jwt-decode";
 
 function Register() {
-  // useEffect(() => {
-  //   async function () {
-  //   }
-  // }, [])
   const [avatar, setAvatar] = useState(null);
   const recaptchaRef = React.createRef();
   const [error, setError] = useState({
@@ -60,37 +56,17 @@ function Register() {
     }
   };
 
-  const imgAvatarUpload = (e) => {
-    // setAvatar(e.target.files[0]);
+  const togglePassword = (e) => {
+    e.preventDefault();
+    let x = document.getElementById("password");
+    let passwordEye = document.getElementById("togglePassword");
+    console.log("jsdkjkdafj", x.value);
+    x.type === "password" ? (x.type = "text") : (x.type = "password");
+    passwordEye.classList.toggle("fa-eye-slash");
   };
 
-  const checkInputSubmit = (email, name, password) => {
-    if (email.value.trim().length === 0) {
-      setError((prev) => {
-        return { ...prev, email: "Email cannot be null" };
-      });
-    } else
-      setError((prev) => {
-        return { ...prev, email: "" };
-      });
-
-    if (name.value.length < 5) {
-      setError((prev) => {
-        return { ...prev, name: "name cannot be null" };
-      });
-    } else
-      setError((prev) => {
-        return { ...prev, name: "" };
-      });
-
-    if (password.value.trim().length < 7) {
-      setError((prev) => {
-        return { ...prev, password: "pass cannot" };
-      });
-    } else
-      setError((prev) => {
-        return { ...prev, password: "" };
-      });
+  const imgAvatarUpload = (e) => {
+    // setAvatar(e.target.files[0]);
   };
 
   const register = async (e) => {
@@ -197,11 +173,18 @@ function Register() {
           <input
             type="password"
             name="password"
+            id="password"
             onChange={onInputChange}
-            // value={input.name}
             placeholder="Password..."
           />
           <span class="form__input--focus"></span>
+          <button
+            class="form__input--eye"
+            type="button"
+            onClick={togglePassword}
+          >
+            <i class="far fa-eye" id="togglePassword"></i>
+          </button>
         </div>
         {error.password && (
           <small className="form__input--error">{error.password}</small>

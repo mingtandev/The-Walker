@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import { blogposts } from "./blogposts";
 import "./blog.scss";
-import blog from "./blogsite";
 
 function BlogCreate() {
   const [blogInput, setBlogInput] = useState({ title: "", content: "" });
@@ -14,12 +12,6 @@ function BlogCreate() {
     e.preventDefault();
     let { title, content } = blogInput;
     console.log(title, " ", content);
-
-    // blogposts.push({
-    //   id: 3,
-    //   title: blogInput.title,
-    //   content: blogInput.content,
-    // });
   };
   return (
     <div>
