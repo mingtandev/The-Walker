@@ -1,18 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link, Redirect } from "react-router-dom";
-import { signOut } from "../actions/authAction";
+import { Link, useHistory } from "react-router-dom";
+import { loadUser, signOut } from "../actions/authAction";
+import userApi from "../api/userApi";
 import "./navbar.scss";
-// import userApi from "../api/userApi";
-// import jwt_decode from "jwt-decode";
+import UserMenu from "./user/userMenu";
 
 function Navbar() {
-  const user = useSelector((state) => state.auth);
   let dispatch = useDispatch();
+  let history = useHistory();
+
+  useState(() => {
+    async function getUserInfo() {
+      console.log("user ne");
+      try {
+        let res = await userApi.getUserInfo();
+        console.log(res);
+        dispatch(loadUser(res.user));
+      } catch (error) {}
+    }
+    getUserInfo();
+  }, []);
+
+  let user = useSelector((state) => state.auth);
+
   const logOut = () => {
     console.log("out");
     dispatch(signOut());
-    return <Redirect to="/" />;
+    // setUser(null);
+    history.push("/");
+    return;
   };
 
   return (
@@ -40,7 +57,7 @@ function Navbar() {
       </div>
       <div className="nav__links">
         <ul className="nav__links--auth">
-          {!localStorage.getItem("token") && (
+          {!user.user && (
             <>
               <li className="nav__link">
                 <Link to="/sign-in">
@@ -54,11 +71,25 @@ function Navbar() {
               </li>
             </>
           )}
-          {localStorage.getItem("token") && (
+          {user.user && (
             <>
-              {user.user && (
-                <li className="nav__link nav__link--user">{user.user.name}</li>
-              )}
+              <div class="nav__userIcon">
+                {
+                  <li className="nav__link nav__link--user">
+                    {user.user.name}
+                  </li>
+                }
+                {/* <div class="nav__link--userdropdown">
+                  <Link to="/user">
+                    <p>Account Information</p>
+                  </Link>
+                  <Link to="/">
+                    <p>Items</p>
+                  </Link>
+                </div> */}
+                <UserMenu />
+              </div>
+
               <li className="nav__link nav__link--logout" onClick={logOut}>
                 Log Out <i class="fas fa-sign-out-alt"></i>
               </li>
@@ -66,41 +97,6 @@ function Navbar() {
           )}
         </ul>
       </div>
-
-      {/* <ul className="nav__links">
-        <li className="nav__link">
-          <Link to="/">
-            <i class="fas fa-home"></i> Home
-          </Link>
-        </li>
-        <li className="nav__link">
-          <Link to="/blog">
-            <i class="fab fa-blogger"></i> Blog and News
-          </Link>
-        </li>
-        {user.user === null && (
-          <>
-            <li className="nav__link">
-              <Link to="/sign-in">
-                <i class="fas fa-sign-in-alt"></i> Sign In
-              </Link>
-            </li>
-            <li className="nav__link">
-              <Link to="/sign-up">
-                <i class="fas fa-user-plus"></i> Register
-              </Link>
-            </li>
-          </>
-        )}
-        {user.user && (
-          <>
-            <li>{user.user.username}</li>
-            <li className="nav__link--logout" onClick={logOut}>
-              Log Out <i class="fas fa-sign-out-alt"></i>
-            </li>
-          </>
-        )}
-      </ul> */}
     </nav>
   );
 }
