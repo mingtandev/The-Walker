@@ -72,32 +72,38 @@ public class MyPlayerController : MonoBehaviour
 
 
             Ray camRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-
             Vector3 endPosition = Vector3.zero;
             isAiming = true;
-            int layerBit = LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("EnemyLayer");
-            if (Physics.Raycast(camRay, out hit, 50f, layerBit))
+            int layerBit = LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("EnemyLayer") | LayerMask.GetMask("BuildingLayer");
+            if (Physics.Raycast(camRay, out hit, 100f, layerBit))
             {
-
                 endPosition = hit.point;
                 //set rotate
                 rotateDir = endPosition - transform.position;
                 rotateDir.y = 0;
                 rot = Quaternion.LookRotation(rotateDir);
-
-
                 if (MyGun.canShot)
                 {
                     MyGun.muzzle.Play();
-                    //HANDLE Damage 
-                    if (1 << hit.transform.gameObject.layer == LayerMask.GetMask("EnemyLayer"))
+                    Ray ShotRay = new Ray(transform.position, (hit.point - transform.position));
+                    RaycastHit enemyHit;
+                    if (Physics.Raycast(ShotRay, out enemyHit, 100f, layerBit))
                     {
-                        GameObject blood = Instantiate(MyGun.blood, hit.point, Quaternion.LookRotation(hit.normal));
-                        hit.transform.gameObject.GetComponent<Enemy>().heath -= MyGun.damage;
-                        Destroy(blood, 1f);
+                        Debug.DrawRay(ShotRay.origin, ShotRay.direction * 50f, Color.red);
+
+                        if (1 << hit.transform.gameObject.layer == LayerMask.GetMask("EnemyLayer"))
+                        {
+                            GameObject blood = Instantiate(MyGun.blood, enemyHit.point, Quaternion.LookRotation(enemyHit.normal));
+                            enemyHit.transform.gameObject.GetComponent<Enemy>().heath -= MyGun.damage;
+                            Destroy(blood, 1f);
+                        }
+                        MyGun.ResetTimeBullet();
+
                     }
-                    MyGun.ResetTimeBullet();
+
                 }
+
+
 
 
 

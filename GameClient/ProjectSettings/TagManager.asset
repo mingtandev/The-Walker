@@ -12,6 +12,7 @@ TagManager:
   - Veh
   - SpawnHolder
   - SpawnPoint
+  - BossWeapon
   layers:
   - Default
   - TransparentFX
