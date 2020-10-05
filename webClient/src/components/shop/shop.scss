@@ -30,7 +30,11 @@
     right: 2%;
     border: 0;
     outline: none;
+    background-color: rgba($color: #ffffff, $alpha: 0.5);
     border-radius: 50%;
     cursor: pointer;
+    &:hover {
+      background-color: white;
+    }
   }
 }

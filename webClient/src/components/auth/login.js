@@ -48,10 +48,10 @@ function Login() {
       return;
     }
 
-    if (password.length < 6 || password.length > 20) {
-      alert("Password length must be from 6-20 characters");
-      return;
-    }
+    // if (password.length < 6 || password.length > 20) {
+    //   alert("Password length must be from 6-20 characters");
+    //   return;
+    // }
 
     try {
       let res = await userApi.post({ email, password });

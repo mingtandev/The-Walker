@@ -26,7 +26,6 @@ function Users() {
     } catch (error) {
       console.log(error);
     }
-    return <Redirect to="/users" />;
   };
 
   return (
