@@ -13,6 +13,9 @@ TagManager:
   - SpawnHolder
   - SpawnPoint
   - BossWeapon
+  - GunBarrel
+  - UIManager
+  - Grenade
   layers:
   - Default
   - TransparentFX

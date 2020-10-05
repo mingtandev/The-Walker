@@ -51,6 +51,7 @@ public class Player : MonoBehaviour
             isDeath = true;
             anim.Play("Die");
             GetComponent<MyPlayerController>().enabled=false;
+            Heal = 0;
 
         }
     }

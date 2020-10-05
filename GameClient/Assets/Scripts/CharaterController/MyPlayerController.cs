@@ -13,9 +13,12 @@ public class MyPlayerController : MonoBehaviour
 
     //Shoot
     public bool isAiming = false;
-    Gun MyGun;
-    RaycastHit hit;
+    public Gun MyGun; //The current gun
 
+    Gun firstGun;
+    Gun secondGun;
+
+    RaycastHit hit;
 
 
 
@@ -34,6 +37,12 @@ public class MyPlayerController : MonoBehaviour
     private void Awake()
     {
 
+        firstGun = GameObject.FindGameObjectWithTag("Gun").GetComponent<Gun>();
+        secondGun = GameObject.FindGameObjectWithTag("Gun2").GetComponent<Gun>();
+        secondGun.gameObject.SetActive(false);
+
+        MyGun = firstGun;
+
         ground = LayerMask.GetMask("GroundLayer");
 
         rid = GetComponent<Rigidbody>();
@@ -43,13 +52,14 @@ public class MyPlayerController : MonoBehaviour
 
     void Start()
     {
-        MyGun = GameObject.FindGameObjectWithTag("Gun").GetComponent<Gun>();
+
     }
 
     // Update is called once per frame
     void Update()
     {
         Aimming();
+        SwapGun();
     }
 
     private void FixedUpdate()
@@ -79,26 +89,32 @@ public class MyPlayerController : MonoBehaviour
             {
                 endPosition = hit.point;
                 //set rotate
-                rotateDir = endPosition - transform.position;
+                rotateDir = endPosition - MyGun.transform.position;
                 rotateDir.y = 0;
                 rot = Quaternion.LookRotation(rotateDir);
-                if (MyGun.canShot)
+
+
+                if (MyGun.canShot && MyGun.readyToUse)
                 {
                     MyGun.muzzle.Play();
+                    MyGun.curAmmo--;
+                    //find the enemy
                     Ray ShotRay = new Ray(transform.position, (hit.point - transform.position));
                     RaycastHit enemyHit;
+
+                    //Instantiate the bullet
+                    MyGun.ShootTheBullet(ShotRay, rot);
+
                     if (Physics.Raycast(ShotRay, out enemyHit, 100f, layerBit))
                     {
-                        Debug.DrawRay(ShotRay.origin, ShotRay.direction * 50f, Color.red);
 
-                        if (1 << hit.transform.gameObject.layer == LayerMask.GetMask("EnemyLayer"))
+                        if (1 << enemyHit.transform.gameObject.layer == LayerMask.GetMask("EnemyLayer"))
                         {
                             GameObject blood = Instantiate(MyGun.blood, enemyHit.point, Quaternion.LookRotation(enemyHit.normal));
                             enemyHit.transform.gameObject.GetComponent<Enemy>().heath -= MyGun.damage;
                             Destroy(blood, 1f);
                         }
-                        MyGun.ResetTimeBullet();
-
+                        MyGun.ResetTimeBullet();  //gun delay start
                     }
 
                 }
@@ -213,6 +229,27 @@ public class MyPlayerController : MonoBehaviour
     }
 
 
+    void SwapGun()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
 
+            MyGun = firstGun;
+            secondGun.gameObject.SetActive(false);
+            firstGun.gameObject.SetActive(true);
+            UIManager.instance.myGun = MyGun;
+
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+
+            MyGun = secondGun;
+            secondGun.gameObject.SetActive(true);
+            firstGun.gameObject.SetActive(false);
+            UIManager.instance.myGun = MyGun;
+
+        }
+    }
 
 }

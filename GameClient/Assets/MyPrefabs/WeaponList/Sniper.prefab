@@ -9543,9 +9543,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   muzzle: {fileID: 1705950381426506910}
   blood: {fileID: 5176219325823134541, guid: e651e021900f86a479d4c6e04a1442b1, type: 3}
-  timeDelay: 2
+  bulletTrail: {fileID: 1046001694842650, guid: 9eb7304a6c9aedb40abba583aff826c5,
+    type: 3}
+  barrel: {fileID: 1046001694842650, guid: 9eb7304a6c9aedb40abba583aff826c5, type: 3}
+  curAmmo: 0
+  loadAmmo: 5
+  totalAmmo: 10
+  nameGun: Operator
+  type: 0
+  timeDelay: 0.1
   damage: 50
+  readyToUse: 0
   canShot: 1
+  isReaload: 0
 --- !u!1 &2615711355467332996
 GameObject:
   m_ObjectHideFlags: 0

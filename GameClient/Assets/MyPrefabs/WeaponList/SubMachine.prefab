@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6440671568528473131}
   m_Layer: 0
   m_Name: FX_Gunshot_Repeating
-  m_TagString: Untagged
+  m_TagString: GunBarrel
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5016,14 +5016,13 @@ GameObject:
   - component: {fileID: 6641168870263819949}
   - component: {fileID: 6631623926609908199}
   - component: {fileID: 4078982727851181932}
-  - component: {fileID: 6655256192224617424}
   m_Layer: 0
   m_Name: SubMachine
   m_TagString: Gun
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6652848635710429231
 Transform:
   m_ObjectHideFlags: 0
@@ -5106,26 +5105,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   muzzle: {fileID: 6607291374347698291}
   blood: {fileID: 5176219325823134541, guid: e651e021900f86a479d4c6e04a1442b1, type: 3}
+  bulletTrail: {fileID: 1046001694842650, guid: 9eb7304a6c9aedb40abba583aff826c5,
+    type: 3}
+  barrel: {fileID: 6445487247908511859}
+  curAmmo: 40
+  loadAmmo: 40
+  totalAmmo: 160
+  nameGun: MP5 - S
+  type: 1
   timeDelay: 0.1
-  damage: 4
+  damage: 3
   canShot: 0
---- !u!114 &6655256192224617424
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6654334270460810589}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 848b7e8224b41df4e99d86baa66e75cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  muzzle: {fileID: 0}
-  blood: {fileID: 0}
-  timeDelay: 0.2
-  damage: 10
-  canShot: 0
+  isReaload: 0
 --- !u!1 &6654352200389116505
 GameObject:
   m_ObjectHideFlags: 0

@@ -32,6 +32,7 @@ GameClient/Assets/Prefabs
 GameClient/Assets/Models
 GameClient/Assets/Textures
 GameClient/Assets/PolygonBossZombies
+GameClient/Assets/Bullet UI
 
 # Unity3D generated meta files
 GameClient/*.pidb.meta
