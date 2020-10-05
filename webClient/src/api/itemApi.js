@@ -10,8 +10,8 @@ const itemApi = {
     return axiosClient.get(url);
   },
   create: (body) => {
-    const url = "";
-    return axiosClient.get(url);
+    const url = "/items";
+    return axiosClient.post(url, body);
   },
   delete: (id) => {
     const url = `/items/${id}`;
