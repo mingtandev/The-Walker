@@ -21,34 +21,36 @@ axiosClient.interceptors.response.use(
     }
     return response;
   },
-  async (error) => {
+  (error) => {
     const originalRequest = error.config;
-    if (
-      error.response.status === 401 &&
-      originalRequest.url ===
-        `${process.env.REACT_APP_BASE_URL}/users/login/refresh`
-    ) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("refreshToken");
-      console.log("day ne");
-      return Promise.reject(error);
-    }
+    // if (
+    //   error.response.status === 401 &&
+    //   originalRequest.url ===
+    //     `${process.env.REACT_APP_BASE_URL}/users/login/refresh`
+    // ) {
+    //   localStorage.removeItem("token");
+    //   localStorage.removeItem("refreshToken");
+    //   console.log("day ne");
+    //   return;
+    // }
     if (error.response.status === 401) {
-      try {
-        const newToken = await axiosClient.post("/users/login/refresh", {
+      axiosClient
+        .post("/users/login/refresh", {
           refreshToken: localStorage.getItem("refreshToken"),
+        })
+        .then((res) => {
+          console.log("new: ", res);
+          localStorage.setItem("token", res.token);
+          axios.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${res.token}`;
+          axiosClient(originalRequest);
+        })
+        .catch((error) => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("refreshToken");
+          console.log("day ne", error);
         });
-        console.log("new: ", newToken);
-        localStorage.setItem("token", newToken.token);
-        axios.defaults.headers.common[
-          "Authorization"
-        ] = `Bearer ${newToken.token}`;
-        return await axiosClient(originalRequest);
-      } catch (error) {
-        console.log("er", error);
-        localStorage.removeItem("token");
-        localStorage.removeItem("refreshToken");
-      }
     }
   }
 );

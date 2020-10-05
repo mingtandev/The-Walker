@@ -21,10 +21,12 @@ import Users from "./components/admin/users";
 import { useSelector } from "react-redux";
 import Items from "./components/shop/items";
 import Item from "./components/shop/item";
+import Admin from "./components/admin/admin";
 
 const UserMenu = React.lazy(() => import("./components/user/userMenu"));
 const UserInfo = React.lazy(() => import("./components/user/info"));
 const BlogCreate = React.lazy(() => import("./components/blog/blogCreate"));
+const ItemCreate = React.lazy(() => import("./components/shop/itemCreate"));
 
 function App() {
   let user = useSelector((state) => state.auth);
@@ -33,8 +35,11 @@ function App() {
     <div className="app">
       <Suspense fallback={<div>Loading ...</div>}>
         <Router>
+          {/* {localStorage.getItem("token") &&
+            jwt_decode(localStorage.getItem("token")).roles === "user" && (
+              <Navbar />
+            )} */}
           <Navbar />
-          {/* {user.user && <UserMenu />} */}
           <Switch>
             <Route path="/" exact component={Home} />
 
@@ -71,6 +76,7 @@ function App() {
               path="/users"
               exact
               render={(props) =>
+                localStorage.getItem("token") &&
                 jwt_decode(localStorage.getItem("token")).roles === "admin" ? (
                   <Users />
                 ) : (
@@ -79,13 +85,28 @@ function App() {
               }
             />
 
+            <Route
+              path="/admin"
+              exact
+              render={(props) =>
+                localStorage.getItem("token") &&
+                jwt_decode(localStorage.getItem("token")).roles === "admin" ? (
+                  <Admin />
+                ) : (
+                  <Redirect to="/" />
+                )
+              }
+            />
+
             <Route path="/shop" exact component={Items} />
+            <Route path="/shop/create" exact component={ItemCreate} />
             <Route path="/shop/:id" component={Item} />
 
             <Route path="/blog" exact component={Blog} />
             <Route
               path="/blog/create"
               render={(props) =>
+                localStorage.getItem("token") &&
                 jwt_decode(localStorage.getItem("token")).roles === "admin" ? (
                   <BlogCreate />
                 ) : (
@@ -104,6 +125,7 @@ function App() {
                 )
               }
             />
+
             <Route component={NotFound} />
           </Switch>
         </Router>
