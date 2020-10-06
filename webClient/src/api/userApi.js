@@ -22,7 +22,11 @@ const userApi = {
     return axiosClient.post(url, body);
   },
   forgot: (body) => {
-    const url = "/users/information";
+    const url = "/users/recovery";
+    return axiosClient.post(url, body);
+  },
+  forgotConfirm: (body) => {
+    const url = "/users/forgot";
     return axiosClient.post(url, body);
   },
   delete: (body) => {
@@ -30,4 +34,5 @@ const userApi = {
     return axiosClient.delete(url, body);
   },
 };
+
 export default userApi;

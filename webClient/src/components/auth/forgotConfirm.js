@@ -1,31 +1,28 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useHistory } from "react-router-dom";
 import userApi from "../../api/userApi";
 import "./form.scss";
 
-function ForgotPassword() {
-  const [error, setError] = useState("");
+function ForgotRecovery() {
   let history = useHistory();
-
-  const onInputChange = (e) => {
-    setError("");
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    let { email } = e.target;
-    email = email.value;
+    let { password, token } = e.target;
+    password = password.value;
+    token = token.value;
 
     userApi
-      .forgot({ email })
+      .forgotConfirm({ newPassword: password, passwordResetToken: token })
       .then((res) => {
+        alert("Change password successfully");
         console.log(res);
-        alert("Check email for Password Reset Token");
-        history.push("/forgot/recovery");
+        history.push("/sign-in");
       })
       .catch((error) => {
-        setError("Can't find your Email");
         console.log(error);
+        alert("Error in Confirming Your Reset Password");
+        history.push("/forgot");
       });
   };
 
@@ -37,14 +34,20 @@ function ForgotPassword() {
       <Link className="forgetform__register" to="/sign-up">
         Register
       </Link>
-      {error && <p className="form__error">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="form__input">
           <input
-            type="email"
-            name="email"
-            onChange={onInputChange}
-            placeholder="Your Email to Reset Password..."
+            type="password"
+            name="password"
+            placeholder="Your Password..."
+          />
+          <span class="form__input--focus"></span>
+        </div>
+        <div className="form__input">
+          <input
+            type="text"
+            name="token"
+            placeholder="Password Reset Token..."
           />
           <span class="form__input--focus"></span>
         </div>
@@ -54,4 +57,4 @@ function ForgotPassword() {
   );
 }
 
-export default ForgotPassword;
+export default ForgotRecovery;

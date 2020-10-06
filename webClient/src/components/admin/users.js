@@ -19,8 +19,8 @@ function Users() {
   //   if (!localStorage.getItem("token")) return <Redirect to="/" />;
 
   const deleteUser = async (id) => {
-    console.log(id);
     try {
+      console.log(id);
       let res = await userApi.delete({ _id: id });
       console.log(res);
     } catch (error) {

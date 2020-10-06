@@ -6,7 +6,7 @@ function AdminMenu() {
     <div className="admin__menu">
       <ul>
         <li>
-          <Link to="/admin/blog/create">Blog create</Link>
+          jfjaskdjfakfjd{/* <Link to="/admin/blog/create">Blog create</Link> */}
         </li>
       </ul>
     </div>

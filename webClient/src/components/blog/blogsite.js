@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./blog.scss";
 import { Link } from "react-router-dom";
 import { blogposts } from "./blogposts";
 
-function blog() {
+function Blog() {
+  useEffect(() => {
+    async function fetchBlogs() {}
+    fetchBlogs();
+  });
+
   return (
     <div className="blogs">
       {blogposts.map((blog) => (
@@ -21,4 +26,4 @@ function blog() {
   );
 }
 
-export default blog;
+export default Blog;

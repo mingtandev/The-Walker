@@ -1,15 +1,7 @@
 import React from "react";
-import Menu from "./adminMenu";
-
-const BlogCreate = React.lazy(() => import("../blog/blogCreate"));
 
 function Admin() {
-  return (
-    <div className="admin">
-      <Menu />
-      <div className="admin__main"></div>
-    </div>
-  );
+  return <div className="admin">Admin</div>;
 }
 
 export default Admin;

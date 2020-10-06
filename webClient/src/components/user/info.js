@@ -18,7 +18,27 @@ function UserInfo() {
     getUserInfo();
   }, []);
 
-  // let user = useSelector((state) => state.auth);
+  const togglePassword = (e) => {
+    e.preventDefault();
+
+    let password = document.querySelector(".password");
+    let passwordEye = document.getElementById("togglePassword");
+    password.type === "password"
+      ? (password.type = "text")
+      : (password.type = "password");
+    passwordEye.classList.toggle("fa-eye-slash");
+  };
+
+  const togglePasswordConfirm = (e) => {
+    e.preventDefault();
+
+    let password = document.querySelector(".passwordConfirm");
+    let passwordEye = document.getElementById("togglePasswordConfirm");
+    password.type === "password"
+      ? (password.type = "text")
+      : (password.type = "password");
+    passwordEye.classList.toggle("fa-eye-slash");
+  };
 
   const handleChangePassword = (e) => {
     e.preventDefault();
@@ -74,18 +94,33 @@ function UserInfo() {
               <input
                 name="password"
                 type="password"
-                id="changePass"
+                className="password"
                 placeholder="New Password"
               />
               <span class="form__input--focus"></span>
+              <button
+                className="form__input--eye"
+                type="button"
+                onClick={togglePassword}
+              >
+                <i class="far fa-eye" id="togglePassword"></i>
+              </button>
             </div>
             <div className="form__input">
               <input
                 name="passwordConfirm"
                 type="password"
+                className="passwordConfirm"
                 placeholder="Confirm new password"
               />
               <span class="form__input--focus"></span>
+              <button
+                className="form__input--eye"
+                type="button"
+                onClick={togglePasswordConfirm}
+              >
+                <i class="far fa-eye" id="togglePasswordConfirm"></i>
+              </button>
             </div>
             <input type="submit" value="Confirm Changing" />
           </form>

@@ -22,6 +22,7 @@ import { useSelector } from "react-redux";
 import Items from "./components/shop/items";
 import Item from "./components/shop/item";
 import Admin from "./components/admin/admin";
+import ForgotConfirm from "./components/auth/forgotConfirm";
 
 const UserMenu = React.lazy(() => import("./components/user/userMenu"));
 const UserInfo = React.lazy(() => import("./components/user/info"));
@@ -63,11 +64,23 @@ function App() {
 
             <Route
               path="/forgot"
+              exact
               render={(props) =>
                 localStorage.getItem("token") ? (
                   <Redirect to="/" />
                 ) : (
                   <ForgotPassword />
+                )
+              }
+            />
+
+            <Route
+              path="/forgot/recovery"
+              render={(props) =>
+                localStorage.getItem("token") ? (
+                  <Redirect to="/" />
+                ) : (
+                  <ForgotConfirm />
                 )
               }
             />

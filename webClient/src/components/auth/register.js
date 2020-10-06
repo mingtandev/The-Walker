@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
-import { Link, Redirect } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { signUp } from "../../actions/authAction";
+import { Link, useHistory } from "react-router-dom";
 import userApi from "../../api/userApi";
-import jwt_decode from "jwt-decode";
 
 function Register() {
   const [avatar, setAvatar] = useState(null);
@@ -15,7 +12,7 @@ function Register() {
     name: "",
     captcha: "",
   });
-  let dispatch = useDispatch();
+  let history = useHistory();
 
   const onInputChange = (e) => {
     let name = e.target.name;
@@ -69,13 +66,11 @@ function Register() {
     // setAvatar(e.target.files[0]);
   };
 
-  const register = async (e) => {
+  const register = (e) => {
     e.preventDefault();
     let { email, name, password } = e.target;
     console.log("e", email.value, name.value, password.value);
     const recaptchaValue = recaptchaRef.current.getValue();
-
-    // checkInputSubmit(email, name, password);
 
     if (!email.value) {
       alert("Please Fill out email");
@@ -103,7 +98,6 @@ function Register() {
 
     if (!recaptchaValue) {
       alert("Check reCaptcha!");
-      // setError({ ...error, captcha: "name cannot be null" });
       return;
     }
 
@@ -111,32 +105,17 @@ function Register() {
     email = email.value;
     name = name.value;
     password = password.value;
-
-    console.log("try");
-    try {
-      let res = await userApi.signUp({ name, email, password });
-      console.log(res);
-      if (res.msg === "Email has been used!") {
-        console.log("Email used");
-        return;
-      }
-      if (res.msg === "Server error!") {
-        console.log("server err");
-        return;
-      }
-      // localStorage.setItem("token", res.token);
-      // localStorage.setItem("refreshtoken", res.refreshToken);
-      alert("Check your email for validation");
-      if (res.token) {
-        let user = jwt_decode(res.token);
-        console.log(user);
-        dispatch(signUp(user));
-        return <Redirect to="/" />;
-      }
-    } catch (error) {
-      console.log(error);
-      return <Redirect to="/" />;
-    }
+    userApi
+      .signUp({ name, email, password })
+      .then((res) => {
+        console.log(res);
+        alert("Check your email for validation");
+        history.push("/sign-in");
+      })
+      .catch((error) => {
+        alert("Error in Register! Please Try again");
+        console.log(error);
+      });
   };
 
   return (
@@ -191,13 +170,13 @@ function Register() {
         )}
 
         <div className="form__input">
+          <label>Your Avatar (Not required)</label>
           <input type="file" name="avatar" onChange={imgAvatarUpload} />
         </div>
         <div className="recaptcha">
           <ReCAPTCHA
             ref={recaptchaRef}
-            sitekey="6LdBUdEZAAAAALoB9_fO6bxb-iiC39gHsKXxH4iW"
-            onChange={console.log("captcha", 1)}
+            sitekey={process.env.REACT_APP_RECAPTCHA_KEY}
           />
         </div>
         <input type="submit" value="SIGN UP" />

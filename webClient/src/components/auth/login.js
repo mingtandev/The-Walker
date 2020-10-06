@@ -23,10 +23,7 @@ function Login() {
   };
 
   const onInputChange = (e) => {
-    let name = e.target.name;
-    let val = e.target.value;
     setLoginErr("");
-    console.log(name, val);
   };
 
   const login = async (e) => {
@@ -48,10 +45,10 @@ function Login() {
       return;
     }
 
-    // if (password.length < 6 || password.length > 20) {
-    //   alert("Password length must be from 6-20 characters");
-    //   return;
-    // }
+    if (password.length < 6 || password.length > 20) {
+      alert("Password length must be from 6-20 characters");
+      return;
+    }
 
     try {
       let res = await userApi.post({ email, password });
@@ -71,7 +68,6 @@ function Login() {
       }
     } catch (error) {
       console.log(error);
-      // alert("Error in login, please try again");
       setLoginErr("Email or Password is not correct");
     }
   };
@@ -111,8 +107,7 @@ function Login() {
         <div className="recaptcha">
           <ReCAPTCHA
             ref={recaptchaRef}
-            sitekey="6LdBUdEZAAAAALoB9_fO6bxb-iiC39gHsKXxH4iW"
-            onChange={console.log("")}
+            sitekey={process.env.REACT_APP_RECAPTCHA_KEY}
           />
         </div>
         <input type="submit" value="LOG IN" />
