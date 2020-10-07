@@ -50,10 +50,22 @@ public class Player : MonoBehaviour
         {
             isDeath = true;
             anim.Play("Die");
-            GetComponent<MyPlayerController>().enabled=false;
+            GetComponent<MyPlayerController>().enabled = false;
             Heal = 0;
 
         }
+    }
+
+    void Walk()
+    {
+        SoundManager.instance.Play("Walk");
+    }
+
+
+    void Run()
+    {
+        SoundManager.instance.Play("Walk");
+
     }
 
 }

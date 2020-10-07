@@ -87,7 +87,7 @@ public class Gun : MonoBehaviour
         if (curAmmo <= 0)
         {
             canShot = false;
-            isReaload = true;
+            // isReaload = true;
         }
 
         if (curAmmo == loadAmmo || totalAmmo == 0)
@@ -108,12 +108,15 @@ public class Gun : MonoBehaviour
 
     IEnumerator GunReload()
     {
-        if (canReload)
+        if (canReload && !isReaload)
         {
+            
             StartCoroutine(myUI.reloadUpdateFill(2f));
 
             canShot = false;
             readyToUse = false;
+            isReaload = true;
+            SoundManager.instance.Play("ReloadStart");
 
             yield return new WaitForSeconds(2f);
 
@@ -138,6 +141,7 @@ public class Gun : MonoBehaviour
                 }
             }
             myUI.reload.transform.gameObject.SetActive(false);
+            SoundManager.instance.Play("ReloadComplete");
         }
         yield return null;
     }
@@ -155,6 +159,7 @@ public class Gun : MonoBehaviour
     {
         // GameObject muzz = Instantiate(muzzle.transform.gameObject , barrel.transform.position , barrel.transform.rotation);
         // Destroy(muzz,1f);
+        SoundManager.instance.Play(nameGun);
         GameObject bullet = BulletPool.Instance.SpawnPool("BulletTrail", barrel.transform.position, followrotation);
         bullet.GetComponent<Rigidbody>().velocity = Vector3.zero;
         bullet.GetComponent<Rigidbody>().AddForce(ShotRay.direction * 5000f);

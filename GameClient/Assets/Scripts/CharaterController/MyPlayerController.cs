@@ -48,6 +48,9 @@ public class MyPlayerController : MonoBehaviour
         secondGun = SaveLoadManager.chooseGun[1].gun.GetComponent<Gun>();
         secondGun.gameObject.SetActive(false);
         MyGun = firstGun;
+
+        Debug.Log(firstGun.nameGun);
+        Debug.Log(secondGun.nameGun);
     }
 
     // Update is called once per frame
@@ -230,6 +233,7 @@ public class MyPlayerController : MonoBehaviour
 
     void SwapGun()
     {
+
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
 
@@ -243,14 +247,11 @@ public class MyPlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-
             MyGun = secondGun;
             secondGun.gameObject.SetActive(true);
             firstGun.gameObject.SetActive(false);
             UIManager.instance.myGun = MyGun;
             UIManager.instance.ActiveGun(2);
-
-
         }
     }
 
