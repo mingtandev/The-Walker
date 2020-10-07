@@ -46,7 +46,7 @@ public class SaveLoadManager : MonoBehaviour
     private void Awake() {
         MakeSingleton();
         LoadGun();
-        //LoadSkin();
+        LoadSkin();
     }
 
     void Start()
@@ -90,27 +90,27 @@ public class SaveLoadManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-    // void LoadSkin()
-    // {
-    //     for(int i = 0 ;  i<Hats.Length ; i++)
-    //     {
-    //         if(Hats[i].isOwn)
-    //         {
-    //             Hats[i].hat.SetActive(true);
-    //             break;
-    //         }
-    //     }
+    void LoadSkin()
+    {
+        for(int i = 0 ;  i<Hats.Length ; i++)
+        {
+            if(Hats[i].isOwn)
+            {
+                Hats[i].hat.SetActive(true);
+                break;
+            }
+        }
 
 
-    //     for(int i = 0 ;  i<Outfits.Length ; i++)
-    //     {
-    //         if(Outfits[i].isOwn)
-    //         {
-    //             Outfits[i].outfit.SetActive(true);
-    //             break;
-    //         }
-    //     }
+        for(int i = 0 ;  i<Outfits.Length ; i++)
+        {
+            if(Outfits[i].isOwn)
+            {
+                Outfits[i].outfit.SetActive(true);
+                break;
+            }
+        }
 
         
-    // }
+    }
 }

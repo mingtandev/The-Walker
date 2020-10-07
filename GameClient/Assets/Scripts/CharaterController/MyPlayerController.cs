@@ -82,7 +82,8 @@ public class MyPlayerController : MonoBehaviour
             Ray camRay = Camera.main.ScreenPointToRay(Input.mousePosition);
             Vector3 endPosition = Vector3.zero;
             isAiming = true;
-            int layerBit = LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("EnemyLayer") | LayerMask.GetMask("BuildingLayer");
+            int layerBit = LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("EnemyLayer");
+            // | LayerMask.GetMask("BuildingLayer")
             if (Physics.Raycast(camRay, out hit, 100f, layerBit))
             {
                 endPosition = hit.point;
@@ -237,18 +238,20 @@ public class MyPlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
 
+
             MyGun = firstGun;
-            secondGun.gameObject.SetActive(false);
             firstGun.gameObject.SetActive(true);
+            secondGun.isReaload = false;
+            secondGun.gameObject.SetActive(false);
             UIManager.instance.myGun = MyGun;
             UIManager.instance.ActiveGun(1);
-
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             MyGun = secondGun;
             secondGun.gameObject.SetActive(true);
+            firstGun.isReaload = false;
             firstGun.gameObject.SetActive(false);
             UIManager.instance.myGun = MyGun;
             UIManager.instance.ActiveGun(2);

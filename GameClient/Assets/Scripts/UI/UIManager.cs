@@ -111,7 +111,9 @@ public class UIManager : MonoBehaviour
 
     public void ActiveGun(int i)
     {
-        if(i==1)
+        reload.transform.gameObject.SetActive(false);
+
+        if (i == 1)
         {
             activeGun1.gameObject.SetActive(true);
             activeGun2.gameObject.SetActive(false);
@@ -120,6 +122,7 @@ public class UIManager : MonoBehaviour
         {
             activeGun1.gameObject.SetActive(false);
             activeGun2.gameObject.SetActive(true);
+
         }
     }
 }

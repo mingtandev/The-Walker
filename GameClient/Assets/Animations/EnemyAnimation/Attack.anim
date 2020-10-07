@@ -76011,7 +76011,7 @@ AnimationClip:
   m_HasGenericRootTransform: 0
   m_HasMotionFloatCurves: 0
   m_Events:
-  - time: 1.0833334
+  - time: 1.1
     functionName: StillAttackRange
     data: 
     objectReferenceParameter: {fileID: 0}

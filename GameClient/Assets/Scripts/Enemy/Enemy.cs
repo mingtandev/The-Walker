@@ -13,14 +13,14 @@ public class Enemy : MonoBehaviour
         Malaise,
         Bigcityboi
     }
-
+    
     public int heath;
     public GameObject attackPoint;
     public NavMeshAgent agent;
     public Player player;
     protected bool isDeath;
     protected int damage;
-
+    public bool isFemale;
 
     protected void AttackInRange()   //this function add to key event
     {
@@ -30,7 +30,7 @@ public class Enemy : MonoBehaviour
             if (obj[0].tag == "Player")
             {
                 player.Heal -= damage;
-                Debug.Log(player.Heal);
+                SoundManager.instance.Play("BeingAttack");
             }
         }
     }

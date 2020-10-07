@@ -127,7 +127,7 @@ GameObject:
   - component: {fileID: 2424761958560602255}
   - component: {fileID: 2424761958560602254}
   m_Layer: 10
-  m_Name: Outfit16 (9)
+  m_Name: TF 902
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -145,7 +145,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2424761959326590897}
-  m_RootOrder: 24
+  m_RootOrder: 23
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &2424761958560602254
 SkinnedMeshRenderer:
@@ -320,7 +320,7 @@ GameObject:
   - component: {fileID: 2424761958613147937}
   - component: {fileID: 2424761958613147936}
   m_Layer: 10
-  m_Name: Outfit4
+  m_Name: Kayz
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -752,7 +752,7 @@ GameObject:
   - component: {fileID: 2424761958728611363}
   - component: {fileID: 2424761958728611362}
   m_Layer: 10
-  m_Name: Outfit16 (11)
+  m_Name: Rick
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -770,7 +770,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2424761959326590897}
-  m_RootOrder: 26
+  m_RootOrder: 25
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &2424761958728611362
 SkinnedMeshRenderer:
@@ -1109,7 +1109,7 @@ GameObject:
   - component: {fileID: 2424761958882247494}
   - component: {fileID: 2424761958882247493}
   m_Layer: 10
-  m_Name: Outfit17
+  m_Name: Officer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1127,7 +1127,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2424761959326590897}
-  m_RootOrder: 16
+  m_RootOrder: 15
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &2424761958882247493
 SkinnedMeshRenderer:
@@ -1272,7 +1272,7 @@ GameObject:
   - component: {fileID: 2424761958915337698}
   - component: {fileID: 2424761958915337697}
   m_Layer: 10
-  m_Name: Outfit10
+  m_Name: Makarov
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1404,7 +1404,7 @@ GameObject:
   - component: {fileID: 2424761958944023492}
   - component: {fileID: 2424761958944023515}
   m_Layer: 10
-  m_Name: Outfit3
+  m_Name: Iraq Man
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1536,7 +1536,7 @@ GameObject:
   - component: {fileID: 2424761958948340788}
   - component: {fileID: 2424761958948340747}
   m_Layer: 10
-  m_Name: Outfit7
+  m_Name: Merc
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1899,7 +1899,7 @@ GameObject:
   - component: {fileID: 2424761959070245836}
   - component: {fileID: 2424761959070245827}
   m_Layer: 10
-  m_Name: Outfit16 (3)
+  m_Name: Hong Minh Thang
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1917,7 +1917,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2424761959326590897}
-  m_RootOrder: 18
+  m_RootOrder: 17
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &2424761959070245827
 SkinnedMeshRenderer:
@@ -2031,7 +2031,7 @@ GameObject:
   - component: {fileID: 2424761959118251515}
   - component: {fileID: 2424761959118251514}
   m_Layer: 10
-  m_Name: Outfit12
+  m_Name: Captain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2163,7 +2163,7 @@ GameObject:
   - component: {fileID: 2424761959123316252}
   - component: {fileID: 2424761959123316243}
   m_Layer: 10
-  m_Name: Outfit2
+  m_Name: Iraq Boy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2295,7 +2295,7 @@ GameObject:
   - component: {fileID: 2424761959162412520}
   - component: {fileID: 2424761959162412527}
   m_Layer: 10
-  m_Name: Outfit8
+  m_Name: Tre Trau Viet Nam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2728,138 +2728,6 @@ Transform:
   m_Father: {fileID: 2424761958699418450}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2424761959263500473
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2424761959263500472}
-  - component: {fileID: 2424761959263500479}
-  m_Layer: 10
-  m_Name: Outfit15
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &2424761959263500472
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2424761959263500473}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 2424761959326590897}
-  m_RootOrder: 14
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!137 &2424761959263500479
-SkinnedMeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2424761959263500473}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 48843a2db7a47754f9c8d6ae390ebf4b, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  serializedVersion: 2
-  m_Quality: 0
-  m_UpdateWhenOffscreen: 0
-  m_SkinnedMotionVectors: 1
-  m_Mesh: {fileID: 4300022, guid: b3a849229c6faea448cb1f0200840e8d, type: 3}
-  m_Bones:
-  - {fileID: 2424761959930011674}
-  - {fileID: 2424761959482544154}
-  - {fileID: 2424761959967471956}
-  - {fileID: 2424761959596459882}
-  - {fileID: 2424761958547446532}
-  - {fileID: 2424761958722903318}
-  - {fileID: 2424761960014105426}
-  - {fileID: 2424761958948474315}
-  - {fileID: 2424761960147113578}
-  - {fileID: 2424761959582419778}
-  - {fileID: 2424761960599879362}
-  - {fileID: 2424761960611233074}
-  - {fileID: 2424761958909978130}
-  - {fileID: 2424761959724263007}
-  - {fileID: 2424761959603216550}
-  - {fileID: 2424761959224069787}
-  - {fileID: 2424761959584989029}
-  - {fileID: 2424761959503459439}
-  - {fileID: 2424761959621753914}
-  - {fileID: 2424761958531065949}
-  - {fileID: 2424761959012496362}
-  - {fileID: 2424761959791438035}
-  - {fileID: 2424761960624829255}
-  - {fileID: 2424761958626666893}
-  - {fileID: 2424761958808443720}
-  - {fileID: 2424761960011322490}
-  - {fileID: 2424761960312005452}
-  - {fileID: 2424761959239768261}
-  - {fileID: 2424761959845032790}
-  - {fileID: 2424761960559867392}
-  - {fileID: 2424761958971556069}
-  - {fileID: 2424761958587530345}
-  - {fileID: 2424761959642630599}
-  - {fileID: 2424761959329699681}
-  - {fileID: 2424761958699418450}
-  - {fileID: 2424761959246274416}
-  - {fileID: 2424761958607359829}
-  - {fileID: 2424761959561096558}
-  - {fileID: 2424761958877356968}
-  - {fileID: 2424761959619165512}
-  - {fileID: 2424761959205480989}
-  - {fileID: 2424761959488029253}
-  - {fileID: 2424761959231661621}
-  - {fileID: 2424761960000031098}
-  - {fileID: 2424761958951442844}
-  - {fileID: 2424761959332464880}
-  - {fileID: 2424761959626600005}
-  - {fileID: 2424761959032134774}
-  - {fileID: 2424761958767302177}
-  - {fileID: 2424761959501575788}
-  m_BlendShapeWeights: []
-  m_RootBone: {fileID: 2424761959930011674}
-  m_AABB:
-    m_Center: {x: -0.0010966659, y: 0.8449393, z: -0.034024134}
-    m_Extent: {x: 1.0258031, y: 0.9435851, z: 0.26744437}
-  m_DirtyAABB: 0
 --- !u!1 &2424761959317037720
 GameObject:
   m_ObjectHideFlags: 0
@@ -2871,7 +2739,7 @@ GameObject:
   - component: {fileID: 2424761959317037727}
   - component: {fileID: 2424761959317037726}
   m_Layer: 10
-  m_Name: Outfit1
+  m_Name: Indian Warrior
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3033,7 +2901,6 @@ Transform:
   - {fileID: 2424761959118251515}
   - {fileID: 2424761959669174040}
   - {fileID: 2424761960428537997}
-  - {fileID: 2424761959263500472}
   - {fileID: 2424761959411311780}
   - {fileID: 2424761958882247494}
   - {fileID: 2424761959829382385}
@@ -3122,7 +2989,7 @@ GameObject:
   - component: {fileID: 2424761959349506067}
   - component: {fileID: 2424761959349506066}
   m_Layer: 10
-  m_Name: Outfit16 (10)
+  m_Name: Park
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3140,7 +3007,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2424761959326590897}
-  m_RootOrder: 25
+  m_RootOrder: 24
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &2424761959349506066
 SkinnedMeshRenderer:
@@ -3412,7 +3279,7 @@ GameObject:
   - component: {fileID: 2424761959382827016}
   - component: {fileID: 2424761959382827023}
   m_Layer: 10
-  m_Name: Outfit11
+  m_Name: Gin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3544,7 +3411,7 @@ GameObject:
   - component: {fileID: 2424761959382847436}
   - component: {fileID: 2424761959382847427}
   m_Layer: 10
-  m_Name: Outfit9
+  m_Name: Rambo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3676,7 +3543,7 @@ GameObject:
   - component: {fileID: 2424761959411311780}
   - component: {fileID: 2424761959411311803}
   m_Layer: 10
-  m_Name: Outfit16
+  m_Name: Battery
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3694,7 +3561,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2424761959326590897}
-  m_RootOrder: 15
+  m_RootOrder: 14
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &2424761959411311803
 SkinnedMeshRenderer:
@@ -3808,12 +3675,12 @@ GameObject:
   - component: {fileID: 2424761959436066897}
   - component: {fileID: 2424761959436066896}
   m_Layer: 10
-  m_Name: Outfit16 (8)
+  m_Name: Steven
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2424761959436066897
 Transform:
   m_ObjectHideFlags: 0
@@ -3826,7 +3693,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2424761959326590897}
-  m_RootOrder: 23
+  m_RootOrder: 22
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &2424761959436066896
 SkinnedMeshRenderer:
@@ -4736,7 +4603,7 @@ GameObject:
   - component: {fileID: 2424761959669174040}
   - component: {fileID: 2424761959669174047}
   m_Layer: 10
-  m_Name: Outfit13
+  m_Name: Phi Cong
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4901,7 +4768,7 @@ GameObject:
   - component: {fileID: 2424761959786141981}
   - component: {fileID: 2424761959786141980}
   m_Layer: 10
-  m_Name: Outfit16 (5)
+  m_Name: Boy Map Dit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4919,7 +4786,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2424761959326590897}
-  m_RootOrder: 20
+  m_RootOrder: 19
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &2424761959786141980
 SkinnedMeshRenderer:
@@ -5064,7 +4931,7 @@ GameObject:
   - component: {fileID: 2424761959829382385}
   - component: {fileID: 2424761959829382384}
   m_Layer: 10
-  m_Name: Outfit16 (2)
+  m_Name: Tan Dep Trai
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5082,7 +4949,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2424761959326590897}
-  m_RootOrder: 17
+  m_RootOrder: 16
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &2424761959829382384
 SkinnedMeshRenderer:
@@ -5230,7 +5097,7 @@ GameObject:
   - component: {fileID: 2424761959911247672}
   - component: {fileID: 2424761959911247679}
   m_Layer: 10
-  m_Name: Outfit16 (7)
+  m_Name: Jason
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5248,7 +5115,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2424761959326590897}
-  m_RootOrder: 22
+  m_RootOrder: 21
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &2424761959911247679
 SkinnedMeshRenderer:
@@ -5503,7 +5370,7 @@ GameObject:
   - component: {fileID: 2424761959971139047}
   - component: {fileID: 2424761959971139046}
   m_Layer: 10
-  m_Name: Outfit5
+  m_Name: Ops5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6316,7 +6183,7 @@ GameObject:
   - component: {fileID: 2424761960241901362}
   - component: {fileID: 2424761960241901361}
   m_Layer: 10
-  m_Name: Outfit6
+  m_Name: Phantom
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6558,7 +6425,7 @@ GameObject:
   - component: {fileID: 2424761960381499655}
   - component: {fileID: 2424761960381499654}
   m_Layer: 10
-  m_Name: Outfit16 (6)
+  m_Name: Tan Chien Binh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6576,7 +6443,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2424761959326590897}
-  m_RootOrder: 21
+  m_RootOrder: 20
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &2424761960381499654
 SkinnedMeshRenderer:
@@ -6770,7 +6637,7 @@ GameObject:
   - component: {fileID: 2424761960428537997}
   - component: {fileID: 2424761960428537996}
   m_Layer: 10
-  m_Name: Outfit14
+  m_Name: Global Risk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7139,7 +7006,7 @@ GameObject:
   - component: {fileID: 2424761960552594864}
   - component: {fileID: 2424761960552594871}
   m_Layer: 10
-  m_Name: Outfit16 (4)
+  m_Name: Prisoner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7157,7 +7024,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2424761959326590897}
-  m_RootOrder: 19
+  m_RootOrder: 18
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &2424761960552594871
 SkinnedMeshRenderer:

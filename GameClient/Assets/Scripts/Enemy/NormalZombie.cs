@@ -6,7 +6,7 @@ using UnityEngine.AI;
 public class NormalZombie : Enemy
 {
     // Start is called before the first frame update
-    
+
 
 
     //STATE PARTTERN
@@ -33,7 +33,7 @@ public class NormalZombie : Enemy
     //private Status WalkerStatus = Status.Idle;
     public float DistanceToChase = 10f;
 
-
+    AudioSource audioSource;
     protected void Awake()
     {
         anim = GetComponent<Animator>();
@@ -41,11 +41,12 @@ public class NormalZombie : Enemy
         playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<MyPlayerController>();
         currentState = idle;
         damage = 10;
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Start()
     {
-        StartCoroutine(Couroutine_PathFiding);    
+        StartCoroutine(Couroutine_PathFiding);
     }
 
     // Update is called once per frame
@@ -89,7 +90,7 @@ public class NormalZombie : Enemy
         else
         {
             anim.SetBool("Attack", false);
-            
+
         }
     }
 
@@ -120,16 +121,25 @@ public class NormalZombie : Enemy
     {
         anim.Play("Die");
         isDeath = true;
-
+        AudioClip clipDie;
+        if (isFemale)
+        {
+            clipDie = Resources.Load("Audio/Female_Dead") as AudioClip;
+        }
+        else
+        {
+            clipDie = Resources.Load("Audio/Male_Dead") as AudioClip;
+        }
+        audioSource.PlayOneShot(clipDie,1f);
+        
         StopCoroutine(Couroutine_PathFiding);
         GetComponent<NavMeshAgent>().enabled = false;  //stop path finding
-
-        yield return new WaitForSeconds(2f);
-
+        yield return new WaitForSeconds(1.8f);
+        audioSource.Stop();
         this.enabled = false;
         GetComponent<CapsuleCollider>().enabled = false;
         GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
-
+        Destroy(gameObject , 2f);
     }
 
     void StopAction()
@@ -160,31 +170,26 @@ public class NormalZombie : Enemy
             float time = 1f / number;
             float delayTime = 0;
             float realtime = 0;
-            
-                
+
+
             currentState = currentState.DoState(this, player, ref delayTime);
 
 
-            if(delayTime+time>1.2)
-                realtime = (delayTime+time)/2f;
+            if (delayTime + time > 1.2)
+                realtime = (delayTime + time) / 2f;
 
-                
+
             yield return new WaitForSeconds(realtime);
-            
+
 
             StartCoroutine(Couroutine_PathFiding);
-       
+
         }
         else
         {
             anim.SetBool("Attack", false);
             anim.SetBool("Chasing", false);
         }
-    }
-
-    public void StopAttack()
-    {
-        //anim.SetBool("Attack", false);
     }
 
 }

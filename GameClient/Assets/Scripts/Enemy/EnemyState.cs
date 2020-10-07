@@ -14,9 +14,10 @@ public class AttackState : IEnemyState
         
         enemy.agent.isStopped = true;
         float dis = Vector3.Distance(enemy.transform.position, player.transform.position);
-        
         AnimatorStateInfo currInfo = enemy.anim.GetCurrentAnimatorStateInfo(0);
         timeDelay = currInfo.length;
+
+        
         enemy.anim.SetBool("Attack", true); // this animation include key event attack
         if (dis < enemy.DistanceToChase)
         {

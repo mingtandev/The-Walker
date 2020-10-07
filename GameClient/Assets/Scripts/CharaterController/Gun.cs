@@ -146,15 +146,6 @@ public class Gun : MonoBehaviour
         yield return null;
     }
 
-    // public void ShootTheBullet(Ray ShotRay, Quaternion followrotation)
-    // {
-    //     GameObject trailBullet = Instantiate(bulletTrail, barrel.transform.position, followrotation);
-    //     trailBullet.SetActive(true);
-    //     trailBullet.GetComponent<Rigidbody>().AddForce(ShotRay.direction * 5000f);
-    //     Destroy(trailBullet, 0.095f);
-    // }
-
-
     public void InstanitateMuzzle(Ray ShotRay, Quaternion followrotation)
     {
         // GameObject muzz = Instantiate(muzzle.transform.gameObject , barrel.transform.position , barrel.transform.rotation);
