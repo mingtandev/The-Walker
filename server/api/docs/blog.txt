@@ -1,0 +1,81 @@
+
+Each req call api => Check res.msg. If 'success' => OK else FAIL
+
+// Get all blog
+Method: GET
+Auth: No
+Req.body: {}
+URL: /blogs
+If 'success' => {
+    msg: 'success'.
+    length: Number,
+    blogs: Array
+}
+
+----------------------------------------------------------------------------
+
+// Get one blog
+Method: GET
+Auth: No,
+Req.params: _id
+URL: /blogs/:_id
+If 'success' => {
+    msg: 'success',
+    blog: {
+
+    }
+}
+
+----------------------------------------------------------------------------
+
+// Create a new blog
+Method: POST
+Auth: Yes
+Roles: Admin only
+Req.body form data {
+    writer: 'ObjectId',
+    title: 'String',
+    content: 'String',
+    thumbnail: File (accepted: JPEG, JPG, PNG)
+}
+URL: /blogs
+If 'success' => {
+    msg: 'success',
+    blog: {
+
+    }
+}
+
+----------------------------------------------------------------------------
+
+// Update blog (title, content)
+Method: PATCH
+Auth: YES
+Roles: Admin only
+Req.body:
+[
+    {
+        "propName": "title",
+        "value": "new title"
+    },
+    ....
+]
+
+URL: /blogs/:_id
+If 'success' => {
+    msg: 'success'
+}
+
+----------------------------------------------------------------------------
+
+// Delete blog
+Method: DELETE
+Auth: Yes
+Roles: Admin only
+Req.params: _id
+URL: /blogs/:_id
+If 'success' => Obj {
+    msg: 'success'
+}
+
+----------------------------------------------------------------------------

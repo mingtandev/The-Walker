@@ -20,11 +20,11 @@ const codeSchema = mongoose.Schema({
     ],
     isUsed: {
         type: Boolean,
-        default: false
+        default: false  
     },
     expiresTime: {
         type: Date,
-        default: Date.now() + 259200000 // 3day
+        default: Date.now() + 259200000 // 3 days
     }
 })
 

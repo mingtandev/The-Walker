@@ -3,7 +3,7 @@ const Item = require('../models/item')
 exports.getAll = (req, res, next) => {
 
     Item.find({})
-    .select('_id name slugName thumbnail type price')
+    .select('_id name slugName thumbnail type price sale saleExpiresTime')
     .then(items => {
         const response = {
             msg: 'success',
@@ -16,6 +16,8 @@ exports.getAll = (req, res, next) => {
                     thumbnail: item.thumbnail,
                     type: item.type,
                     price: item.price,
+                    sale: item.sale,
+                    saleExpiresTime: item.saleExpiresTime,
                     request: {
                         type: 'GET',
                         url: req.hostname + '/items/' + item._id
@@ -39,7 +41,7 @@ exports.getOne = (req, res, next) => {
     const {itemId} = req.params
 
     Item.findById(itemId)
-    .select('_id name slugName thumbnail type price')
+    .select('_id name slugName thumbnail type price sale saleExpiresTime')
     .then(item => {
 
         if(!item){
@@ -57,6 +59,8 @@ exports.getOne = (req, res, next) => {
                 thumbnail: item.thumbnail,
                 type: item.type,
                 price: item.price,
+                sale: item.sale,
+                saleExpiresTime: item.saleExpiresTime,
                 request: {
                     type: 'GET',
                     url: req.hostname + '/items'
@@ -74,7 +78,7 @@ exports.getOne = (req, res, next) => {
 }
 
 exports.create = (req, res, next) => {
-    const {name, type, price} = req.body
+    const {name, type, price, sale, saleExpiresTime} = req.body
 
     if(!name || !type || !price){
         return res.status(400).json({
@@ -95,6 +99,11 @@ exports.create = (req, res, next) => {
         thumbnail: req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '')
     })
 
+    if(+sale > 0){
+        item['sale'] = +sale,
+        item['saleExpiresTime'] = Date.now() + +saleExpiresTime ||  Date.now() + 259200000 // 3 days
+    }
+
     item.save()
     .then(newItem => {
         res.status(201).json({
@@ -106,6 +115,8 @@ exports.create = (req, res, next) => {
                 thumbnail: newItem.thumbnail,
                 type: newItem.type,
                 price: newItem.price,
+                sale: item.sale,
+                saleExpiresTime: item.saleExpiresTime,
                 request: {
                     type: 'GET',
                     url: req.hostname + '/items/' + newItem._id
@@ -135,6 +146,10 @@ exports.update = (req, res, next) => {
 
     for (const ops of req.body) {
         item[ops.propName] = ops.value
+
+        if(ops.propName === 'saleExpiresTime'){
+            item[ops.propName] = Date.now() + +ops.value
+        }
     }
 
     Item.updateOne({_id}, {$set: item})

@@ -22,6 +22,14 @@ const itemScheme = mongoose.Schema({
     price: {
         type: Number,
         required: true
+    },
+    sale: {
+        type: Number,
+        default: 0
+    },
+    saleExpiresTime: {
+        type: Date,
+        default: Date.now()
     }
 })
 

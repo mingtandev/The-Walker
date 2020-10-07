@@ -436,12 +436,12 @@ exports.information = (req, res, next) => {
             return res.status(404).json({
                 msg: 'User not found!'
             })
+        }else{
+            res.status(200).json({
+                msg: 'success',
+                user
+            })
         }
-
-        res.status(200).json({
-            msg: 'success',
-            user
-        })
     })
     .catch(error => {
         res.status(500).json({
@@ -467,7 +467,7 @@ exports.delete =  (req, res, next) => {
         })
     }
 
-    User.findById({_id})
+    User.findById(_id)
     .then(user => {
         if(!user){
             return res.status(404).json({
@@ -480,18 +480,18 @@ exports.delete =  (req, res, next) => {
                 msg: `You don't have the permission!`
             })
         }
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
 
-    User.deleteOne({_id})
-    .then(result => {
-        res.status(200).json({
-            msg: 'success'
+        User.deleteOne({_id})
+        .then(result => {
+            res.status(200).json({
+                msg: 'success'
+            })
+        })
+        .catch(error => {
+            res.status(500).json({
+                msg: 'Server error!',
+                error
+            })
         })
     })
     .catch(error => {
