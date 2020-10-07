@@ -9551,11 +9551,12 @@ MonoBehaviour:
   totalAmmo: 10
   nameGun: Operator
   type: 0
-  timeDelay: 0.1
-  damage: 50
+  timeDelay: 2
+  damage: 100
   readyToUse: 0
   canShot: 1
   isReaload: 0
+  canReload: 1
 --- !u!1 &2615711355467332996
 GameObject:
   m_ObjectHideFlags: 0

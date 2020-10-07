@@ -20,7 +20,7 @@ MonoBehaviour:
   curAmmo: 0
   loadAmmo: 30
   totalAmmo: 90
-  nameGun: 
+  nameGun: MP5K - Combo
   type: 1
   timeDelay: 0.08
   damage: 4

@@ -22,7 +22,7 @@ MonoBehaviour:
   totalAmmo: 250
   nameGun: RPK
   type: 3
-  timeDelay: 0.15
+  timeDelay: 0.09
   damage: 4
   readyToUse: 0
   canShot: 0

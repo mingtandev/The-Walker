@@ -20,7 +20,7 @@ MonoBehaviour:
   curAmmo: 0
   loadAmmo: 30
   totalAmmo: 90
-  nameGun: M16A - Black
+  nameGun: M16A4
   type: 2
   timeDelay: 0.1
   damage: 5
@@ -38,12 +38,12 @@ PrefabInstance:
     - target: {fileID: 5951468001788407264, guid: ddd9eb4a6cc268444be4db877be76f19,
         type: 3}
       propertyPath: InitialModule.startSize.scalar
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5951468001788407264, guid: ddd9eb4a6cc268444be4db877be76f19,
         type: 3}
       propertyPath: InitialModule.startSize.minScalar
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5951468001788407266, guid: ddd9eb4a6cc268444be4db877be76f19,
         type: 3}
@@ -128,7 +128,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1490873028196816, guid: a3fe0be603767ae42a0d14c81d777c2b, type: 3}
       propertyPath: m_Name
-      value: M16A - Black
+      value: M16A4
       objectReference: {fileID: 0}
     - target: {fileID: 1490873028196816, guid: a3fe0be603767ae42a0d14c81d777c2b, type: 3}
       propertyPath: m_IsActive
@@ -184,7 +184,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4323151498273656, guid: a3fe0be603767ae42a0d14c81d777c2b, type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4439011080725836, guid: a3fe0be603767ae42a0d14c81d777c2b, type: 3}
       propertyPath: m_RootOrder
@@ -192,7 +192,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4523154104387116, guid: a3fe0be603767ae42a0d14c81d777c2b, type: 3}
       propertyPath: m_RootOrder
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a3fe0be603767ae42a0d14c81d777c2b, type: 3}
