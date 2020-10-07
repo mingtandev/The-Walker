@@ -16,6 +16,7 @@ TagManager:
   - GunBarrel
   - UIManager
   - Grenade
+  - BulletTrail
   layers:
   - Default
   - TransparentFX

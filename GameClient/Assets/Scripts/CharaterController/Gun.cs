@@ -11,7 +11,8 @@ public class Gun : MonoBehaviour
     {
         Sniper,
         Submachine,
-        Rifle
+        Rifle,
+        Automatic
     }
 
 
@@ -141,13 +142,30 @@ public class Gun : MonoBehaviour
         yield return null;
     }
 
-    public void ShootTheBullet(Ray ShotRay, Quaternion followrotation)
+    // public void ShootTheBullet(Ray ShotRay, Quaternion followrotation)
+    // {
+    //     GameObject trailBullet = Instantiate(bulletTrail, barrel.transform.position, followrotation);
+    //     trailBullet.SetActive(true);
+    //     trailBullet.GetComponent<Rigidbody>().AddForce(ShotRay.direction * 5000f);
+    //     Destroy(trailBullet, 0.095f);
+    // }
+
+
+    public void InstanitateMuzzle(Ray ShotRay, Quaternion followrotation)
     {
-        GameObject trailBullet = Instantiate(bulletTrail, barrel.transform.position, followrotation, barrel.transform);
-        trailBullet.SetActive(true);
-        trailBullet.GetComponent<Rigidbody>().AddForce(ShotRay.direction * 5000f);
-        Destroy(trailBullet, 0.095f);
+        // GameObject muzz = Instantiate(muzzle.transform.gameObject , barrel.transform.position , barrel.transform.rotation);
+        // Destroy(muzz,1f);
+        GameObject bullet = BulletPool.Instance.SpawnPool("BulletTrail", barrel.transform.position, followrotation);
+        bullet.GetComponent<Rigidbody>().velocity = Vector3.zero;
+        bullet.GetComponent<Rigidbody>().AddForce(ShotRay.direction * 5000f);
+        StartCoroutine(UnactiveBullet(bullet, 0.095f));
     }
 
 
+    IEnumerator UnactiveBullet(GameObject obj, float time)
+    {
+        yield return new WaitForSeconds(time);
+        obj.SetActive(false);
+
+    }
 }

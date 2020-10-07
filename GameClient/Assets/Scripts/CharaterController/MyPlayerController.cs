@@ -36,15 +36,7 @@ public class MyPlayerController : MonoBehaviour
 
     private void Awake()
     {
-
-        firstGun = GameObject.FindGameObjectWithTag("Gun").GetComponent<Gun>();
-        secondGun = GameObject.FindGameObjectWithTag("Gun2").GetComponent<Gun>();
-        secondGun.gameObject.SetActive(false);
-
-        MyGun = firstGun;
-
         ground = LayerMask.GetMask("GroundLayer");
-
         rid = GetComponent<Rigidbody>();
         anim = GetComponent<Animator>();
         moveDir = Vector3.forward;
@@ -52,7 +44,10 @@ public class MyPlayerController : MonoBehaviour
 
     void Start()
     {
-
+        firstGun = SaveLoadManager.chooseGun[0].gun.GetComponent<Gun>();
+        secondGun = SaveLoadManager.chooseGun[1].gun.GetComponent<Gun>();
+        secondGun.gameObject.SetActive(false);
+        MyGun = firstGun;
     }
 
     // Update is called once per frame
@@ -96,15 +91,19 @@ public class MyPlayerController : MonoBehaviour
 
                 if (MyGun.canShot && MyGun.readyToUse)
                 {
-                    MyGun.muzzle.Play();
-                    MyGun.curAmmo--;
-                    //find the enemy
+
+                    //Find the enemy
                     Ray ShotRay = new Ray(transform.position, (hit.point - transform.position));
                     RaycastHit enemyHit;
 
-                    //Instantiate the bullet
-                    MyGun.ShootTheBullet(ShotRay, rot);
 
+                    //Pricle play
+                    MyGun.muzzle.Play();
+
+                    //Pook object the bullet
+                    MyGun.InstanitateMuzzle(ShotRay, rot);
+                    MyGun.curAmmo--;
+                    Debug.DrawRay(ShotRay.origin, ShotRay.direction * 50f, Color.red);
                     if (Physics.Raycast(ShotRay, out enemyHit, 100f, layerBit))
                     {
 
@@ -238,6 +237,7 @@ public class MyPlayerController : MonoBehaviour
             secondGun.gameObject.SetActive(false);
             firstGun.gameObject.SetActive(true);
             UIManager.instance.myGun = MyGun;
+            UIManager.instance.ActiveGun(1);
 
         }
 
@@ -248,6 +248,8 @@ public class MyPlayerController : MonoBehaviour
             secondGun.gameObject.SetActive(true);
             firstGun.gameObject.SetActive(false);
             UIManager.instance.myGun = MyGun;
+            UIManager.instance.ActiveGun(2);
+
 
         }
     }

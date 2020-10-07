@@ -6,40 +6,45 @@ public class UIManager : MonoBehaviour
 {
     // Start is called before the first frame update
     public static UIManager instance;
+    bool canExecute;
 
     //REFERENCE 
     [HideInInspector] public Gun myGun; // refer to Current Gun
     [HideInInspector] public Player player;
 
-    //GUN UI
+    [Header("GUN UI")]
     public Text curAmmo;
     public Text totalAmmo;
     public Text gunName;
     public Text typeName;
     public Image reload;
+    public GameObject activeGun1;
+    public GameObject activeGun2;
 
-    //HEAL
+    [Header("HEAL UI")]
     public Text heal;
     public Image fillHeal;
 
     void Awake()
     {
-        myGun = GameObject.FindGameObjectWithTag("Player").GetComponent<MyPlayerController>().MyGun;
-        player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
 
     }
     void Start()
     {
-        GunInit();
+
+        StartCoroutine(LoadReference());
         MakeInstace();
     }
 
     // Update is called once per frame
     void Update()
     {
-        GunInit();
-        UpdateAmmo();
-        UpdateHeal();
+        if (canExecute)
+        {
+            GunInit();
+            UpdateAmmo();
+            UpdateHeal();
+        }
     }
 
 
@@ -80,6 +85,8 @@ public class UIManager : MonoBehaviour
         }
     }
 
+
+
     void MakeInstace()
     {
         if (instance == null)
@@ -89,6 +96,30 @@ public class UIManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+        }
+    }
+
+
+    IEnumerator LoadReference()
+    {
+        yield return new WaitForSeconds(0.5f);
+        myGun = GameObject.FindGameObjectWithTag("Player").GetComponent<MyPlayerController>().MyGun;
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+        canExecute = true;
+    }
+
+
+    public void ActiveGun(int i)
+    {
+        if(i==1)
+        {
+            activeGun1.gameObject.SetActive(true);
+            activeGun2.gameObject.SetActive(false);
+        }
+        else
+        {
+            activeGun1.gameObject.SetActive(false);
+            activeGun2.gameObject.SetActive(true);
         }
     }
 }
