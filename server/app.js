@@ -13,6 +13,7 @@ const itemRoutes = require('./api/routes/items')
 const giffcodeRoutes = require('./api/routes/giffcodes')
 const blogRoutes = require('./api/routes/blogs')
 const rollupRoutes = require('./api/routes/rollups')
+const userItemRoutes = require('./api/routes/userItems')
 
 const app = express()
 
@@ -32,6 +33,7 @@ app.use('/items', itemRoutes)
 app.use('/giffcodes', giffcodeRoutes)
 app.use('/blogs', blogRoutes)
 app.use('/rolls', rollupRoutes)
+app.use('/user-items', userItemRoutes)
 
 // Handling server errors
 app.use((req, res, next) => {
