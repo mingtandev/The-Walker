@@ -14,7 +14,7 @@ function BlogCreate() {
     console.log(title, " ", content);
   };
   return (
-    <div>
+    <div className="blogs__container">
       <form onSubmit={create} className="blogs__create">
         <h1>Write A Blog</h1>
         <input

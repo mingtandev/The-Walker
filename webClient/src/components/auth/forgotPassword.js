@@ -20,8 +20,11 @@ function ForgotPassword() {
       .forgot({ email })
       .then((res) => {
         console.log(res);
-        alert("Check email for Password Reset Token");
-        history.push("/forgot/recovery");
+        if (res.status !== 404)
+        {
+          alert("Check email for Password Reset Token");
+          history.push("/forgot/recovery");
+        }
       })
       .catch((error) => {
         setError("Can't find your Email");
@@ -30,26 +33,28 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="form forgetform">
-      <Link className="forgetform__login" to="/sign-in">
-        Back to login
-      </Link>
-      <Link className="forgetform__register" to="/sign-up">
-        Register
-      </Link>
-      {error && <p className="form__error">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div className="form__input">
-          <input
-            type="email"
-            name="email"
-            onChange={onInputChange}
-            placeholder="Your Email to Reset Password..."
-          />
-          <span class="form__input--focus"></span>
-        </div>
-        <input type="submit" value="Submit" />
-      </form>
+    <div className="form__container">
+      <div className="form forgetform">
+        <Link className="forgetform__login" to="/sign-in">
+          Back to login
+        </Link>
+        <Link className="forgetform__register" to="/sign-up">
+          Register
+        </Link>
+        {error && <p className="form__error">{error}</p>}
+        <form onSubmit={handleSubmit}>
+          <div className="form__input">
+            <input
+              type="email"
+              name="email"
+              onChange={onInputChange}
+              placeholder="Your Email to Reset Password..."
+            />
+            <span class="form__input--focus"></span>
+          </div>
+          <input type="submit" value="Submit" />
+        </form>
+      </div>
     </div>
   );
 }

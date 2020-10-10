@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import "./blog.scss";
 import { Link } from "react-router-dom";
 import { blogposts } from "./blogposts";
@@ -10,7 +10,7 @@ function Blog() {
   });
 
   return (
-    <div className="blogs">
+    <div className="blogs__container">
       {blogposts.map((blog) => (
         <div className="blogs__blog" key={blog.id}>
           <h1 className="blog__title">{blog.title}</h1>

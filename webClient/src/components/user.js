@@ -10,11 +10,6 @@ function UserInfo() {
   useEffect(() => {
     async function getUserInfo() {
       try {
-        // if (!localStorage.getItem("token")) {
-        //   console.log("kdfs");
-        //   history.push("/");
-        //   return;
-        // }
         let res = await userApi.getUserInfo();
         console.log(res);
         setUser(res.user);

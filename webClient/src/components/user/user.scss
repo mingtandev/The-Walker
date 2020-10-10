@@ -3,6 +3,9 @@
   margin: 3rem auto;
   background-color: whitesmoke;
   border-radius: 20px;
+  &__container {
+    padding-top: 15rem;
+  }
   &__info {
     display: grid;
     grid-template-columns: 40% 60%;

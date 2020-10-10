@@ -1,8 +1,10 @@
 import React from "react";
 import itemApi from "../../api/itemApi";
-import { Redirect } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 function ItemCreate() {
+  let history = useHistory();
+
   const handleCreateItem = (e) => {
     e.preventDefault();
     let { name, type, price, thumbnail } = e.target;
@@ -37,13 +39,11 @@ function ItemCreate() {
     formData.append("price", price);
     formData.append("thumbnail", thumbnail.files[0]);
 
-    for (var pair of formData.entries()) {
-      console.log(pair[0] + ", " + pair[1]);
-    }
     itemApi
       .create(formData)
       .then((res) => {
         console.log(res);
+        if (res.msg === "success") return history.push("/shop");
       })
       .catch((error) => {
         alert("Fail in Creating Item");
@@ -52,8 +52,8 @@ function ItemCreate() {
   };
 
   return (
-    <>
-      <form className="form" onSubmit={handleCreateItem}>
+    <div className="items__container">
+      <form className="form form__items" onSubmit={handleCreateItem}>
         <h1>Create A New Item</h1>
         <div className="form__input">
           <input type="text" name="name" placeholder="Name..." />
@@ -68,11 +68,12 @@ function ItemCreate() {
           <span class="form__input--focus"></span>
         </div>
         <div className="form__input">
+          <label>Item Thumbnail (accepted: JPEG, JPG, PNG)</label>
           <input type="file" name="thumbnail" />
         </div>
         <input type="submit" value="CREATE" />
       </form>
-    </>
+    </div>
   );
 }
 

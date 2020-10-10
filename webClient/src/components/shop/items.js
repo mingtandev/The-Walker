@@ -29,14 +29,8 @@ function Items() {
       {items &&
         items.map((item) => (
           <div key={item._id} className="item">
-            <img
-              className="item__img"
-              src={item.thumbnail.replace(
-                "localhost",
-                process.env.REACT_APP_BASE_URL
-              )}
-              alt="item"
-            />
+            <img className="item__img" src={item.thumbnail} alt="item" />
+            <p className="item__name">Name: {item.name}</p>
             <p className="item__type">Type: {item.type}</p>
             <p className="item__price">Price: {item.price}</p>
             <button className="item__add" type="button">

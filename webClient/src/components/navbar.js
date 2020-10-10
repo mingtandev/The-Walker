@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { loadUser, signOut } from "../actions/authAction";
@@ -10,24 +10,23 @@ function Navbar() {
   let dispatch = useDispatch();
   let history = useHistory();
 
-  useState(() => {
+  useEffect(() => {
     async function getUserInfo() {
-      console.log("user ne");
       try {
+        if (!localStorage.getItem("token")) return;
         let res = await userApi.getUserInfo();
-        console.log(res);
+        console.log("res: ", res);
         dispatch(loadUser(res.user));
       } catch (error) {}
     }
     getUserInfo();
   }, []);
-
+    
   let user = useSelector((state) => state.auth);
 
   const logOut = () => {
     console.log("out");
     dispatch(signOut());
-    // setUser(null);
     history.push("/");
     return;
   };
@@ -45,12 +44,17 @@ function Navbar() {
         <ul className="nav__links--pages">
           <li className="nav__link">
             <Link to="/">
-              <i class="fas fa-home"></i> Home
+              <i class="fas fa-home"></i> HOME
             </Link>
           </li>
           <li className="nav__link">
             <Link to="/blog">
-              <i class="fab fa-blogger"></i> Blog and News
+              <i class="fab fa-blogger"></i> BLOGS
+            </Link>
+          </li>
+          <li className="nav__link">
+            <Link to="/shop">
+              <i class="fas fa-cart-plus"></i> SHOP
             </Link>
           </li>
         </ul>
@@ -79,17 +83,8 @@ function Navbar() {
                     {user.user.name}
                   </li>
                 }
-                {/* <div class="nav__link--userdropdown">
-                  <Link to="/user">
-                    <p>Account Information</p>
-                  </Link>
-                  <Link to="/">
-                    <p>Items</p>
-                  </Link>
-                </div> */}
                 <UserMenu />
               </div>
-
               <li className="nav__link nav__link--logout" onClick={logOut}>
                 Log Out <i class="fas fa-sign-out-alt"></i>
               </li>

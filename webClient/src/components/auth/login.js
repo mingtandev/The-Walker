@@ -38,7 +38,6 @@ function Login() {
     let { email, password } = e.target;
     email = email.value;
     password = password.value;
-    console.log("e", email, password, typeof email, typeof password);
 
     if (!email) {
       alert("Please fill out email");
@@ -52,7 +51,6 @@ function Login() {
 
     try {
       let res = await userApi.post({ email, password });
-      console.log(res);
       if (res.msg === "Auth failed!") {
         setLoginErr("Email or Password is not correct");
       }
@@ -62,7 +60,6 @@ function Login() {
         localStorage.setItem("refreshToken", res.refreshToken);
         console.log(localStorage.getItem("token"));
         let user = jwt_decode(res.token);
-        console.log(user);
         dispatch(signIn(user));
         history.push("/");
       }
@@ -73,45 +70,47 @@ function Login() {
   };
 
   return (
-    <div className="form login">
-      <Link to="/forgot">Forgot Password</Link>
-      <Link to="/sign-up">Not have an account?</Link>
-      {loginErr && <p className="form__error">{loginErr}</p>}
-      <form onSubmit={login}>
-        <div className="form__input">
-          <input
-            type="email"
-            name="email"
-            onChange={onInputChange}
-            placeholder="Email..."
-          />
-          <span class="form__input--focus"></span>
-        </div>
-        <div className="form__input">
-          <input
-            type="password"
-            name="password"
-            id="password"
-            onChange={onInputChange}
-            placeholder="Your password"
-          />
-          <span class="form__input--focus"></span>
-          <button
-            class="form__input--eye"
-            type="button"
-            onClick={togglePassword}
-          >
-            <i class="far fa-eye" id="togglePassword"></i>
-          </button>
-        </div>
-        <div className="recaptcha">
-          <ReCAPTCHA
-            ref={recaptchaRef}
-            sitekey={process.env.REACT_APP_RECAPTCHA_KEY}
-          />
-        </div>
-        <input type="submit" value="LOG IN" />
-      </form>
+    <div className="form__container">
+      <div className="form form__login">
+        <Link to="/forgot">Forgot Password</Link>
+        <Link to="/sign-up">Not have an account?</Link>
+        {loginErr && <p className="form__error">{loginErr}</p>}
+        <form onSubmit={login}>
+          <div className="form__input">
+            <input
+              type="email"
+              name="email"
+              onChange={onInputChange}
+              placeholder="Email..."
+            />
+            <span class="form__input--focus"></span>
+          </div>
+          <div className="form__input">
+            <input
+              type="password"
+              name="password"
+              id="password"
+              onChange={onInputChange}
+              placeholder="Your password"
+            />
+            <span class="form__input--focus"></span>
+            <button
+              class="form__input--eye"
+              type="button"
+              onClick={togglePassword}
+            >
+              <i class="far fa-eye" id="togglePassword"></i>
+            </button>
+          </div>
+          <div className="recaptcha">
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey={process.env.REACT_APP_RECAPTCHA_KEY}
+            />
+          </div>
+          <input type="submit" value="LOG IN" />
+        </form>
+      </div>
     </div>
   );
 }

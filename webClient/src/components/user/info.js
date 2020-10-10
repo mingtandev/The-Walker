@@ -71,7 +71,7 @@ function UserInfo() {
 
   return (
     user && (
-      <>
+      <div className="user__container">
         <div className="user">
           <div className="user__info">
             <span>ID: </span>
@@ -125,7 +125,7 @@ function UserInfo() {
             <input type="submit" value="Confirm Changing" />
           </form>
         </div>
-      </>
+      </div>
     )
   );
 }

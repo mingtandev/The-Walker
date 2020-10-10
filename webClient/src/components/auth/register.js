@@ -87,15 +87,6 @@ function Register() {
       return;
     }
 
-    console.log("after: ", error);
-
-    for (const prop in error) {
-      if (error[prop]) {
-        console.log("find e");
-        return;
-      }
-    }
-
     if (!recaptchaValue) {
       alert("Check reCaptcha!");
       return;
@@ -119,68 +110,70 @@ function Register() {
   };
 
   return (
-    <div className="form register">
-      <form id="register" onSubmit={register}>
-        <Link to="/sign-in">I have an account</Link>
-        <div className="form__input">
-          <input
-            type="email"
-            name="email"
-            onChange={onInputChange}
-            placeholder="Email..."
-          />
-          <span class="form__input--focus"></span>
-        </div>
-        {error.email && (
-          <small className="form__input--error">{error.email}</small>
-        )}
+    <div className="form__container form__container--smallertop">
+      <div className="form form__register">
+        <form id="register" onSubmit={register}>
+          <Link to="/sign-in">I have an account</Link>
+          <div className="form__input">
+            <input
+              type="email"
+              name="email"
+              onChange={onInputChange}
+              placeholder="Email..."
+            />
+            <span class="form__input--focus"></span>
+          </div>
+          {error.email && (
+            <small className="form__input--error">{error.email}</small>
+          )}
 
-        <div className="form__input">
-          <input
-            type="text"
-            name="name"
-            onChange={onInputChange}
-            placeholder="Username..."
-          />
-          <span class="form__input--focus"></span>
-        </div>
-        {error.name && (
-          <small className="form__input--error">{error.name}</small>
-        )}
+          <div className="form__input">
+            <input
+              type="text"
+              name="name"
+              onChange={onInputChange}
+              placeholder="Username..."
+            />
+            <span class="form__input--focus"></span>
+          </div>
+          {error.name && (
+            <small className="form__input--error">{error.name}</small>
+          )}
 
-        <div className="form__input">
-          <input
-            type="password"
-            name="password"
-            id="password"
-            onChange={onInputChange}
-            placeholder="Password..."
-          />
-          <span class="form__input--focus"></span>
-          <button
-            class="form__input--eye"
-            type="button"
-            onClick={togglePassword}
-          >
-            <i class="far fa-eye" id="togglePassword"></i>
-          </button>
-        </div>
-        {error.password && (
-          <small className="form__input--error">{error.password}</small>
-        )}
+          <div className="form__input">
+            <input
+              type="password"
+              name="password"
+              id="password"
+              onChange={onInputChange}
+              placeholder="Password..."
+            />
+            <span class="form__input--focus"></span>
+            <button
+              class="form__input--eye"
+              type="button"
+              onClick={togglePassword}
+            >
+              <i class="far fa-eye" id="togglePassword"></i>
+            </button>
+          </div>
+          {error.password && (
+            <small className="form__input--error">{error.password}</small>
+          )}
 
-        <div className="form__input">
-          <label>Your Avatar (Not required)</label>
-          <input type="file" name="avatar" onChange={imgAvatarUpload} />
-        </div>
-        <div className="recaptcha">
-          <ReCAPTCHA
-            ref={recaptchaRef}
-            sitekey={process.env.REACT_APP_RECAPTCHA_KEY}
-          />
-        </div>
-        <input type="submit" value="SIGN UP" />
-      </form>
+          <div className="form__input">
+            <label>Your Avatar (Not required)</label>
+            <input type="file" name="avatar" onChange={imgAvatarUpload} />
+          </div>
+          <div className="recaptcha">
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey={process.env.REACT_APP_RECAPTCHA_KEY}
+            />
+          </div>
+          <input type="submit" value="SIGN UP" />
+        </form>
+      </div>
     </div>
   );
 }

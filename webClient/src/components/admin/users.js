@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Redirect } from "react-router-dom";
 import userApi from "../../api/userApi";
 
 function Users() {
@@ -16,7 +15,6 @@ function Users() {
     }
     fetchUsers();
   }, []);
-  //   if (!localStorage.getItem("token")) return <Redirect to="/" />;
 
   const deleteUser = async (id) => {
     try {

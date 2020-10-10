@@ -16,7 +16,7 @@ export const signUp = ({ email, password, username }) => {
 export const signOut = () => {
   return {
     type: "LOGOUT_SUCCESS",
-    payload: "",
+    payload: null,
   };
 };
 

@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import "./App.css";
+import "./App.scss";
 
 import {
   BrowserRouter as Router,
@@ -7,7 +7,6 @@ import {
   Route,
   Redirect,
 } from "react-router-dom";
-import jwt_decode from "jwt-decode";
 
 import Login from "./components/auth/login";
 import Register from "./components/auth/register";
@@ -18,131 +17,103 @@ import Navbar from "./components/navbar";
 import NotFound from "./components/notFound";
 import ForgotPassword from "./components/auth/forgotPassword";
 import Users from "./components/admin/users";
-import { useSelector } from "react-redux";
 import Items from "./components/shop/items";
 import Item from "./components/shop/item";
 import Admin from "./components/admin/admin";
 import ForgotConfirm from "./components/auth/forgotConfirm";
+import PrivateRoute from "./routes/privateRoute";
 
-const UserMenu = React.lazy(() => import("./components/user/userMenu"));
 const UserInfo = React.lazy(() => import("./components/user/info"));
 const BlogCreate = React.lazy(() => import("./components/blog/blogCreate"));
 const ItemCreate = React.lazy(() => import("./components/shop/itemCreate"));
 
 function App() {
-  let user = useSelector((state) => state.auth);
-
   return (
-    <div className="app">
-      <Suspense fallback={<div>Loading ...</div>}>
-        <Router>
-          {/* {localStorage.getItem("token") &&
-            jwt_decode(localStorage.getItem("token")).roles === "user" && (
-              <Navbar />
-            )} */}
-          <Navbar />
-          <Switch>
-            <Route path="/" exact component={Home} />
+    <div>
+      <div className="app">
+        <Suspense fallback={<div>Loading ...</div>}>
+          <Router>
+            <Navbar />
+            <Switch>
+              <Route path="/" exact component={Home} />
 
-            <Route
-              path="/sign-in"
-              render={(props) =>
-                localStorage.getItem("token") ? <Redirect to="/" /> : <Login />
-              }
-            ></Route>
+              <Route
+                path="/sign-in"
+                render={(props) =>
+                  localStorage.getItem("token") ? <Redirect to="/" /> : <Login />
+                }
+              ></Route>
 
-            <Route
-              path="/sign-up"
-              render={(props) =>
-                localStorage.getItem("token") ? (
-                  <Redirect to="/" />
-                ) : (
-                  <Register />
-                )
-              }
-            />
+              <Route
+                path="/sign-up"
+                render={(props) =>
+                  localStorage.getItem("token") ? ( 
+                    <Redirect to="/" />
+                  ) : (
+                    <Register />
+                  )
+                }
+              />
 
-            <Route
-              path="/forgot"
-              exact
-              render={(props) =>
-                localStorage.getItem("token") ? (
-                  <Redirect to="/" />
-                ) : (
-                  <ForgotPassword />
-                )
-              }
-            />
+              <Route
+                path="/forgot"
+                exact
+                render={(props) =>
+                  localStorage.getItem("token") ? (
+                    <Redirect to="/" />
+                  ) : (
+                    <ForgotPassword />
+                  )
+                }
+              />
 
-            <Route
-              path="/forgot/recovery"
-              render={(props) =>
-                localStorage.getItem("token") ? (
-                  <Redirect to="/" />
-                ) : (
-                  <ForgotConfirm />
-                )
-              }
-            />
+              <Route
+                path="/forgot/recovery"
+                render={(props) =>
+                  localStorage.getItem("token") ? (
+                    <Redirect to="/" />
+                  ) : (
+                    <ForgotConfirm />
+                  )
+                }
+              />
 
-            <Route
-              path="/users"
-              exact
-              render={(props) =>
-                localStorage.getItem("token") &&
-                jwt_decode(localStorage.getItem("token")).roles === "admin" ? (
-                  <Users />
-                ) : (
-                  <Redirect to="/" />
-                )
-              }
-            />
+              <PrivateRoute path="/users" exact role="admin" component={Users} />
+              <PrivateRoute path="/admin" exact role="admin" component={Admin} />
 
-            <Route
-              path="/admin"
-              exact
-              render={(props) =>
-                localStorage.getItem("token") &&
-                jwt_decode(localStorage.getItem("token")).roles === "admin" ? (
-                  <Admin />
-                ) : (
-                  <Redirect to="/" />
-                )
-              }
-            />
+              <Route path="/shop" exact component={Items} />
 
-            <Route path="/shop" exact component={Items} />
-            <Route path="/shop/create" exact component={ItemCreate} />
-            <Route path="/shop/:id" component={Item} />
+              <PrivateRoute
+                path="/shop/create"
+                exact
+                role="admin"
+                component={ItemCreate}
+              />
+              <Route path="/shop/:id" component={Item} />
 
-            <Route path="/blog" exact component={Blog} />
-            <Route
-              path="/blog/create"
-              render={(props) =>
-                localStorage.getItem("token") &&
-                jwt_decode(localStorage.getItem("token")).roles === "admin" ? (
-                  <BlogCreate />
-                ) : (
-                  <Redirect to="/blog" />
-                )
-              }
-            />
-            <Route path={`/blog/:id`} component={blogDetail} />
-            <Route
-              path={`/user`}
-              render={(props) =>
-                localStorage.getItem("token") || user.user ? (
-                  <UserInfo />
-                ) : (
-                  <Redirect to="/" />
-                )
-              }
-            />
+              <Route path="/blog" exact component={Blog} />
+              <PrivateRoute
+                path="/blog/create"
+                role="admin"
+                component={BlogCreate}
+              />
+              <Route path={`/blog/:id`} component={blogDetail} />
 
-            <Route component={NotFound} />
-          </Switch>
-        </Router>
-      </Suspense>
+              <PrivateRoute path="/user" component={UserInfo} />
+
+              <Route component={NotFound} />
+            </Switch>
+          </Router>
+        </Suspense>
+      </div>
+      <div className="footer">
+        <span>A project in Introduction to Software Engineering</span>
+        <span> 
+          <span className="footer__contact">CONTACT US: </span>
+          <a className="footer__icon" href="https://www.facebook.com/ReferenceToWorld" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook"></i></a>
+          <a className="footer__icon" href="https://www.facebook.com/messages/t/ReferenceToWorld" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-messenger"></i></a>
+        </span>
+      </div>
     </div>
   );
 }

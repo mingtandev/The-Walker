@@ -9,7 +9,7 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(async (config) => {
   const token = localStorage.getItem("token") || null;
-  config.headers["Authorization"] = `Bearer ${token}`;
+  config.headers["authorization"] = `Bearer ${token}`;
   return config;
 });
 
@@ -23,38 +23,27 @@ axiosClient.interceptors.response.use(
   },
   (error) => {
     const originalRequest = error.config;
-    if (
-      error.response.status === 401 &&
-      originalRequest.url ===
-        process.env.REACT_APP_BASE_URL + "/users/login/refresh"
-    ) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("refreshToken");
-      console.log("refreshToken fail");
-      return;
-    }
-    if (
-      error.response.status === 401 &&
-      originalRequest.url ===
-        `${process.env.REACT_APP_BASE_URL}/users/login/refresh`
-    ) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("refreshToken");
-      console.log("day ne");
-      return;
-    }
     if (error.response.status === 401) {
+      if (originalRequest.url === "/users/login/refresh") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        console.log("get refreshToken failed");
+        return;
+      }
       axiosClient
         .post("/users/login/refresh", {
           refreshToken: localStorage.getItem("refreshToken"),
         })
         .then((res) => {
-          console.log("new: ", res);
-          localStorage.setItem("token", res.token);
-          axios.defaults.headers.common[
-            "Authorization"
-          ] = `Bearer ${res.token}`;
-          return axiosClient(originalRequest);
+          if (res && res.msg === "success") {
+            console.log("new: ", res);
+            localStorage.setItem("token", res.token);
+            axios.defaults.headers.common[
+              "Authorization"
+            ] = `Bearer ${res.token}`;
+            console.log("orginal req: ", originalRequest);
+            return axiosClient(originalRequest);
+          }
         })
         .catch((error) => {
           localStorage.removeItem("token");
@@ -62,7 +51,6 @@ axiosClient.interceptors.response.use(
           console.log("day ne", error);
         });
     }
-    return Promise.reject(error);
   }
 );
 

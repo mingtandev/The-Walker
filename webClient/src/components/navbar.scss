@@ -1,12 +1,17 @@
 .nav {
-  margin-bottom: 5rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin-bottom: 1rem;
   padding-top: 1rem;
   display: grid;
   grid-template-columns: 20% 60% 20%;
   justify-items: center;
   align-items: center;
-  background-color: rgba($color: whitesmoke, $alpha: 0.6);
+  background-color: rgba($color: whitesmoke, $alpha: 0.3);
   box-shadow: 0 1px 13px darkgrey;
+  z-index: 111;
   &__logo {
     width: 10rem;
   }
@@ -16,13 +21,27 @@
       list-style: none;
       display: flex;
     }
+    &--pages {
+      a:hover {
+        color: orangered;
+      }
+    }
+    &--auth {
+      align-items: center;
+      a:hover {
+        color: mediumturquoise;
+      }
+    }
   }
   &__userIcon {
     display: inline-block;
   }
   &__link {
     margin-right: 5rem;
-    background-color: rgba($color: darkgray, $alpha: 0.1);
+    padding: 0.5rem 1rem;
+    background-color: rgba($color: black, $alpha: 0.5);
+    color: white;
+    border-radius: 10px;
     text-transform: uppercase;
     a {
       font-size: 1.7rem;
@@ -48,10 +67,14 @@
     }
     &--logout {
       margin-right: 2rem;
-      background-color: transparent;
-      color: slateblue;
+      background-color: white;
+      color: blue;
+      font-weight: bold;
       text-transform: capitalize;
       cursor: pointer;
+    }
+    &--logout:hover {
+      color: red;
     }
     &:last-child {
       margin-right: 0;
