@@ -89,7 +89,7 @@ exports.create = (req, res, next) => {
     .then(userItem => {
         res.status(201).json({
             msg: "success",
-            blog: {
+            userItem: {
                 _id: userItem._id,
                 userId: userItem.userId,
                 coin: userItem.coin,
@@ -130,6 +130,11 @@ exports.update = (req, res, next) => {
     UserItem.updateOne({userId}, {
         $inc: {
             coin: +coin
+        },
+        $addToSet: {
+            "items.guns": items.guns,
+            "items.hats": items.hats,
+            "items.outfits": items.outfits,
         }
     })
     .then(result => {
