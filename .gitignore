@@ -42,6 +42,3 @@ GameClient/sysinfo.txt
 # Server
 server/node_modules
 server/.env
-
-GameClient
-webClient
