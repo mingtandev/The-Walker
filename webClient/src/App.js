@@ -14,24 +14,29 @@ import Home from "./components/home";
 import Blog from "./components/blog/blogsite";
 import blogDetail from "./components/blog/blogDetail";
 import Navbar from "./components/navbar";
-import NotFound from "./components/notFound";
-import ForgotPassword from "./components/auth/forgotPassword";
 import Users from "./components/admin/users";
 import Items from "./components/shop/items";
 import Item from "./components/shop/item";
 import Admin from "./components/admin/admin";
-import ForgotConfirm from "./components/auth/forgotConfirm";
 import PrivateRoute from "./routes/privateRoute";
+import Loading from "./components/loading/loading";
 
 const UserInfo = React.lazy(() => import("./components/user/info"));
 const BlogCreate = React.lazy(() => import("./components/blog/blogCreate"));
 const ItemCreate = React.lazy(() => import("./components/shop/itemCreate"));
+const ForgotPassword = React.lazy(() =>
+  import("./components/auth/forgotPassword")
+);
+const ForgotConfirm = React.lazy(() =>
+  import("./components/auth/forgotConfirm")
+);
+const NotFound = React.lazy(() => import("./components/notFound"));
 
 function App() {
   return (
     <div>
       <div className="app">
-        <Suspense fallback={<div>Loading ...</div>}>
+        <Suspense fallback={<Loading />}>
           <Router>
             <Navbar />
             <Switch>
@@ -40,14 +45,18 @@ function App() {
               <Route
                 path="/sign-in"
                 render={(props) =>
-                  localStorage.getItem("token") ? <Redirect to="/" /> : <Login />
+                  localStorage.getItem("token") ? (
+                    <Redirect to="/" />
+                  ) : (
+                    <Login />
+                  )
                 }
               ></Route>
 
               <Route
                 path="/sign-up"
                 render={(props) =>
-                  localStorage.getItem("token") ? ( 
+                  localStorage.getItem("token") ? (
                     <Redirect to="/" />
                   ) : (
                     <Register />
@@ -78,8 +87,18 @@ function App() {
                 }
               />
 
-              <PrivateRoute path="/users" exact role="admin" component={Users} />
-              <PrivateRoute path="/admin" exact role="admin" component={Admin} />
+              <PrivateRoute
+                path="/users"
+                exact
+                role="admin"
+                component={Users}
+              />
+              <PrivateRoute
+                path="/admin"
+                exact
+                role="admin"
+                component={Admin}
+              />
 
               <Route path="/shop" exact component={Items} />
 
@@ -108,10 +127,24 @@ function App() {
       </div>
       <div className="footer">
         <span>A project in Introduction to Software Engineering</span>
-        <span> 
+        <span>
           <span className="footer__contact">CONTACT US: </span>
-          <a className="footer__icon" href="https://www.facebook.com/ReferenceToWorld" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook"></i></a>
-          <a className="footer__icon" href="https://www.facebook.com/messages/t/ReferenceToWorld" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-messenger"></i></a>
+          <a
+            className="footer__icon"
+            href="https://www.facebook.com/ReferenceToWorld"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fab fa-facebook"></i>
+          </a>
+          <a
+            className="footer__icon"
+            href="https://www.facebook.com/messages/t/ReferenceToWorld"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fab fa-facebook-messenger"></i>
+          </a>
         </span>
       </div>
     </div>

@@ -15,7 +15,7 @@ const itemApi = {
   },
   delete: (id) => {
     const url = `/items/${id}`;
-    return axiosClient.get(url);
+    return axiosClient.delete(url);
   },
 };
 

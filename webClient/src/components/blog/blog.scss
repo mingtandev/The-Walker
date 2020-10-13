@@ -10,7 +10,8 @@
     background-color: whitesmoke;
     border-radius: 20px;
   }
-  &__create {
+  &__create,
+  &__update {
     margin: auto;
     padding: 2rem 2rem;
     padding-bottom: 0;
@@ -46,6 +47,9 @@
 }
 
 .blog {
+  &__detail {
+    padding-top: 20rem;
+  }
   &__content {
     width: 100%;
     margin-top: 2rem;
