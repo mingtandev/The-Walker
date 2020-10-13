@@ -32,6 +32,12 @@ GameClient/Assets/Prefabs
 GameClient/Assets/Models
 GameClient/Assets/Textures
 GameClient/Assets/PolygonBossZombies
+GameClient/Assets/PlayerPrefabs
+
+GameClient/Assets/Bullet UI
+GameClient/Assets/Game Sound Solutions - Zombie voices
+GameClient/Assets/Sounds
+GameClient/Assets/Sound and music
 
 # Unity3D generated meta files
 GameClient/*.pidb.meta
