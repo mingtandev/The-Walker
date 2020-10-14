@@ -1,0 +1,81 @@
+
+Each req call api => Check res.msg. If 'success' => OK else FAIL
+
+Note: Temporarily, no auth
+
+// Get all userItem
+Method: GET
+Auth: No
+Req.body: {}
+URL: /user-items
+If 'success' => {
+    msg: 'success'.
+    length: Number,
+    userItems: Array
+}
+
+----------------------------------------------------------------------------
+
+// Get one userItem
+Method: GET
+Auth: No
+Req.params: userId
+URL: /user-items/:userId
+If 'success' => {
+    msg: 'success',
+    userItem: {
+
+    }
+}
+
+----------------------------------------------------------------------------
+
+// Create a new userItem
+Method: POST
+Auth: No
+Roles: No
+Req.body {
+    userId: ObjId
+}
+URL: /user-items
+If 'success' => {
+    msg: 'success',
+    userItem: {
+
+    }
+}
+
+----------------------------------------------------------------------------
+
+// Update userItem
+Method: PATCH
+Auth: No
+Roles: No
+Req.body:
+{
+	coin: Number (pos or negative),
+	items: {
+		guns: ["Gun 2"],
+		hats: [],
+		outfits: ["Outfit 2"]
+	}
+}
+NOTE: Must be enough 3 fields of items
+URL: /user-items/:userId
+If 'success' => {
+    msg: 'success'
+}
+
+----------------------------------------------------------------------------
+
+// Delete userItem
+Method: DELETE
+Auth: No
+Roles: No
+Req.params: userId
+URL: /user-items/:userId
+If 'success' => Obj {
+    msg: 'success'
+}
+
+-----------------------------------------------------------------------------
