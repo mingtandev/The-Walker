@@ -1,0 +1,161 @@
+
+Each req call api => Check res.msg. If 'success' => OK else FAIL
+
+// Get all user account
+Method: GET
+Auth: Yes
+Roles: Admin only
+Req.body: {}
+URL: http://localhost:8080/users
+If 'success' => {
+    msg: 'success'.
+    length: Number,
+    users: Array
+}
+
+----------------------------------------------------------------------------
+
+// Signup new account
+Method: POST
+Auth: No
+Req.body:
+{
+	name: String
+	email: String
+	password: String
+}
+URL: http://localhost:8080/users/signup
+If 'success' => Check email => Verify
+
+----------------------------------------------------------------------------
+
+// Email verify
+Method: GET (in email)
+Auth: No
+Req.body: {}
+URL: http://localhost:8080/users/confirmation/:verifyToken
+If 'success' => Account verified and user can login
+
+----------------------------------------------------------------------------
+
+// Resend email verify
+Method: POST
+Auth: No
+Req.body:
+{
+	email: String
+}
+URL: http://localhost:8080/users/signup/confirmation/resend
+If 'success' => Check email => Verify
+
+----------------------------------------------------------------------------
+
+// User login
+Method: POST
+Auth: No
+Req.body:
+{
+	email: String,
+    password: String
+}
+URL: http://localhost:8080/users/login
+If 'success' => Obj {
+    msg: 'success',
+    token: String,
+    refreshToken: String
+}
+
+----------------------------------------------------------------------------
+
+// User refresh token
+Method: POST
+Auth: No
+Req.body:
+{
+	refreshToken: String
+}
+URL: http://localhost:8080/users/login/refresh
+If 'success' => Obj {
+    msg: 'success',
+    token: String
+}
+
+----------------------------------------------------------------------------
+
+// Reset password
+Method: POST
+Auth: No
+Req.body:
+{
+	email: String
+}
+URL: http://localhost:8080/users/recovery
+If 'success' => Check email and copy passwordResetToken for api Forgot password
+
+----------------------------------------------------------------------------
+
+// Forgot password
+Method: POST
+Auth: No
+Req.body:
+{
+    newPassword: String,
+	passwordResetToken: String (below)
+}
+URL: http://localhost:8080/users/forgot
+If 'success' => Password has been updated
+
+----------------------------------------------------------------------------
+
+// Change password
+Method: POST
+Auth: Yes
+Req.body:
+{
+    newPassword: String
+}
+URL: http://localhost:8080/users/information
+If 'success' => Password has been updated
+
+----------------------------------------------------------------------------
+
+// Query user information
+Method: GET
+Auth: Yes
+URL: http://localhost:8080/users/information
+If 'success' => {
+    name: String,
+    email: String,
+    roles: String,
+    isVerified: Boolean
+}
+
+----------------------------------------------------------------------------
+
+// Delete user
+Method: DELETE
+Auth: Yes
+Roles: 'admin' only
+Req.body:
+{
+    _id: ObjId
+}
+URL: http://localhost:8080/users/delete
+If 'success' => User has been deleted
+
+----------------------------------------------------------------------------
+
+Resources:
+
+Account admin roles:
+U: bik56810@eoopy.com
+P: 12345678
+
+Token decode test: https://jwt.io/
+
+Email garbage: https://10minutemail.net/
+
+DB atlas: https://www.mongodb.com/cloud/atlas
+    - Sign in with account 'google blogger'
+    - DB name: The-Walker
+    - Choose on tab Collections

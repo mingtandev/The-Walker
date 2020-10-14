@@ -1,0 +1,87 @@
+
+Each req call api => Check res.msg. If 'success' => OK else FAIL
+
+// Get all giffcode
+Method: GET
+Auth: Yes,
+Roles: Admin only
+Req.body: {}
+URL: /items
+If 'success' => {
+    msg: 'success'.
+    length: Number,
+    giffcodes: Array
+}
+
+----------------------------------------------------------------------------
+
+// Get one giffcode
+Method: GET
+Auth: Yes,
+Roles: Admin only
+Req.params: _id
+URL: /giffcodes/:_id
+If 'success' => {
+    msg: 'success',
+    code: {
+
+    }
+}
+
+----------------------------------------------------------------------------
+
+// Create a new item
+Method: POST
+Auth: Yes
+Roles: Admin only
+Req.body {
+    code: 'String',
+    type: 'String',
+    items: 'Array of Item id',
+    expiresTime: 'Number (millisecond)'
+}
+URL: /giffcodes
+If 'success' => {
+    msg: 'success',
+    code: {
+
+    }
+}
+
+----------------------------------------------------------------------------
+
+// Update giffcode (name, type, price, not thumbnail)
+Method: PATCH
+Auth: YES
+Roles: Admin only
+Req.body:
+[
+    {
+        "propName": "code",
+        "value": "newValue"
+    },
+    {
+        "propName": "type",
+        "value": "newType"
+    },
+    ....
+]
+
+URL: /giffcodes/:_id
+If 'success' => {
+    msg: 'success'
+}
+
+----------------------------------------------------------------------------
+
+// Delete code
+Method: DELETE
+Auth: Yes
+Roles: Admin only
+Req.params: _id
+URL: /giffcodes/:_id
+If 'success' => Obj {
+    msg: 'success'
+}
+
+----------------------------------------------------------------------------
