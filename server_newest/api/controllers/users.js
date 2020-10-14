@@ -2,9 +2,9 @@ const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 
-const User = require('../models/user')
+const User = require('./../models/user')
 
-const { sendMail } =  require('../config/nodemailer')
+const { sendMail } =  require('./../config/nodemailer')
 
 const tokenLife = process.env.TOKEN_LIFE
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE

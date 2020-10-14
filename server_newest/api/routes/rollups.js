@@ -1,7 +1,7 @@
 const express = require('express')
 
-const RollupController = require('../controllers/rollups')
-const checkAuth = require('../middleware/checkAuth')
+const RollupController = require('./../controllers/rollups')
+const checkAuth = require('./../middleware/checkAuth')
 
 const router = express.Router()
 

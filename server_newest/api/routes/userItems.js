@@ -1,7 +1,7 @@
 const express = require('express')
 
-const UserItemController = require('../controllers/userItems')
-const checkAuth = require('../middleware/checkAuth')
+const UserItemController = require('./../controllers/userItems')
+const checkAuth = require('./../middleware/checkAuth')
 
 const router = express.Router()
 

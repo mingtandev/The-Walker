@@ -1,8 +1,8 @@
 const express = require('express')
 
-const ItemsController = require('../controllers/items')
-const checkAuth = require('../middleware/checkAuth')
-const upload = require('../config/upload')
+const ItemsController = require('./../controllers/items')
+const checkAuth = require('./../middleware/checkAuth')
+const upload = require('./../config/upload')
 
 const router = express.Router()
 
