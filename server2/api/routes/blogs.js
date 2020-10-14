@@ -1,8 +1,8 @@
 const express = require('express')
 
-const BlogController = require('./../controllers/blogs')
-const checkAuth = require('./../middleware/checkAuth')
-const upload = require('./../config/upload')
+const BlogController = require('../controllers/blogs')
+const checkAuth = require('../middleware/checkAuth')
+const upload = require('../config/upload')
 
 const router = express.Router()
 

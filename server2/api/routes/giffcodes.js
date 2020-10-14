@@ -1,7 +1,7 @@
 const express = require('express')
 
-const GiffcodeController = require('./../controllers/giffcodes')
-const checkAuth = require('./../middleware/checkAuth')
+const GiffcodeController = require('../controllers/giffcodes')
+const checkAuth = require('../middleware/checkAuth')
 
 const router = express.Router()
 
