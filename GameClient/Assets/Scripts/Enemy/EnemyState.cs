@@ -37,7 +37,7 @@ public class IdleState : IEnemyState
 
     public IEnemyState DoState(NormalZombie enemy, Player player , ref float timeDelay)
     {
-                enemy.agent.isStopped = true;
+        enemy.agent.isStopped = true;
         timeDelay = 0.2f;
         float dis = Vector3.Distance(enemy.transform.position, player.transform.position);
         if (dis < enemy.DistanceToChase)

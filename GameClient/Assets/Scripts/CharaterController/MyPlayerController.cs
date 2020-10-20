@@ -22,7 +22,10 @@ public class MyPlayerController : MonoBehaviour
 
     Gun firstGun;
     Gun secondGun;
+    int activeIndexGun = 1;
+    bool isGunActive = true;
     public Transform CrossHairTarget;
+    bool changingWeapon;
 
 
 
@@ -42,6 +45,8 @@ public class MyPlayerController : MonoBehaviour
     public Transform WeaponParent;
     public Transform WeaponLeftIK;
     public Transform WeaponRightIK;
+    public Transform WeasponSlot;
+    public Transform WeaponHandle;
 
     //--------------------------------------------------------------------------------------------------------------------------------------------
     //NEW
@@ -71,13 +76,13 @@ public class MyPlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        SwapGun();
-        Movement_V2(); 
+        Swap_HideGun();
+        Movement_V2();
     }
 
     private void FixedUpdate()
     {
-        
+
     }
 
 
@@ -103,26 +108,29 @@ public class MyPlayerController : MonoBehaviour
 
     public void Aimming_V2()
     {
-        if (!MyGun.canShot)
+        if (isGunActive)
         {
-            MyGun.muzzle.Stop();
-        }
-        if (Input.GetMouseButtonUp(0))
-        {
-            MyGun.muzzle.Stop();
-        }
-
-
-        if (Input.GetMouseButton(0) && isAiming)
-        {
-            if (MyGun.canShot && MyGun.readyToUse)
+            if (!MyGun.canShot)
             {
-
-                MyGun.GunShotHandle();
-                MyGun.curAmmo--;
+                MyGun.muzzle.Stop();
             }
+            if (Input.GetMouseButtonUp(0))
+            {
+                MyGun.muzzle.Stop();
+            }
+
+
+            if (Input.GetMouseButton(0) && isAiming)
+            {
+                if (MyGun.canShot && MyGun.readyToUse)
+                {
+
+                    MyGun.GunShotHandle();
+                    MyGun.curAmmo--;
+                }
+            }
+            MyGun.UpdateGravityBullets(Time.deltaTime);
         }
-        MyGun.UpdateGravityBullets(Time.deltaTime);
 
 
 
@@ -132,38 +140,125 @@ public class MyPlayerController : MonoBehaviour
 
 
 
+    //-----------------GUN SWAP HANDLE
 
-    void SwapGun()
+    IEnumerator ActivePrimaryGun()
+    {
+        //If previous is second gun
+        if (activeIndexGun != 0 && activeIndexGun != 1)
+        {
+            StartCoroutine(HideAndShowAtGunIndex(activeIndexGun));
+            yield return new WaitForSeconds(rigController.GetCurrentAnimatorStateInfo(0).length - 0.05f);
+        }
+        MyGun = firstGun;
+        activeIndexGun = 1;
+
+        Reset_Animation();
+
+        firstGun.gameObject.SetActive(true);
+        UIManager.instance.myGun = MyGun;
+        UIManager.instance.ActiveGun(1);
+        rigController.Play(MyGun.type.ToString());
+
+        //UNACTIVE SECOND GUN
+        secondGun.isReaload = false;
+    }
+
+    IEnumerator ActiveSecondaryGun()
     {
 
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        if (activeIndexGun != 0 && activeIndexGun != 2)
         {
+            StartCoroutine(HideAndShowAtGunIndex(activeIndexGun));
+            yield return new WaitForSeconds(rigController.GetCurrentAnimatorStateInfo(0).length - 0.05f);
 
-
-            MyGun = firstGun;
-            firstGun.gameObject.SetActive(true);
-            secondGun.isReaload = false;
-            secondGun.gameObject.SetActive(false);
-            UIManager.instance.myGun = MyGun;
-            UIManager.instance.ActiveGun(1);
-            rigController.Play("Rifle");
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            MyGun = secondGun;
-            secondGun.gameObject.SetActive(true);
-            firstGun.isReaload = false;
-            firstGun.gameObject.SetActive(false);
-            UIManager.instance.myGun = MyGun;
-            UIManager.instance.ActiveGun(2);
-            rigController.Play(MyGun.type.ToString());
+        MyGun = secondGun;
+        activeIndexGun = 2;
 
+        Reset_Animation();
+
+        secondGun.gameObject.SetActive(true);
+        UIManager.instance.myGun = MyGun;
+        UIManager.instance.ActiveGun(2);
+        rigController.Play(MyGun.type.ToString());
+
+        //UNACTIVE FIRST GUN
+        firstGun.isReaload = false;
+    }
+
+    IEnumerator HideAndShowAtGunIndex(int index)
+    {
+
+        bool curState = rigController.GetBool("HiddenGun");
+        curState = !curState;
+        rigController.SetBool("HiddenGun", curState);
+
+        activeIndexGun = 0;
+
+        if (!curState)
+        {
+            yield return null;
+            MyGun.gameObject.transform.parent = WeaponHandle;
+            EnableGun();
+        }
+        else
+        {
+            changingWeapon = true;
+            yield return new WaitForSeconds(rigController.GetCurrentAnimatorStateInfo(0).length - 0.05f);
+            MyGun.gameObject.transform.parent = WeasponSlot;
+            changingWeapon = false;
+            DisableGun();
+        }
+
+    }
+
+    void Reset_Animation()
+    {
+        rigController.SetBool("HiddenGun", false);
+        EnableGun();
+        MyGun.gameObject.transform.parent = WeaponHandle;
+
+    }
+
+    void Swap_HideGun()
+    {
+
+        if (!changingWeapon)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                StartCoroutine(ActivePrimaryGun());
+                EnableGun();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                StartCoroutine(ActiveSecondaryGun());
+                EnableGun();
+            }
+
+            if (Input.GetKeyDown(KeyCode.X) && changingWeapon == false)
+            {
+                StartCoroutine(HideAndShowAtGunIndex(activeIndexGun));
+            }
         }
     }
 
-  
 
+
+    void EnableGun()
+    {
+        isGunActive = true;
+        MyGun.enabled = true;
+    }
+
+    void DisableGun()
+    {
+        isGunActive = false;
+        MyGun.enabled = false;
+    }
 
 
 
@@ -178,222 +273,7 @@ public class MyPlayerController : MonoBehaviour
         recoder.TakeSnapshot(0.0f);
         recoder.SaveToClip(MyGun.weaponAnimation);
         UnityEditor.AssetDatabase.SaveAssets();
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //OLD
-
-
-
-
-    // void Aimming()
-    // {
-
-    //     if (!MyGun.canShot)
-    //     {
-    //         MyGun.muzzle.Stop();
-    //     }
-
-    //     if (Input.GetMouseButton(0) && isGround == true)
-    //     {
-
-
-    //         Ray camRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-    //         Vector3 endPosition = Vector3.zero;
-    //         isAiming = true;
-    //         int layerBit = LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("EnemyLayer");
-    //         int layerBitEnemy = LayerMask.GetMask("GroundLayer") | LayerMask.GetMask("EnemyLayer") | LayerMask.GetMask("BuildingLayer");
-    //         // | LayerMask.GetMask("BuildingLayer")
-    //         if (Physics.Raycast(camRay, out hit, 100f, layerBit))
-    //         {
-    //             endPosition = hit.point;
-    //             //set rotate
-    //             rotateDir = endPosition - MyGun.transform.position;
-    //             rotateDir.y = 0;
-    //             rot = Quaternion.LookRotation(rotateDir);
-
-
-
-    //             if (MyGun.canShot && MyGun.readyToUse)
-    //             {
-
-    //                 //Pricle play
-    //                 MyGun.muzzle.Play();
-
-    //                 if (MyGun.type == Gun.typeGun.Shotgun)
-    //                 {
-    //                     for (int i = 0; i < 6; i++)
-    //                     {
-    //                         //Find the enemy
-    //                         Ray ShotRay = new Ray(transform.position, (hit.point - transform.position));
-    //                         RaycastHit enemyHit;
-    //                         ShotRay.direction = Quaternion.AngleAxis(Random.Range(0, 30), Vector3.up) * ShotRay.direction;
-    //                         //Pook object the bullet
-    //                         //MyGun.InstanitateMuzzle(ShotRay, rot);
-    //                         if (Physics.Raycast(ShotRay, out enemyHit, 100f, layerBitEnemy))
-    //                         {
-
-    //                             if (1 << enemyHit.transform.gameObject.layer == LayerMask.GetMask("EnemyLayer"))
-    //                             {
-    //                                 GameObject blood = Instantiate(MyGun.blood, enemyHit.point, Quaternion.LookRotation(enemyHit.normal));
-    //                                 enemyHit.transform.gameObject.GetComponent<Enemy>().heath -= MyGun.damage;
-    //                                 Destroy(blood, 1f);
-    //                             }
-    //                             MyGun.ResetTimeBullet();  //gun delay start
-    //                         }
-    //                     }
-    //                     MyGun.ResetTimeBullet();  //gun delay start
-
-    //                     MyGun.curAmmo--;
-
-    //                 }
-    //                 else
-    //                 {
-    //                     //Find the enemy
-    //                     Ray ShotRay = new Ray(transform.position, (hit.point - transform.position));
-    //                     RaycastHit enemyHit;
-
-
-    //                     //Pook object the bullet
-    //                     //MyGun.InstanitateMuzzle(ShotRay, rot);
-    //                     MyGun.curAmmo--;
-
-    //                     if (Physics.Raycast(ShotRay, out enemyHit, 100f, layerBitEnemy))
-    //                     {
-
-    //                         if (1 << enemyHit.transform.gameObject.layer == LayerMask.GetMask("EnemyLayer"))
-    //                         {
-    //                             GameObject blood = Instantiate(MyGun.blood, enemyHit.point, Quaternion.LookRotation(enemyHit.normal));
-    //                             enemyHit.transform.gameObject.GetComponent<Enemy>().heath -= MyGun.damage;
-    //                             Destroy(blood, 1f);
-    //                         }
-    //                         MyGun.ResetTimeBullet();  //gun delay start
-    //                     }
-    //                 }
-
-
-
-    //             }
-
-
-
-
-
-    //             // Do something with the object that was hit by the raycast.
-    //         }
-    //     }
-
-    //     if (Input.GetMouseButtonUp(0))
-    //     {
-    //         MyGun.muzzle.Stop();
-    //         isAiming = false;
-    //     }
-    // }
-
-
-    // void AddForceToMove(Vector3 moveDirection)
-    // {
-
-
-    //     rid.velocity = new Vector3((moveSpeed * moveDirection.normalized).x, rid.velocity.y, (moveSpeed * moveDirection.normalized).z);
-    // }
-
-    // void Movement()
-    // {
-
-    //     float h = Input.GetAxis("Horizontal");
-    //     // float v = Input.GetAxis("Vertical");
-    //     // moveDir.x = h;
-    //     // moveDir.z = v;
-
-    //     moveDir = Camera.main.transform.forward;
-    //     moveDir.y = 0;
-    //     //walk handle
-    //     if (!isAiming)
-    //     {
-    //         if (Input.GetKey(KeyCode.W))
-    //         {
-    //             anim.SetInteger("Speed", 1);
-    //             AddForceToMove(moveDir);
-    //         }
-    //         if (Input.GetKey(KeyCode.A))
-    //         {
-    //             Vector3 normal = new Vector3(moveDir.z, moveDir.y, moveDir.x);
-    //             normal.x *= -1;
-    //             anim.Play("LeftWalk");
-    //             if (Input.GetKey(KeyCode.W))
-    //             {
-    //                 moveDir += normal;
-    //                 AddForceToMove(moveDir);
-    //             }
-    //             else
-    //             {
-    //                 AddForceToMove(normal);
-    //             }
-    //             anim.SetBool("LeftWalk", true);
-    //         }
-    //         // else if (Input.GetKey(KeyCode.S))
-    //         // {
-
-    //         // }
-    //         // else
-    //         // {
-    //         //     if (isGround)
-    //         //         rid.velocity = new Vector3(0, rid.velocity.y, 0);
-    //         //     anim.SetInteger("Speed", 0);
-    //         // }
-    //     }
-
-
-    //     //Run handle
-    //     if (Input.GetKey(KeyCode.LeftShift) && anim.GetInteger("Speed") == 1)
-    //     {
-    //         moveSpeed = 4.5f;
-    //         anim.SetInteger("Speed", 2);
-
-    //     }
-    //     if (Input.GetKeyUp(KeyCode.LeftShift))
-    //     {
-    //         moveSpeed = 2f;
-    //         anim.SetInteger("Speed", 1);
-    //     }
-
-
-
-
-    //     Vector3 PointToHit = hit.point - transform.position;
-    //     Vector3 direcMoveBackward = -PointToHit;
-    //     if (Input.GetKey(KeyCode.S) && isAiming)
-    //     {
-    //         anim.SetBool("AimWalkBackward", true);
-    //         AddForceToMove(direcMoveBackward);
-    //         moveSpeed = 2f;
-    //     }
-    //     else
-    //     {
-    //         anim.SetBool("AimWalkBackward", false);
-    //     }
-
-
-
-
-    //     //transform.rotation = rot;
-    // }
-
-
     void Jumping()
     {
         anim.SetBool("IsGround", isGround);
@@ -414,10 +294,6 @@ public class MyPlayerController : MonoBehaviour
             isGround = true;
         }
     }
-
-
-
-
 
 
 }

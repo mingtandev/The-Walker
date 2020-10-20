@@ -89,14 +89,14 @@ public class Gun : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        currenTime += Time.deltaTime;
-        if (currenTime > timeDelay)
-        {
-            canShot = true;
-            currenTime = timeDelay;
-        }
+            currenTime += Time.deltaTime;
+            if (currenTime > timeDelay)
+            {
+                canShot = true;
+                currenTime = timeDelay;
+            }
 
-        CheckAmmoAndReload();
+            CheckAmmoAndReload();
     }
 
     public void ResetTimeBullet()
@@ -234,7 +234,7 @@ public class Gun : MonoBehaviour
             if (Physics.Raycast(ray, out hit, Distance))
             {
                 bullet.time = maxLifeTime;
-                if(bullet.tracer)
+                if (bullet.tracer)
                     bullet.tracer.transform.position = hit.point;
                 if (1 << hit.transform.gameObject.layer != LayerMask.GetMask("EnemyLayer"))
                 {
@@ -252,7 +252,7 @@ public class Gun : MonoBehaviour
             }
             else
             {
-                if(bullet.tracer)
+                if (bullet.tracer)
                     bullet.tracer.transform.position = end;
             }
 
