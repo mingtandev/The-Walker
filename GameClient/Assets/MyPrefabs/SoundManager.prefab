@@ -1,0 +1,298 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2694744979150413034
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2694744979150413032}
+  - component: {fileID: 2694744979150413033}
+  m_Layer: 0
+  m_Name: SoundManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2694744979150413032
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2694744979150413034}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 97.45714, y: 0.8755137, z: -2.1607335}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2694744979150413033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2694744979150413034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c90cd42515b9caa48ad25487e109fd50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sounds:
+  - name: Walk
+    clip: {fileID: 8300000, guid: 378f2c9621f7c4b58bc668ef2f7a108b, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: AK47
+    clip: {fileID: 8300000, guid: 02af3b9bda1d54c1fb4c8258eac24f20, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: AK117
+    clip: {fileID: 8300000, guid: c7987d0edb6a4471b976daf9d2b4b7df, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: SCAR-20
+    clip: {fileID: 8300000, guid: c20263d6b9e7d4881a30c2f55d651c56, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: RPK
+    clip: {fileID: 8300000, guid: 368f94dc3cec34431a2d1207a8087272, type: 3}
+    volume: 1
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Operator
+    clip: {fileID: 8300000, guid: 743436b0cc4e04ef99044d547c0834fd, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Spectre
+    clip: {fileID: 8300000, guid: 8443edd8863774f7090947e4d02c18e3, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: B51
+    clip: {fileID: 8300000, guid: f01b9da2cd02a45b8b345cf374f15ce4, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Gaygun
+    clip: {fileID: 8300000, guid: 0ca8b371913074c5087f00574af07647, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Gurdian
+    clip: {fileID: 8300000, guid: 0fab54c6a7f754ee698a191446b6e202, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Gurdian - Silver
+    clip: {fileID: 8300000, guid: 0fab54c6a7f754ee698a191446b6e202, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Hunter
+    clip: {fileID: 8300000, guid: c434f3a3a58294d9c8084424dde6934b, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Hunter - Combo
+    clip: {fileID: 8300000, guid: c434f3a3a58294d9c8084424dde6934b, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Hybrid
+    clip: {fileID: 8300000, guid: 272918ae4878744d7ad30b6b2d27f16f, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: M16A4
+    clip: {fileID: 8300000, guid: 4a6897c6310524cf986d13c95768a7d2, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Revolver
+    clip: {fileID: 8300000, guid: f99ab97996cf147069e4bf5aaef507a9, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: MP5K - Combo
+    clip: {fileID: 8300000, guid: 13d6926d48b1d4ceea98e98ee457a86a, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: MP5K
+    clip: {fileID: 8300000, guid: 13d6926d48b1d4ceea98e98ee457a86a, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Odin
+    clip: {fileID: 8300000, guid: 00511cf87b56f4b17b344cf2a3a7fffe, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Sequential
+    clip: {fileID: 8300000, guid: c67ce4c2b4dac40b0bc3adfca73409d5, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Sibling
+    clip: {fileID: 8300000, guid: 13d6926d48b1d4ceea98e98ee457a86a, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Thomson
+    clip: {fileID: 8300000, guid: f01b9da2cd02a45b8b345cf374f15ce4, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Peckeeper
+    clip: {fileID: 8300000, guid: bb139bc3b6d77324ca39c25428652f3a, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: FemaleZombie
+    clip: {fileID: 8300000, guid: 36b92f5be1b42499cb6eb8af3c09e04d, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: ReloadStart
+    clip: {fileID: 8300000, guid: 2499f9e2b0a3e4ee1865034ab101cc82, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: ReloadComplete
+    clip: {fileID: 8300000, guid: 36b92f5be1b42499cb6eb8af3c09e04d, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: SoundTrack
+    clip: {fileID: 8300000, guid: b4bddb8e316d4884b95dffcb9ba838f4, type: 3}
+    volume: 0.05
+    pitch: 1
+    source: {fileID: 0}
+    loop: 1
+  - name: BeingAttack
+    clip: {fileID: 8300000, guid: aea0697a0268ec94ab3acc94ffaf1fcd, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Bigcityboi_Breath
+    clip: {fileID: 8300000, guid: eb45446f33c824459baaf47da79984bf, type: 3}
+    volume: 0.3
+    pitch: 1
+    source: {fileID: 0}
+    loop: 1
+  - name: Bigcityboi_Crawl
+    clip: {fileID: 8300000, guid: 12425a239e49f433982ef20abc1e858a, type: 3}
+    volume: 1
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Bigcityboi_Attack
+    clip: {fileID: 8300000, guid: 03bed31ba91da4456865e446f975b4d5, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Bigcityboi_Attack1
+    clip: {fileID: 8300000, guid: 18f0ad18d6d314bc090372a3ca6bfb43, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Bigcityboi_Attack2
+    clip: {fileID: 8300000, guid: 3fee88a9978e74cdb9d31aca7b00935b, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Bigcityboi_Dead
+    clip: {fileID: 8300000, guid: d4270b8fefdb14ad386aec9f4d098507, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Bigcityboi_Footstep
+    clip: {fileID: 8300000, guid: 369fa02acc87a3345bfc8428e3a9f2ae, type: 3}
+    volume: 0.2
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Bigcityboi_Attack1
+    clip: {fileID: 8300000, guid: 18f0ad18d6d314bc090372a3ca6bfb43, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Bigcityboi_Attack1
+    clip: {fileID: 8300000, guid: 18f0ad18d6d314bc090372a3ca6bfb43, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Bigcityboi_Attack1
+    clip: {fileID: 8300000, guid: 18f0ad18d6d314bc090372a3ca6bfb43, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Bigcityboi_Attack1
+    clip: {fileID: 8300000, guid: 18f0ad18d6d314bc090372a3ca6bfb43, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Bigcityboi_Attack1
+    clip: {fileID: 8300000, guid: 18f0ad18d6d314bc090372a3ca6bfb43, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Bigcityboi_Attack1
+    clip: {fileID: 8300000, guid: 18f0ad18d6d314bc090372a3ca6bfb43, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
+  - name: Bigcityboi_Attack1
+    clip: {fileID: 8300000, guid: 18f0ad18d6d314bc090372a3ca6bfb43, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
