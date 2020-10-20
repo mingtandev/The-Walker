@@ -8,7 +8,7 @@ import {
   blogFailLoaded,
 } from "../../actions/blogAction";
 import blogApi from "../../api/blogApi";
-import Loading from "../loading/loading";
+import Loading from "../loading";
 
 function Blog() {
   const [blogs, setBlogs] = useState([]);

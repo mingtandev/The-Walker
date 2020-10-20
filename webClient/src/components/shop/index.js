@@ -7,7 +7,7 @@ import {
   itemsLoaded,
   itemsFailLoaded,
 } from "../../actions/itemsAction";
-import Loading from "../loading/loading";
+import Loading from "../loading";
 
 function Items() {
   const [items, setItems] = useState([]);

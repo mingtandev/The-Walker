@@ -8,19 +8,19 @@ import {
   Redirect,
 } from "react-router-dom";
 
-import Navbar from "./components/navbar/navbar";
-import Home from "./components/home/home";
+import Navbar from "./components/navbar";
+import Home from "./pages/home";
 import Login from "./components/auth/login";
 import Register from "./components/auth/register";
-import Blog from "./components/blog/blogsite";
+import Blog from "./pages/blog";
 import blogDetail from "./components/blog/blogDetail";
 import Users from "./components/admin/users";
-import Items from "./components/shop/items";
+import Items from "./pages/shop";
 import Item from "./components/shop/item";
-import Admin from "./components/admin/admin";
 import PrivateRoute from "./routes/privateRoute";
-import Loading from "./components/loading/loading";
-import NotFound from "./components/notFound/notFound";
+import Loading from "./components/loading";
+import NotFound from "./components/notFound";
+import AdminPage from "./pages/admin/";
 
 const UserInfo = React.lazy(() => import("./components/user/info"));
 const BlogCreate = React.lazy(() => import("./components/blog/blogCreate"));
@@ -38,7 +38,6 @@ function App() {
       <div className="app">
         <Suspense fallback={<Loading />}>
           <Router>
-            <Navbar />
             <Switch>
               <Route path="/" exact component={Home} />
 
@@ -93,11 +92,11 @@ function App() {
                 role="admin"
                 component={Users}
               />
-              <PrivateRoute
+              <Route
                 path="/admin"
                 exact
-                role="admin"
-                component={Admin}
+                // role="admin"
+                component={AdminPage}
               />
 
               <Route path="/shop" exact component={Items} />
@@ -122,6 +121,7 @@ function App() {
 
               <Route component={NotFound} />
             </Switch>
+            <Navbar />
           </Router>
         </Suspense>
       </div>

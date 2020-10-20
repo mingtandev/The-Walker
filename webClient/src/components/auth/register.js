@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Link, useHistory } from "react-router-dom";
 import userApi from "../../api/userApi";
+import userItemApi from "../../api/userItemApi";
 
 function Register() {
   const [avatar, setAvatar] = useState(null);
@@ -100,8 +101,14 @@ function Register() {
       .signUp({ name, email, password })
       .then((res) => {
         console.log(res);
-        alert("Check your email for validation");
-        history.push("/sign-in");
+        if (res && res.msg === "success") {
+          alert("Check your email for validation");
+          userItemApi
+            .create(res.user._id)
+            .then((res) => console.log("us item", res))
+            .catch((error) => console.log("us it", error));
+          history.push("/sign-in");
+        }
       })
       .catch((error) => {
         alert("Error in Register! Please Try again");

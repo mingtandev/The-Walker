@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { loadUser, signOut } from "../../actions/authAction";
@@ -7,10 +7,18 @@ import "./navbar.scss";
 import UserMenu from "../user/userMenu";
 
 function Navbar() {
+  const [navStyle, setNavStyle] = useState(false);
   let dispatch = useDispatch();
   let history = useHistory();
 
+  const changeNavStyle = () => {
+    if (window.scrollY >= 50) {
+      setNavStyle(true);
+    } else setNavStyle(false);
+  };
+
   useEffect(() => {
+    window.addEventListener("scroll", changeNavStyle);
     async function getUserInfo() {
       try {
         if (!localStorage.getItem("token")) return;
@@ -32,11 +40,11 @@ function Navbar() {
   };
 
   return (
-    <nav className="nav">
+    <nav className={navStyle ? "nav--change" : "nav"}>
       <Link to="/">
         <img
           className="nav__logo"
-          src={require("../../img/logo.png")}
+          src={require("../../images/logo.png")}
           alt="Home"
         />
       </Link>

@@ -9,7 +9,7 @@ function Home() {
         <Carousel.Item>
           <img
             className="carousel__img"
-            src={require("../../img/carousel_bg1.png")}
+            src={require("../../images/carousel_bg1.png")}
             alt="First slide"
           />
           <Carousel.Caption>
@@ -23,7 +23,7 @@ function Home() {
         <Carousel.Item>
           <img
             className="carousel__img"
-            src={require("../../img/carousel_bg2.png")}
+            src={require("../../images/carousel_bg2.png")}
             alt="Second slide"
           />
           <Carousel.Caption>
@@ -37,7 +37,7 @@ function Home() {
         <Carousel.Item>
           <img
             className="carousel__img"
-            src={require("../../img/carousel_bg3.png")}
+            src={require("../../images/carousel_bg3.png")}
             alt="Third slide"
           />
           <Carousel.Caption>

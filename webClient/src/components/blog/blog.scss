@@ -1,8 +1,10 @@
 .blogs {
   &__container {
-    max-width: 50%;
     margin: 0 auto;
+    min-height: 100vh;
     padding-top: 15rem;
+    background-image: url("../../images/wallpaper.png");
+    background-size: cover;
   }
   &__blog {
     margin-bottom: 2rem;
