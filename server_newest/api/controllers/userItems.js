@@ -22,6 +22,7 @@ exports.getAll = (req, res, next) => {
             })
         }
 
+        res.set("x-total-count", userItems.length);
         res.status(200).json(response)
     })
     .catch(error => {

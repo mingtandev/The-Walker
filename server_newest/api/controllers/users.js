@@ -20,6 +20,8 @@ exports.getAll = (req, res, next) => {
     User.find({})
     .select('name slugName email cash roles isVerified')
     .then(users => {
+
+        res.set("x-total-count", users.length);
         res.status(200).json({
             msg: 'success',
             length: users.length,

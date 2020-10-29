@@ -13,26 +13,27 @@ exports.getAll = (req, res, next) => {
 
     Code.find({})
     .select('_id code type items isUsed expiresTime')
-    .then(items => {
+    .then(codes => {
         const response = {
             msg: 'success',
-            length: items.length,
-            giffcodes: items.map(item => {
+            length: codes.length,
+            giffcodes: codes.map(code => {
                 return {
-                    _id: item._id,
-                    code: item.code,
-                    type: item.type,
-                    items: item.items,
-                    isUsed: item.isUsed,
-                    expiresTime: item.expiresTime,
+                    _id: code._id,
+                    code: code.code,
+                    type: code.type,
+                    items: code.items,
+                    isUsed: code.isUsed,
+                    expiresTime: code.expiresTime,
                     request: {
                         type: 'GET',
-                        url: req.hostname + '/giffcodes/' + item._id
+                        url: req.hostname + '/giffcodes/' + code._id
                     }
                 }
             })
         }
 
+        res.set("x-total-count", codes.length);
         res.status(200).json(response)
     })
     .catch(error => {

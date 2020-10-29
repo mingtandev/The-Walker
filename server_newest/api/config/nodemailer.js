@@ -18,7 +18,7 @@ exports.sendMail = (req, receiver, token, type) => {
         }
     })
 
-    const urlConfirmation = `http://${req.hostname}/users/signup/confirmation/${token}`
+    const urlConfirmation = `http://${req.hostname}/users/confirm/${token}`
 
     const mailOptionsConfirmation = {
         from: '"The Walker ✔ "<bathanggayk18@gmail.com>', // sender address

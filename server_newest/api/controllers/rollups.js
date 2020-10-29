@@ -23,6 +23,7 @@ exports.getAll = (req, res, next) => {
             })
         }
 
+        res.set("x-total-count", rolls.length);
         res.status(200).json(response)
     })
     .catch(error => {
@@ -70,7 +71,7 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create = (req, res, next) => {
+exports.create = async (req, res, next) => {
     const {day, coin, item} = req.body
 
     if(!day){
@@ -91,6 +92,23 @@ exports.create = (req, res, next) => {
 
     if(item){
         roll['item'] = item
+
+        await Item.findById(item)
+        .then(item => {
+            if(!item) {
+                return res.status(404).json({
+                    msg: 'Item not found!'
+                })
+            }
+
+            roll['thumbnail'] = item.thumbnail
+        })
+        .catch(error => {
+            res.status(500).json({
+                msg: 'Server error!',
+                error
+            })
+        })
     }
 
     if(coin){
@@ -101,7 +119,7 @@ exports.create = (req, res, next) => {
 
     const rollObj = new Rollup(roll)
 
-    rollObj.save()
+    await rollObj.save()
     .then(newRoll => {
         res.status(201).json({
             msg: "success",
@@ -110,6 +128,7 @@ exports.create = (req, res, next) => {
                 day: newRoll.day,
                 coin: newRoll.coin,
                 item: newRoll.item,
+                thumbnail: newRoll.thumbnail,
                 request: {
                     type: 'GET',
                     url: req.hostname + '/rolls/' + newRoll.day

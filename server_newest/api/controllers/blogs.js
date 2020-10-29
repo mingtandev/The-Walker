@@ -24,6 +24,7 @@ exports.getAll = (req, res, next) => {
             })
         }
 
+        res.set("x-total-count", blogs.length);
         res.status(200).json(response)
     })
     .catch(error => {
