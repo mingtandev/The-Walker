@@ -1,12 +1,12 @@
 import React from "react";
 import Carousel from "react-bootstrap/Carousel";
-import "./home.scss";
+import "./index.scss";
 
 function Home() {
   return (
     <div className="home">
       <Carousel>
-        <Carousel.Item>
+        <Carousel.Item interval={1000}>
           <img
             className="carousel__img"
             src={require("../../images/carousel_bg1.png")}
@@ -20,7 +20,7 @@ function Home() {
           </Carousel.Caption>
         </Carousel.Item>
 
-        <Carousel.Item>
+        <Carousel.Item interval={4000}>
           <img
             className="carousel__img"
             src={require("../../images/carousel_bg2.png")}
@@ -34,7 +34,7 @@ function Home() {
           </Carousel.Caption>
         </Carousel.Item>
 
-        <Carousel.Item>
+        <Carousel.Item interval={4000}>
           <img
             className="carousel__img"
             src={require("../../images/carousel_bg3.png")}

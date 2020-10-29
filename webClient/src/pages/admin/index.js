@@ -1,8 +1,10 @@
 import React from "react";
 import { Admin, Resource } from "react-admin";
-import simpleRestProvider from "ra-data-simple-rest";
+import jsonServerProvider from "ra-data-json-server";
 import { createHashHistory } from "history";
-import Home from "../../components/home";
+import BlogList from "../../components/admin/blogs/blogList";
+import BlogCreate from "../../components/admin/blogs/blogCreate";
+import ItemList from "../../components/admin/items/itemList";
 
 function AdminPage() {
   const history = createHashHistory();
@@ -13,10 +15,13 @@ function AdminPage() {
       <Admin
         authProvider={authProvider}
         history={history}
-        dataProvider={simpleRestProvider(process.env.REACT_APP_BASE_URL)}
+        dataProvider={jsonServerProvider(
+          "https://jsonplaceholder.typicode.com"
+        )}
         title="My Admin"
       >
-        <Resource name="users" list={Home} />
+        <Resource name="blogs" list={BlogList} create={BlogCreate} />
+        <Resource name="photos" list={ItemList} />
       </Admin>
     </div>
   );

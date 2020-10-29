@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { loadUser, signOut } from "../../actions/authAction";
 import userApi from "../../api/userApi";
-import "./navbar.scss";
+import "./index.scss";
 import UserMenu from "../user/userMenu";
 
 function Navbar() {
@@ -44,7 +44,7 @@ function Navbar() {
       <Link to="/">
         <img
           className="nav__logo"
-          src={require("../../images/logo.png")}
+          src="https://scontent.fsgn5-5.fna.fbcdn.net/v/t1.0-9/94262218_112321463790130_9162205595116240896_n.png?_nc_cat=111&ccb=2&_nc_sid=85a577&_nc_ohc=3HB_0Liu-vgAX8s4J5v&_nc_ht=scontent.fsgn5-5.fna&oh=0c027dcef0f6f6b269d7fec73f079967&oe=5FBC84B2"
           alt="Home"
         />
       </Link>
@@ -63,6 +63,11 @@ function Navbar() {
           <li className="nav__link">
             <Link to="/shop">
               <i class="fas fa-cart-plus"></i> SHOP
+            </Link>
+          </li>
+          <li className="nav__link">
+            <Link to="/roll-up">
+              <i class="fas fa-dharmachakra"></i> Roll Up
             </Link>
           </li>
         </ul>

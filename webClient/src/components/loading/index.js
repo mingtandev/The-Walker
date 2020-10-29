@@ -1,5 +1,5 @@
 import React from "react";
-import "./loading.scss";
+import "./index.scss";
 import { Spinner } from "react-bootstrap";
 
 function BlogLoading() {

@@ -1,4 +1,3 @@
-import React from "react";
-import Shop from "../../components/shop";
+import Shop from "../../container/shop";
 
 export default Shop;

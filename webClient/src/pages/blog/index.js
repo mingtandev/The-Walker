@@ -1,3 +1,3 @@
-import Blog from "../../components/blog/blogsite";
+import Blogs from "../../container/blog";
 
-export default Blog;
+export default Blogs;

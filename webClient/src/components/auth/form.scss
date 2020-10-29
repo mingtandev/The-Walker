@@ -2,12 +2,17 @@
   margin: auto;
   padding: 2rem 2rem;
   padding-bottom: 0;
-  width: 40%;
-  background-color: rgba($color: #f9f2cd, $alpha: 0.8);
+  width: 30%;
+  background-color: rgba($color: gray, $alpha: 0.7);
   text-align: right;
-  border-radius: 20px;
-  a:first-child {
+  border: 1px solid white;
+  a {
+    width: fit-content;
+    margin-left: auto;
+    padding: 2px 4px;
     margin-right: 2rem;
+    background-color: lavender;
+    font-weight: bold;
   }
   &__container {
     padding-top: 20rem;
@@ -28,8 +33,12 @@
       padding: 1rem;
       border: 0;
       outline: none;
+      color: white;
       background-color: transparent;
       border-bottom: 1.5px solid black;
+    }
+    input::placeholder {
+      color: white;
     }
     label {
       margin-left: 1rem;

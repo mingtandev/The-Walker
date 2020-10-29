@@ -1,11 +1,11 @@
 .blogs {
-  &__container {
-    margin: 0 auto;
-    min-height: 100vh;
-    padding-top: 15rem;
-    background-image: url("../../images/wallpaper.png");
-    background-size: cover;
-  }
+  // &__container {
+  //   margin: 0 auto;
+  //   min-height: 100vh;
+  //   padding-top: 15rem;
+  //   background-image: url("../../images/wallpaper.png");
+  //   background-size: cover;
+  // }
   &__blog {
     margin-bottom: 2rem;
     padding: 2rem 2rem;
@@ -49,8 +49,21 @@
 }
 
 .blog {
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background-color: lightgray;
+  &__title {
+    font-size: 2rem;
+    font-weight: bold;
+  }
   &__detail {
-    padding-top: 20rem;
+    padding-top: 10rem;
+    min-height: 100vh;
+    background-color: lightgray;
+  }
+  &__thumbnail {
+    width: 200px;
+    height: 200px;
   }
   &__content {
     width: 100%;

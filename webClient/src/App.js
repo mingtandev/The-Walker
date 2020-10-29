@@ -15,12 +15,13 @@ import Register from "./components/auth/register";
 import Blog from "./pages/blog";
 import blogDetail from "./components/blog/blogDetail";
 import Users from "./components/admin/users";
-import Items from "./pages/shop";
+import Shop from "./pages/shop";
 import Item from "./components/shop/item";
 import PrivateRoute from "./routes/privateRoute";
 import Loading from "./components/loading";
 import NotFound from "./components/notFound";
 import AdminPage from "./pages/admin/";
+import RollUp from "./pages/rollup";
 
 const UserInfo = React.lazy(() => import("./components/user/info"));
 const BlogCreate = React.lazy(() => import("./components/blog/blogCreate"));
@@ -99,7 +100,9 @@ function App() {
                 component={AdminPage}
               />
 
-              <Route path="/shop" exact component={Items} />
+              <Route path="/shop" exact component={Shop} />
+
+              <Route path="/roll-up" exact component={RollUp} />
 
               <PrivateRoute
                 path="/shop/create"
