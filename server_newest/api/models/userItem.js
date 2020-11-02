@@ -15,7 +15,7 @@ const userItemSchema = mongoose.Schema({
     items: {
         guns: {
             type: Array,
-            default: ['M16A4', 'AWM']
+            default: ['M16A4']
         }
         ,
         hats: {
@@ -25,7 +25,7 @@ const userItemSchema = mongoose.Schema({
         ,
         outfits: {
             type: Array,
-            default: ['Amor lv1']
+            default: ['Bikini']
         }
     }
 })

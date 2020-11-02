@@ -36,7 +36,7 @@ Req.body:
 	email: String
 	password: String
 }
-URL: /users/signup
+URL: /users
 If 'success' => Check email => Verify
 
 ----------------------------------------------------------------------------

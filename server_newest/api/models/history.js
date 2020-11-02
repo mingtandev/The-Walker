@@ -9,30 +9,54 @@ const historySchema = mongoose.Schema({
         required: true
     },
     actions: {
-        accInfos: [
-            {
-                type: Array,
-                default: []
-            }
-        ],
-        items: [
-            {
-                type: Array,
-                default: []
-            }
-        ],
-        rolls: [
-            {
-                type: Array,
-                default: []
-            }
-        ],
-        codes: [
-            {
-                type: Array,
-                default: []
-            }
-        ]
+        accInfos: {
+            personal: [
+                {
+                    type: String,
+                }
+            ],
+            manage: [
+                {
+                    type: String,
+                }
+            ]
+        },
+        items: {
+            personal: [
+                {
+                    type: String,
+                }
+            ],
+            manage: [
+                {
+                    type: String,
+                }
+            ]
+        },
+        rolls: {
+            personal: [
+                {
+                    type: String,
+                }
+            ],
+            manage: [
+                {
+                    type: String,
+                }
+            ]
+        },
+        codes: {
+            personal: [
+                {
+                    type: String,
+                }
+            ],
+            manage: [
+                {
+                    type: String,
+                }
+            ]
+        }
     }
 })
 

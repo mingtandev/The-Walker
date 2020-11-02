@@ -1,3 +1,5 @@
+const {saveHistory, loadHistory} = require('../utils/history')
+
 const Code = require('../models/giffcode')
 const User = require('../models/user')
 const Item = require('../models/item')
@@ -144,6 +146,7 @@ exports.useOne = async (req, res, next) => {
     validCode = validCode[0]
 
     if(!validCode){
+
         return res.status(200).json({
             msg: 'Code does not exist!'
         })
@@ -153,50 +156,65 @@ exports.useOne = async (req, res, next) => {
     userItem = userItem[0]
 
     if(!userItem){
+
         return res.status(200).json({
             msg: 'UserItem does not exist!'
         })
     }
 
     const {type, items, isUsed, expiresTime} = validCode
+    const historyCodes = await loadHistory(userId, 'codes', 'personal')
 
-    if (expiresTime < Date.now())
+    if (expiresTime < Date.now()) {
+
         return res.status(200).json({
             msg: 'The code has been expired!'
         })
+    }
 
-    if(type === 'Vip') {
-        if(isUsed) {
+    if(type === 'Normal' && historyCodes.includes(code)) {
 
-            return res.status(200).json({
-                msg: 'The code has been used!'
-            })
+        return res.status(200).json({
+            msg: 'You has been used this code!'
+        })
+    }
+
+    if(isUsed) {
+
+        return res.status(200).json({
+            msg: 'The code has been used!'
+        })
+    }
+    else {
+
+        for(let i = 0; i < items.length; i++) {
+            const result  = await Item.findById(items[i])
+            await userItem.items[`${result.type}s`].push(result.name)
         }
-        else {
+    }
 
-            for(let i = 0; i < items.length; i++) {
-                const result  = await Item.findById(items[i])
-                await userItem.items[`${result.type}s`].push(result.name)
-            }
-        }
-
-        console.log(userItem.items)
-        await userItem.save()
+    if (type === 'Vip') {
 
         validCode.isUsed = true
-        await validCode.save()
-        .then(async result => {
+    }
 
-            res.status(200).json({
-                msg: 'success'
-            })
+    console.log(userItem.items)
+
+    const result_1 = await userItem.save()
+    const result_2 = await validCode.save()
+
+    if(result_1 && result_2) {
+
+        saveHistory(userId, 'codes', 'personal', `${code} ${new Date()}`)
+
+        res.status(200).json({
+            msg: 'success'
         })
-        .catch(error => {
+    } else {
 
-            res.status(500).json({
-                msg: 'Server error!',
-                error
-            })
+        res.status(500).json({
+            msg: 'Server error!',
+            error
         })
     }
 }
