@@ -2,25 +2,22 @@ import React from "react";
 import "./index.scss";
 
 function Item(props) {
-  const { _id, name, type, thumbnail, price } = props;
+  const { _id, name, type, thumbnail, price, onPurchase } = props;
+
+  const handleBuyItem = () => {
+    if (onPurchase) onPurchase(_id);
+  };
+
   return (
     <div className="item">
       <img className="item__img" src={thumbnail} alt="item" />
-      <p className="item__name">Name: {name}</p>
-      <p className="item__type">Type: {type}</p>
-      <p className="item__price">Price: {price}</p>
-      <button className="item__add" type="button">
-        Add to Cart
+      <p className="item__name">{name}</p>
+      <p className="item__price">
+        Price: <span style={{ color: "red" }}>{price}</span>
+      </p>
+      <button className="item__add" type="button" onClick={handleBuyItem}>
+        Buy
       </button>
-      {/* {user.user && user.user.roles === "admin" && (
-        <button
-          className="item__delete"
-          type="button"
-          //   onClick={() => handleDeleteItem(item._id)}
-        >
-          <i class="fas fa-trash"></i>
-        </button>
-      )} */}
     </div>
   );
 }

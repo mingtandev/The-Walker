@@ -7,6 +7,7 @@ import { adminReducer, adminSaga, USER_LOGOUT } from "react-admin";
 import authReducer from "./authReducer";
 import blogReducer from "./blogReducer";
 import itemsReducer from "./itemsReducer";
+import { reducer as toastrReducer } from "react-redux-toastr";
 
 export default ({ authProvider, dataProvider, history }) => {
   const reducer = combineReducers({
@@ -15,6 +16,7 @@ export default ({ authProvider, dataProvider, history }) => {
     auth: authReducer,
     blog: blogReducer,
     items: itemsReducer,
+    toastr: toastrReducer,
   });
 
   const resettableAppReducer = (state, action) =>

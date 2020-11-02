@@ -6,7 +6,7 @@ function Home() {
   return (
     <div className="home">
       <Carousel>
-        <Carousel.Item interval={1000}>
+        <Carousel.Item interval={2}>
           <img
             className="carousel__img"
             src={require("../../images/carousel_bg1.png")}
@@ -20,7 +20,7 @@ function Home() {
           </Carousel.Caption>
         </Carousel.Item>
 
-        <Carousel.Item interval={4000}>
+        <Carousel.Item interval={2}>
           <img
             className="carousel__img"
             src={require("../../images/carousel_bg2.png")}
@@ -34,10 +34,24 @@ function Home() {
           </Carousel.Caption>
         </Carousel.Item>
 
-        <Carousel.Item interval={4000}>
+        <Carousel.Item interval={2}>
           <img
             className="carousel__img"
             src={require("../../images/carousel_bg3.png")}
+            alt="Third slide"
+          />
+          <Carousel.Caption>
+            <h3 className="carousel__title">Third slide label</h3>
+            <p className="carousel__caption">
+              Praesent commodo cursus magna, vel scelerisque nisl consectetur.
+            </p>
+          </Carousel.Caption>
+        </Carousel.Item>
+
+        <Carousel.Item interval={2}>
+          <img
+            className="carousel__img"
+            src={require("../../images/carousel_bg4.png")}
             alt="Third slide"
           />
           <Carousel.Caption>

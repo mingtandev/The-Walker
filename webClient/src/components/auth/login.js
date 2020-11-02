@@ -5,6 +5,7 @@ import { Link, useHistory } from "react-router-dom";
 import { signIn } from "../../actions/authAction";
 import userApi from "../../api/userApi";
 import jwt_decode from "jwt-decode";
+import { toastr } from "react-redux-toastr";
 
 import "./form.scss";
 
@@ -40,12 +41,12 @@ function Login() {
     password = password.value;
 
     if (!email) {
-      alert("Please fill out email");
+      toastr.error("Oops!", "Please fill out email");
       return;
     }
 
     if (password.length < 6 || password.length > 20) {
-      alert("Password length must be from 6-20 characters");
+      toastr.error("Oops!", "Password length must be from 6-20 characters");
       return;
     }
 

@@ -70,6 +70,11 @@ function Navbar() {
               <i class="fas fa-dharmachakra"></i> Roll Up
             </Link>
           </li>
+          <li className="nav__link">
+            <Link to="/giftcode">
+              <i class="fas fa-award"></i> GIFTCODE
+            </Link>
+          </li>
         </ul>
       </div>
       <div className="nav__links">
@@ -105,6 +110,13 @@ function Navbar() {
           )}
         </ul>
       </div>
+      {user.user && (
+        <div className="nav__sub">
+          <p>
+            Cash: <span className="nav__subCash">{user.user.cash}</span>
+          </p>
+        </div>
+      )}
     </nav>
   );
 }

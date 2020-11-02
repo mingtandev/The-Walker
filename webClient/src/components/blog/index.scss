@@ -51,24 +51,27 @@
 .blog {
   margin-bottom: 2rem;
   padding: 2rem;
-  background-color: lightgray;
+  width: calc(33.33% - 20px);
+  max-height: 500px;
+  overflow: hidden;
+  background-color: white;
+  transition: 0.4s ease-in-out;
   &__title {
     font-size: 2rem;
     font-weight: bold;
-  }
-  &__detail {
-    padding-top: 10rem;
-    min-height: 100vh;
-    background-color: lightgray;
   }
   &__thumbnail {
     width: 200px;
     height: 200px;
   }
+  &__caption {
+    font-size: 1.4rem;
+  }
   &__content {
     width: 100%;
     margin-top: 2rem;
     margin-bottom: 2rem;
+    font-size: 1.6rem;
     p {
       display: -webkit-box;
       -webkit-line-clamp: 3;
@@ -79,6 +82,32 @@
   &__seemore {
     text-align: right;
     color: blue;
+  }
+  &:hover {
+    box-shadow: 0px 2px 7px white;
+    transform: translateY(-10px);
+  }
+}
+
+.blogDetail {
+  width: 70%;
+  margin: auto;
+  margin-top: 12rem;
+  padding: 2rem;
+  min-height: 50vh;
+  background-color: white;
+  &__title {
+    font-size: 3rem;
+  }
+  &__caption {
+    font-size: 1.6rem;
+  }
+  &__thumbnail {
+    width: 20rem;
+    margin: 2rem;
+  }
+  &__content {
+    font-size: 2rem;
   }
 }
 

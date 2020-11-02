@@ -1,6 +1,14 @@
 .app {
+  padding-bottom: 2rem;
   text-align: center;
   min-height: 100vh;
+}
+
+.redux-toastr {
+  .top-right {
+    top: 100px;
+    right: 10px;
+  }
 }
 
 .footer {

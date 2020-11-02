@@ -10,6 +10,9 @@ function UserMenu() {
       <Link to="/user">
         <p>Account Information</p>
       </Link>
+      <Link to="/user/change-password">
+        <p>Change Password</p>
+      </Link>
       {user.user && user.user.roles === "admin" && (
         <Link to="/blog/create">
           <p>Blog Create</p>

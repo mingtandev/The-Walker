@@ -9,6 +9,10 @@ const itemApi = {
     const url = `/items/${id}`;
     return axiosClient.get(url);
   },
+  buyOne: (itemID) => {
+    const url = `/items/${itemID}`;
+    return axiosClient.post(url);
+  },
   create: (body) => {
     const url = "/items";
     return axiosClient.post(url, body);

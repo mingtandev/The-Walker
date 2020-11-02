@@ -9,11 +9,13 @@ import {
 } from "../../actions/blogAction";
 import Loading from "../../components/loading";
 import Blog from "../../components/blog";
+import { useHistory } from "react-router-dom";
 
 function Blogs() {
   const [blogs, setBlogs] = useState([]);
   const blogStatus = useSelector((state) => state.blog.status);
   const dispatch = useDispatch();
+  const history = useHistory();
 
   useEffect(() => {
     async function getBlogs() {
@@ -35,13 +37,20 @@ function Blogs() {
     dispatch(blogLoading());
   }
 
+  const showDetail = (id) => {
+    console.log(id);
+    history.push(`/blog/${id}`);
+  };
+
   return (
     <>
       {blogStatus === "loading" && <Loading />}
       {blogStatus === "fail" && <div>FAIL TO FETCH BLOGS</div>}
       <div className="blogs__container">
-        {blogStatus === "success" && blogs.length ? (
-          blogs.map((item, id) => <Blog key={id} {...item} />)
+        {blogs.length ? (
+          blogs.map((item, id) => (
+            <Blog onclick={() => showDetail(item._id)} key={id} {...item} />
+          ))
         ) : (
           <div>NO BLOGS</div>
         )}

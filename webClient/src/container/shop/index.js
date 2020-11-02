@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 import "./index.scss";
 import itemApi from "../../api/itemApi";
 import {
@@ -9,6 +10,8 @@ import {
 } from "../../actions/itemsAction";
 import Loading from "../../components/loading";
 import Item from "../../components/item";
+import userApi from "../../api/userApi";
+import { loadUser } from "../../actions/authAction";
 
 function Shop() {
   const [items, setItems] = useState([]);
@@ -29,18 +32,29 @@ function Shop() {
       }
     }
     getItems();
-  }, [itemStatus, dispatch]);
+  }, [itemStatus]);
 
-  // const handleDeleteItem = async (id) => {
-  //   try {
-  //     console.log(id);
-  //     let res = await itemApi.delete(id);
-  //     console.log(res);
-  //     // if (res.msg === "success") dispatch(itemsLoading());
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
+  const handleBuyItem = async (id) => {
+    try {
+      console.log(id);
+      itemApi.buyOne(id).then((res) => {
+        console.log("buy: ", res);
+        if (res && res.msg === "success") {
+          toastr.success("Buy Item Successfully", "Check Your Items Now");
+          userApi
+            .getUserInfo()
+            .then((res) => {
+              if (res.msg === "success") dispatch(loadUser(res.user));
+            })
+            .catch((error) => console.log(error));
+        } else if (res && res.msg === "Cash not enough!")
+          toastr.error("NOT ENOUGH CASH !", "Buy Item Fail");
+        else toastr.warning("Cannot Afford Item", "Please Try Again");
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   if (itemStatus === "idle") {
     dispatch(itemsLoading());
@@ -52,7 +66,13 @@ function Shop() {
       {itemStatus === "fail" && <div>FAIL TO FETCH SHOP ITEMS</div>}
       <div className="items__container">
         {itemStatus === "success" && items.length ? (
-          items.map((item, id) => <Item key={id} {...item} />)
+          items.map((item, id) => (
+            <Item
+              onPurchase={() => handleBuyItem(item._id)}
+              key={id}
+              {...item}
+            />
+          ))
         ) : (
           <div>NO ITEMS</div>
         )}

@@ -30,7 +30,7 @@ function RollUp() {
 
   return (
     <div className="rollup__container">
-      <Table>
+      <Table striped bordered hover>
         <thead>
           <tr>
             <th>Day</th>

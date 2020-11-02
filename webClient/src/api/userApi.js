@@ -14,7 +14,7 @@ const userApi = {
     return axiosClient.post(url, body);
   },
   signUp: (body) => {
-    const url = "/users/signup";
+    const url = "/users";
     return axiosClient.post(url, body);
   },
   changePass: (body) => {
@@ -30,8 +30,8 @@ const userApi = {
     return axiosClient.post(url, body);
   },
   delete: (body) => {
-    const url = "/users/delete";
-    return axiosClient.delete(url, body);
+    const url = "/users/" + body;
+    return axiosClient.delete(url);
   },
 };
 
