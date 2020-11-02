@@ -26,6 +26,26 @@ If 'success' => {
     }
 }
 
+
+----------------------------------------------------------------------------
+
+// Buy one item
+Method: POST
+Auth: Yes
+Roles: User or Admin
+
+Req.params: itemId
+Req.body: {}
+
+URL: /items/:itemId
+
+If 'success' => {
+    msg: 'success',
+    userItem: {
+
+    }
+}
+
 ----------------------------------------------------------------------------
 
 // Create a new item

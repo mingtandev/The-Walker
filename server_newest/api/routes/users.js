@@ -5,27 +5,18 @@ const checkAuth = require('./../middleware/checkAuth')
 
 const router = express.Router()
 
-// Get all user
+
 router.get('/', checkAuth, UsersController.getAll)
-// Signup new account
-router.post('/signup', UsersController.signup)
-// Email verify
-router.get('/signup/confirmation/:verifyToken', UsersController.confirmation)
-// Resend email verify
-router.post('/signup/confirmation/resend', UsersController.resend)
-// User login
+router.get('/:userId', checkAuth, UsersController.getOne)
+router.post('/', UsersController.create)
+router.patch('/:userId', checkAuth, UsersController.update)
+router.delete('/:userId', checkAuth, UsersController.delete)
+
+router.get('/confirm/:verifyToken', UsersController.confirmation)
+router.post('/confirm/resend', UsersController.resend)
 router.post('/login', UsersController.login)
-// User refresh token
 router.post('/login/refresh', UsersController.refresh)
-// Reset password
 router.post('/recovery', UsersController.recovery)
-// Forgot password
 router.post('/forgot', UsersController.forgot)
-// Change password
-router.post('/information', checkAuth, UsersController.change)
-// Query user information
-router.get('/information', checkAuth, UsersController.information)
-// Delete user
-router.delete('/delete', checkAuth, UsersController.delete)
 
 module.exports = router

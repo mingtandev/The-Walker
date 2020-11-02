@@ -14,6 +14,10 @@ const rollupSchema = mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: 'Item',
         default: null
+    },
+    thumbnail: {
+        type: String,
+        default: ''
     }
 })
 

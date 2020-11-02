@@ -35,6 +35,6 @@ const itemScheme = mongoose.Schema({
 
 // Add plugins
 mongoose.plugin(slug)
-itemScheme.set('timestamps', true)
+itemScheme.set('timestamps', true) 
 
 module.exports = mongoose.model('Item', itemScheme)
