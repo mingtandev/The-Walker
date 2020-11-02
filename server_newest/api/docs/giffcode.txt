@@ -30,14 +30,14 @@ If 'success' => {
 
 ----------------------------------------------------------------------------
 
-// Create a new item
+// Create a new code
 Method: POST
 Auth: Yes
 Roles: Admin only
 Req.body {
-    code: 'String',
-    type: 'String',
-    items: 'Array of Item id',
+	"code": "12345678",
+	"type": "Vip", // Vip, Normal
+	"items": "5f9ac4ba98989a002e27c87a 5f9ac4ba98989a002e27c87a",
     expiresTime: 'Number (millisecond)'
 }
 URL: /giffcodes
@@ -46,6 +46,18 @@ If 'success' => {
     code: {
 
     }
+}
+
+----------------------------------------------------------------------------
+
+// Use a giftcode
+Method: POST
+Auth: Yes
+Roles: User or Admin
+Req.body {}
+URL: /giffcodes/:stringCode
+If 'success' => {
+    msg: 'success'
 }
 
 ----------------------------------------------------------------------------

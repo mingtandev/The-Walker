@@ -8,6 +8,7 @@ const router = express.Router()
 
 router.get('/', ItemsController.getAll)
 router.get('/:itemId', ItemsController.getOne)
+router.post('/:itemId', checkAuth, ItemsController.buyOne)
 router.post('/', checkAuth, upload.single('thumbnail'), ItemsController.create)
 router.patch('/:itemId', checkAuth, ItemsController.update)
 router.delete('/:itemId', checkAuth, ItemsController.delete)

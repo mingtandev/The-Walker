@@ -1,4 +1,8 @@
+const mongoose = require('mongoose')
+
 const Item = require('../models/item')
+const User = require('../models/user')
+const UserItem = require('../models/userItem')
 
 exports.getAll = (req, res, next) => {
 
@@ -26,7 +30,7 @@ exports.getAll = (req, res, next) => {
             })
         }
 
-        res.set("x-total-count", items.length);
+        res.set('Content-Range', `items 0-4/${items.length}`)
         res.status(200).json(response)
     })
     .catch(error => {
@@ -73,6 +77,72 @@ exports.getOne = (req, res, next) => {
         console.log(error)
         res.status(500).json({
             msg: "Server error!",
+            error
+        })
+    })
+}
+
+exports.buyOne = async (req, res, next) => {
+    const {itemId} = req.params
+
+    const {_id} = req.userData
+
+    const user = await User.findById(_id)
+    const userItem = await UserItem.find({userId: _id})
+    const item = await Item.findById(itemId)
+
+    {
+        if(!user) {
+            return res.status(404).json({
+                msg: 'User not found!',
+            })
+        }
+        if(!userItem[0]) {
+            return res.status(404).json({
+                msg: 'UserItem not found!',
+            })
+        }
+        if(!item) {
+            return res.status(404).json({
+                msg: 'Item not found!',
+            })
+        }
+    }
+
+
+    const {cash} = user
+    const {name, type, price, sale, saleExpiresTime} = item
+
+    let salePrice = price
+
+    if(saleExpiresTime >= Date.now()){
+        salePrice = (price - sale/100*price).toFixed(2)
+
+        console.log(`Sale: ${sale}%`)
+        console.log(`Sale price: ${salePrice}`)
+    }
+
+    if(cash < salePrice) {
+        return res.status(404).json({
+            msg: 'Cash not enough!'
+        })
+    }
+
+    userItem[0].items[`${type}s`].push(name)
+    user.cash = cash - price
+
+    await userItem[0].save()
+    .then(async userItem => {
+        await user.save()
+
+        res.status(200).json({
+            msg: 'success',
+            userItem
+        })
+    })
+    .catch(error => {
+        res.status(500).json({
+            msg: 'Server error!',
             error
         })
     })

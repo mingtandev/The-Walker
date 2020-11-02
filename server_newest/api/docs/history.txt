@@ -1,0 +1,62 @@
+
+Each req call api => Check res.msg. If 'success' => OK else FAIL
+
+// Get all history
+Method: GET
+Auth: Yes,
+Roles: Admin only
+Req.body: {}
+URL: /histories
+If 'success' => {
+    msg: 'success'.
+    length: Number,
+    histories: []
+}
+
+----------------------------------------------------------------------------
+
+// Get one history
+Method: GET
+Auth: Yes,
+Roles: User or Admin
+Req.params: userId
+URL: /histories/:userId
+If 'success' => {
+    msg: 'success',
+    history: {
+        _id,
+        userId,
+        actions: {
+            accInfos: [],   // Create acc, Update info, Forgot pass, ....
+            items: [],      // Buy items, Delete items (Game client)
+            rolls: [],      // History rolls
+            code: []        // Code used
+        }
+    }
+}
+
+----------------------------------------------------------------------------
+
+// Create a new item
+Method: POST
+Auth: No
+Roles: No
+Req.body {
+    userId: ObjectId
+}
+URL: /histories
+If 'success' => {
+    msg: 'success',
+    history: {
+        _id,
+        userId,
+        actions: {
+            accInfos: [],   // Create acc, Update info, Forgot pass, ....
+            items: [],      // Buy items, Delete items (Game client)
+            rolls: [],      // History rolls
+            code: []        // Code used
+        }
+    }
+}
+
+----------------------------------------------------------------------------

@@ -4,7 +4,7 @@ const Item = require('../models/item')
 exports.getAll = (req, res, next) => {
 
     Rollup.find({})
-    .select('_id day coin item')
+    .select('_id day thumbnail coin item')
     .then(rolls => {
         const response = {
             msg: 'success',
@@ -14,6 +14,7 @@ exports.getAll = (req, res, next) => {
                     _id: roll._id,
                     day: roll.day,
                     coin: roll.coin,
+                    thumbnail: roll.thumbnail,
                     item: roll.item,
                     request: {
                         type: 'GET',
@@ -23,7 +24,7 @@ exports.getAll = (req, res, next) => {
             })
         }
 
-        res.set("x-total-count", rolls.length);
+        // res.set('Content-Range', ``);
         res.status(200).json(response)
     })
     .catch(error => {
@@ -39,7 +40,7 @@ exports.getOne = (req, res, next) => {
     const {rollupDay} = req.params
 
     Rollup.find({day: rollupDay})
-    .select('_id day coin item')
+    .select('_id day thumbnail coin item')
     .then(rolls => {
         const roll = rolls[0]
 
@@ -53,6 +54,7 @@ exports.getOne = (req, res, next) => {
             roll: {
                 _id: roll._id,
                 day: roll.day,
+                thumbnail: roll.thumbnail,
                 coin: roll.coin,
                 item: roll.item,
                 request: {

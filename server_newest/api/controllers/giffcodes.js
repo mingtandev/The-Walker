@@ -1,6 +1,7 @@
 const Code = require('../models/giffcode')
 const User = require('../models/user')
 const Item = require('../models/item')
+const UserItem = require('../models/userItem')
 
 
 exports.getAll = (req, res, next) => {
@@ -37,7 +38,6 @@ exports.getAll = (req, res, next) => {
         res.status(200).json(response)
     })
     .catch(error => {
-        console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
@@ -81,7 +81,6 @@ exports.getOne = (req, res, next) => {
         })
     })
     .catch(error => {
-        console.log(error)
         res.status(500).json({
             msg: "Server error!",
             error
@@ -107,7 +106,7 @@ exports.create = (req, res, next) => {
     const codeObj = new Code({
         code,
         type,
-        items: items.split(','),
+        items: items.split(' '),
         expiresTime
     })
 
@@ -120,6 +119,7 @@ exports.create = (req, res, next) => {
                 code: newCode.code,
                 type: newCode.type,
                 items: newCode.items,
+                isUsed: newCode.isUsed,
                 expiresTime: Date.now() +  +newCode.expiresTime,
                 request: {
                     type: 'GET',
@@ -129,12 +129,76 @@ exports.create = (req, res, next) => {
         })
     })
     .catch(error => {
-        console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
         })
     })
+}
+
+exports.useOne = async (req, res, next) => {
+    const {code} = req.params
+    const {_id: userId} = req.userData
+
+    let validCode = await Code.find({code})
+    validCode = validCode[0]
+
+    if(!validCode){
+        return res.status(200).json({
+            msg: 'Code does not exist!'
+        })
+    }
+
+    let userItem = await UserItem.find({userId})
+    userItem = userItem[0]
+
+    if(!userItem){
+        return res.status(200).json({
+            msg: 'UserItem does not exist!'
+        })
+    }
+
+    const {type, items, isUsed, expiresTime} = validCode
+
+    if (expiresTime < Date.now())
+        return res.status(200).json({
+            msg: 'The code has been expired!'
+        })
+
+    if(type === 'Vip') {
+        if(isUsed) {
+
+            return res.status(200).json({
+                msg: 'The code has been used!'
+            })
+        }
+        else {
+
+            for(let i = 0; i < items.length; i++) {
+                const result  = await Item.findById(items[i])
+                await userItem.items[`${result.type}s`].push(result.name)
+            }
+        }
+
+        console.log(userItem.items)
+        await userItem.save()
+
+        validCode.isUsed = true
+        await validCode.save()
+        .then(async result => {
+
+            res.status(200).json({
+                msg: 'success'
+            })
+        })
+        .catch(error => {
+
+            res.status(500).json({
+                msg: 'Server error!',
+                error
+            })
+        })
+    }
 }
 
 // Updating
@@ -240,7 +304,6 @@ exports.update = (req, res, next) => {
         })
     })
     .catch(error => {
-        console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
@@ -274,7 +337,6 @@ exports.delete = (req, res, next) => {
         })
     })
     .catch(error => {
-        console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
