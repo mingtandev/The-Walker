@@ -20,6 +20,8 @@ exports.getAll = (req, res, next) => {
     User.find({})
     .select('name slugName email cash roles isVerified')
     .then(users => {
+
+        res.set("x-total-count", users.length);
         res.status(200).json({
             msg: 'success',
             length: users.length,
@@ -34,7 +36,32 @@ exports.getAll = (req, res, next) => {
     })
 }
 
-exports.signup =  (req, res, next) => {
+exports.getOne = (req, res, next) => {
+    const _id = req.userData._id
+
+    User.findById(_id)
+    .select('name email roles cash isVerified')
+    .then(user => {
+        if(!user){
+            return res.status(404).json({
+                msg: 'User not found!'
+            })
+        }else{
+            res.status(200).json({
+                msg: 'success',
+                user
+            })
+        }
+    })
+    .catch(error => {
+        res.status(500).json({
+            msg: 'Server error!',
+            error
+        })
+    })
+}
+
+exports.create =  (req, res, next) => {
     const {name, email, password} = req.body
 
     if(!name || !email || !password) {
@@ -76,7 +103,8 @@ exports.signup =  (req, res, next) => {
                     sendMail(req, newUser.email, token, 'confirmation')
 
                     res.status(201).json({
-                        msg: "success"
+                        msg: "success",
+                        user: newUser
                     })
                 })
                 .catch(error => {
@@ -95,6 +123,158 @@ exports.signup =  (req, res, next) => {
         })
     })
 }
+
+
+exports.update = (req, res, next) => {
+    const {userId: _id} = req.params
+    const {newPassword} = req.body
+
+    let hasPassword = false
+
+    const newUser = {}
+
+    for (const ops of req.body) {
+        newUser[ops.propName] = ops.value
+
+        if(ops.propName === 'password'){
+            hasPassword = true
+        }
+    }
+
+
+    User.findById(_id)
+    .then(user => {
+        if(!user){
+            return res.status(500).json({
+                msg: 'User not found!'
+            })
+        }
+
+        if(hasPassword){
+            bcrypt.hash(newUser.password, 10, (error, encryptedPassword) => {
+                if(error){
+                    return res.status(500).json({
+                        msg: 'Server error!',
+                        error
+                    })
+
+                }
+
+                newUser.password = encryptedPassword
+
+                User.updateOne({_id}, {$set: newUser})
+                .then(result => {
+                    res.status(200).json({
+                        msg: "success",
+                        request: {
+                            type: 'GET',
+                            url: req.hostname + '/users/' + _id
+                        }
+                    })
+                })
+                .catch(error => {
+                    console.log(error)
+                    res.status(500).json({
+                        msg: 'Server error!',
+                        error
+                    })
+                })
+
+                // user.password = encryptedPassword
+                // user.save()
+                // .then(newUser => {
+                //     res.status(200).json({
+                //         msg: 'success'
+                //     })
+                // })
+                // .catch(error => {
+                //     res.status(500).json({
+                //         msg: 'Server error!',
+                //         error
+                //     })
+                // })
+            })
+
+        }else{
+            User.updateOne({_id}, {$set: newUser})
+            .then(result => {
+                res.status(200).json({
+                    msg: "success",
+                    request: {
+                        type: 'GET',
+                        url: req.hostname + '/users/' + _id
+                    }
+                })
+            })
+            .catch(error => {
+                console.log(error)
+                res.status(500).json({
+                    msg: 'Server error!',
+                    error
+                })
+            })
+        }
+    })
+    .catch(error => {
+        res.status(500).json({
+            msg: 'Server error!',
+            error
+        })
+    })
+}
+
+exports.delete =  (req, res, next) => {
+    const {roles} = req.userData
+    const {userId: _id} = req.params
+
+    if(roles != 'admin'){
+        return res.status(403).json({
+            msg: `You don't have the permission!`
+        })
+    }
+
+    if(!_id){
+        return res.status(404).json({
+            msg: 'UserID is required!'
+        })
+    }
+
+    User.findById(_id)
+    .then(user => {
+        if(!user){
+            return res.status(404).json({
+                msg: 'User not found!'
+            })
+        }
+
+        if(user.roles === 'admin'){
+            return res.status(404).json({
+                msg: `You don't have the permission!`
+            })
+        }
+
+        User.deleteOne({_id})
+        .then(result => {
+            res.status(200).json({
+                msg: 'success'
+            })
+        })
+        .catch(error => {
+            res.status(500).json({
+                msg: 'Server error!',
+                error
+            })
+        })
+    })
+    .catch(error => {
+        res.status(500).json({
+            msg: 'Server error!',
+            error
+        })
+    })
+}
+
+// --------------------------------------------------------------------
 
 exports.confirmation = (req, res, next) => {
     const {verifyToken: token} = req.params
@@ -286,50 +466,6 @@ exports.refresh = (req, res, next) => {
     }
 }
 
-exports.change = (req, res, next) => {
-    const {_id} = req.userData
-    const {newPassword} = req.body
-
-    User.findById({ _id})
-    .then(user => {
-        if(!user){
-            return res.status(500).json({
-                msg: 'User not found!'
-            })
-        }
-
-        bcrypt.hash(newPassword, 10, (error, encryptedPassword) => {
-            if(error){
-                return res.status(500).json({
-                    msg: 'Server error!',
-                    error
-                })
-
-            }
-
-            user.password = encryptedPassword
-            user.save()
-            .then(newUser => {
-                res.status(200).json({
-                    msg: 'success'
-                })
-            })
-            .catch(error => {
-                res.status(500).json({
-                    msg: 'Server error!',
-                    error
-                })
-            })
-        })
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
-
 exports.recovery = (req, res, next) => {
     const {email} = req.body
 
@@ -415,82 +551,6 @@ exports.forgot = (req, res, next)  => {
                     msg: 'Server error!',
                     error
                 })
-            })
-        })
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
-
-exports.information = (req, res, next) => {
-    const _id = req.userData._id
-
-    User.findById(_id)
-    .select('name email roles cash isVerified')
-    .then(user => {
-        if(!user){
-            return res.status(404).json({
-                msg: 'User not found!'
-            })
-        }else{
-            res.status(200).json({
-                msg: 'success',
-                user
-            })
-        }
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
-
-exports.delete =  (req, res, next) => {
-    const {roles} = req.userData
-    const {_id} = req.body
-
-    if(roles != 'admin'){
-        return res.status(403).json({
-            msg: `You don't have the permission!`
-        })
-    }
-
-    if(!_id){
-        return res.status(404).json({
-            msg: 'UserID is required!'
-        })
-    }
-
-    User.findById(_id)
-    .then(user => {
-        if(!user){
-            return res.status(404).json({
-                msg: 'User not found!'
-            })
-        }
-
-        if(user.roles === 'admin'){
-            return res.status(404).json({
-                msg: `You don't have the permission!`
-            })
-        }
-
-        User.deleteOne({_id})
-        .then(result => {
-            res.status(200).json({
-                msg: 'success'
-            })
-        })
-        .catch(error => {
-            res.status(500).json({
-                msg: 'Server error!',
-                error
             })
         })
     })

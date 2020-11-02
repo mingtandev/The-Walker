@@ -32,7 +32,7 @@ If 'success' => {
 Method: POST
 Auth: Yes
 Roles: Admin only
-Req.body form data {
+Req.body {
     day: 'Number' 1 -> 31 unique,
     coin: 'Number' option, default: 1000,
     item: 'ObjectId' option, default: null

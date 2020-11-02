@@ -6,7 +6,7 @@ Method: GET
 Auth: Yes
 Roles: Admin only
 Req.body: {}
-URL: http://localhost:8080/users
+URL: /users
 If 'success' => {
     msg: 'success'.
     length: Number,
@@ -15,7 +15,19 @@ If 'success' => {
 
 ----------------------------------------------------------------------------
 
-// Signup new account
+// Get one user
+Method: GET
+Auth: Yes
+URL: users/:userId
+If 'success' => {
+    name: String,
+    email: String,
+    roles: String,
+    isVerified: Boolean
+}
+----------------------------------------------------------------------------
+
+// Create new account
 Method: POST
 Auth: No
 Req.body:
@@ -24,8 +36,45 @@ Req.body:
 	email: String
 	password: String
 }
-URL: http://localhost:8080/users/signup
+URL: /users/signup
 If 'success' => Check email => Verify
+
+----------------------------------------------------------------------------
+
+// Update user
+Method: PATCH
+Auth: Yes
+Roles: Admin only
+Req.body:
+[
+	{
+		"propName": "password",
+		"value": "1234567"
+	},
+	{
+		"propName": "name",
+		"value": "tuilathaiday"
+	}
+]
+
+NOTE: propName in ["name", "roles", "cash", "password"]
+
+URL: /users/:userId
+If 'success' => {
+    msg: 'success',
+}
+
+----------------------------------------------------------------------------
+
+// Delete user
+Method: DELETE
+Auth: Yes
+Roles: Admin only
+Req.body: {}
+URL: /users/:userId
+If 'success' => {
+    msg: 'success
+}
 
 ----------------------------------------------------------------------------
 
@@ -33,7 +82,7 @@ If 'success' => Check email => Verify
 Method: GET (in email)
 Auth: No
 Req.body: {}
-URL: http://localhost:8080/users/confirmation/:verifyToken
+URL: /users/confirm/:verifyToken
 If 'success' => Account verified and user can login
 
 ----------------------------------------------------------------------------
@@ -45,7 +94,7 @@ Req.body:
 {
 	email: String
 }
-URL: http://localhost:8080/users/signup/confirmation/resend
+URL: /users/confirm/resend
 If 'success' => Check email => Verify
 
 ----------------------------------------------------------------------------
@@ -58,7 +107,7 @@ Req.body:
 	email: String,
     password: String
 }
-URL: http://localhost:8080/users/login
+URL: /users/login
 If 'success' => Obj {
     msg: 'success',
     token: String,
@@ -74,7 +123,7 @@ Req.body:
 {
 	refreshToken: String
 }
-URL: http://localhost:8080/users/login/refresh
+URL: /users/login/refresh
 If 'success' => Obj {
     msg: 'success',
     token: String
@@ -89,7 +138,7 @@ Req.body:
 {
 	email: String
 }
-URL: http://localhost:8080/users/recovery
+URL: /users/recovery
 If 'success' => Check email and copy passwordResetToken for api Forgot password
 
 ----------------------------------------------------------------------------
@@ -102,54 +151,15 @@ Req.body:
     newPassword: String,
 	passwordResetToken: String (below)
 }
-URL: http://localhost:8080/users/forgot
-If 'success' => Password has been updated
-
-----------------------------------------------------------------------------
-
-// Change password
-Method: POST
-Auth: Yes
-Req.body:
-{
-    newPassword: String
-}
-URL: http://localhost:8080/users/information
-If 'success' => Password has been updated
-
-----------------------------------------------------------------------------
-
-// Query user information
-Method: GET
-Auth: Yes
-URL: http://localhost:8080/users/information
+URL: /users/forgot
 If 'success' => {
-    name: String,
-    email: String,
-    roles: String,
-    isVerified: Boolean
+    msg: 'success'
 }
 
 ----------------------------------------------------------------------------
 
-// Delete user
-Method: DELETE
-Auth: Yes
-Roles: 'admin' only
-Req.body:
-{
-    _id: ObjId
-}
-URL: http://localhost:8080/users/delete
-If 'success' => User has been deleted
-
-----------------------------------------------------------------------------
 
 Resources:
-
-Account admin roles:
-U: bik56810@eoopy.com
-P: 12345678
 
 Token decode test: https://jwt.io/
 

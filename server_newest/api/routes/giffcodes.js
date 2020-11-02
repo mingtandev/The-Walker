@@ -1,15 +1,15 @@
 const express = require('express')
 
-const GiffcodeController = require('./../controllers/giffcodes')
+const CodeController = require('./../controllers/giffcodes')
 const checkAuth = require('./../middleware/checkAuth')
 
 const router = express.Router()
 
-router.get('/', checkAuth, GiffcodeController.getAll)
-router.get('/:codeId', checkAuth, GiffcodeController.getOne)
-router.post('/', checkAuth, GiffcodeController.create)
-router.post('/:codeId/use', checkAuth, GiffcodeController.use)
-router.patch('/:codeId', checkAuth, GiffcodeController.update)
-router.delete('/:codeId', checkAuth, GiffcodeController.delete)
+router.get('/', checkAuth, CodeController.getAll)
+router.get('/:codeId', checkAuth, CodeController.getOne)
+router.post('/', checkAuth, CodeController.create)
+router.post('/:code', checkAuth, CodeController.useOne)
+router.patch('/:codeId', checkAuth, CodeController.update)
+router.delete('/:codeId', checkAuth, CodeController.delete)
 
 module.exports = router

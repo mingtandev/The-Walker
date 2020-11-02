@@ -9,7 +9,7 @@ const codeSchema = mongoose.Schema({
     },
     type: {
         type: String,
-        default: 'normal'
+        default: 'Normal'
     },
     items: [
         {
@@ -20,7 +20,7 @@ const codeSchema = mongoose.Schema({
     ],
     isUsed: {
         type: Boolean,
-        default: false  
+        default: false
     },
     expiresTime: {
         type: Date,
