@@ -56,6 +56,18 @@ const historySchema = mongoose.Schema({
                     type: String,
                 }
             ]
+        },
+        blogs: {
+            personal: [
+                {
+                    type: String,
+                }
+            ],
+            manage: [
+                {
+                    type: String,
+                }
+            ]
         }
     }
 })

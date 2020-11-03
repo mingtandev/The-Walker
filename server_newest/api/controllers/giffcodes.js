@@ -90,7 +90,7 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create = (req, res, next) => {
+exports.create = async (req, res, next) => {
     const {code, type, items, expiresTime} = req.body
 
     if(!code || !items){
@@ -112,8 +112,11 @@ exports.create = (req, res, next) => {
         expiresTime
     })
 
-    codeObj.save()
-    .then(newCode => {
+    await codeObj.save()
+    .then(async newCode => {
+
+        await saveHistory(req.userData._id, 'codes', 'manage', `Create a gift code: ${newCode._id}-${code}-${codeObj.type.toLowerCase()}-${items.split(' ').join('-')}-${codeObj.expiresTime} | ${new Date()}`)
+
         res.status(201).json({
             msg: "success",
             code: {
@@ -205,7 +208,7 @@ exports.useOne = async (req, res, next) => {
 
     if(result_1 && result_2) {
 
-        saveHistory(userId, 'codes', 'personal', `${code} ${new Date()}`)
+        await saveHistory(userId, 'codes', 'personal', `Used code: ${code} | ${new Date()}`)
 
         res.status(200).json({
             msg: 'success'
@@ -219,84 +222,7 @@ exports.useOne = async (req, res, next) => {
     }
 }
 
-// Updating
-exports.use = (req, res, next) => {
-    const {codeId} = req.params
-    const {_id} = req.body
-
-    let userItems = {
-        userId: '',
-        items: []
-    }
-
-    User.findById({_id})
-    .then(user => {
-        if(!user){
-            return res.status(400).json({
-                msg: 'User not found!'
-            })
-        }
-
-        userItems.userId = user._id
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-
-    Code.findById({_id: codeId})
-    .then(code => {
-        if(!code){
-            return res.status(400).json({
-                msg: 'Code not found!'
-            })
-        }
-
-        if(code.isUsed){
-            return res.status(400).json({
-                msg: 'The code has been used!'
-            })
-        }
-
-        // map
-        for (const _id of code.items){
-            Item.findById(_id)
-            .then(item => {
-                // can be change
-                if(item){
-                    userItems.items.push(item.name)
-
-                    // call model user-items .push item
-                }
-
-            })
-            .catch(error => {
-                return res.status(500).json({
-                    msg: 'Server error!',
-                    error
-                })
-            })
-        }
-
-        code.isUsed = true
-
-        code.save()
-
-        res.status(200).json({
-            msg: 'success'
-        })
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
-
-exports.update = (req, res, next) => {
+exports.update = async (req, res, next) => {
     const {codeId: _id} = req.params
 
     if (req.userData.roles != 'admin'){
@@ -311,7 +237,9 @@ exports.update = (req, res, next) => {
         code[ops.propName] = ops.value
     }
 
-    Code.updateOne({_id}, {$set: code})
+    await saveHistory(req.userData._id, 'codes', 'manage', `Update a gift code: ${_id}-${Object.keys(code).join('-')} | ${new Date()}`)
+
+    await Code.updateOne({_id}, {$set: code})
     .then(result => {
         res.status(200).json({
             msg: "success",
@@ -329,8 +257,8 @@ exports.update = (req, res, next) => {
     })
 }
 
-exports.delete = (req, res, next) => {
-    const {codeId: _id} = req.params
+exports.delete = async (req, res, next) => {
+    const {code: _code} = req.params
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -338,7 +266,20 @@ exports.delete = (req, res, next) => {
         })
     }
 
-    Code.deleteOne({_id})
+    const objCode = await Code.find({code: _code})
+
+    if(!objCode[0]) {
+
+        return res.status(404).json({
+            msg: 'Code not found!'
+        })
+    }
+
+    const {_id, code, type, items, isUsed, expiresTime} = objCode[0]
+
+    await saveHistory(req.userData._id, 'codes', 'manage', `Delete a gift code: ${_id}-${code}-${type.toLowerCase()}-${items.join('-')}-${isUsed}-${expiresTime} | ${new Date()}`)
+
+    await Code.deleteOne({_id})
     .then(result => {
         res.status(200).json({
             msg: 'success',

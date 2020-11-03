@@ -2,11 +2,11 @@ const History = require('../models/history')
 
 exports.getAll = (req, res, next) => {
 
-    // if (req.userData.roles != 'admin'){
-    //     return res.status(403).json({
-    //         msg: `You don't have the permission!`
-    //     })
-    // }
+    if (req.userData.roles != 'admin'){
+        return res.status(403).json({
+            msg: `You don't have the permission!`
+        })
+    }
 
     History.find({})
     .select('userId actions')
@@ -41,12 +41,6 @@ exports.getAll = (req, res, next) => {
 
 exports.getOne = (req, res, next) => {
     const {userId} = req.params
-
-    // if (req.userData.roles != 'admin'){
-    //     return res.status(403).json({
-    //         msg: `You don't have the permission!`
-    //     })
-    // }
 
     History.find({userId})
     .select('_id userId actions')
@@ -90,19 +84,29 @@ exports.create = (req, res, next) => {
         })
     }
 
-    // if (req.userData.roles != 'admin'){
-    //     return res.status(403).json({
-    //         msg: `You don't have the permission!`
-    //     })
-    // }
-
     const history = new History({
         userId,
         actions: {
-            accInfos: [],
-            items: [],
-            rolls: [],
-            codes: []
+            accInfos: {
+                personal: [],
+                manage: []
+            },
+            items:  {
+                personal: [],
+                manage: []
+            },
+            rolls:  {
+                personal: [],
+                manage: []
+            },
+            codes:  {
+                personal: [],
+                manage: []
+            },
+            blogs:  {
+                personal: [],
+                manage: []
+            }
         }
     })
 

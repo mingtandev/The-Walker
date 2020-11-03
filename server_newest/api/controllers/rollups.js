@@ -1,6 +1,8 @@
 const Rollup = require('../models/rollup')
 const Item = require('../models/item')
 
+const {saveHistory, loadHistory} = require('./../utils/history')
+
 exports.getAll = (req, res, next) => {
 
     Rollup.find({})
@@ -122,15 +124,19 @@ exports.create = async (req, res, next) => {
     const rollObj = new Rollup(roll)
 
     await rollObj.save()
-    .then(newRoll => {
+    .then(async newRoll => {
+        const {_id, day, coin, item, thumbnail} = newRoll
+
+        await saveHistory(req.userData._id, 'rolls', 'manage', `Create a roll: ${_id}-${day}-${coin}-${item}} | ${new Date()}`)
+
         res.status(201).json({
             msg: "success",
             roll: {
-                _id: newRoll._id,
-                day: newRoll.day,
-                coin: newRoll.coin,
-                item: newRoll.item,
-                thumbnail: newRoll.thumbnail,
+                _id,
+                day,
+                coin,
+                item,
+                thumbnail,
                 request: {
                     type: 'GET',
                     url: req.hostname + '/rolls/' + newRoll.day
@@ -146,8 +152,16 @@ exports.create = async (req, res, next) => {
     })
 }
 
-exports.update = (req, res, next) => {
+exports.update = async (req, res, next) => {
     const {rollupDay} = req.params
+
+    const objRoll = await Rollup.find({day: rollupDay})
+
+    if(!objRoll[0]) {
+        return res.status(404).json({
+            msg: 'Roll day not found!'
+        })
+    }
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -161,7 +175,9 @@ exports.update = (req, res, next) => {
         roll[ops.propName] = ops.value
     }
 
-    Rollup.updateOne({day: rollupDay}, {$set: roll})
+    await saveHistory(req.userData._id, 'rolls', 'manage', `Update a roll: ${objRoll[0]._id}-${rollupDay}-${Object.keys(roll).join('-')} | ${new Date()}`)
+
+    await Rollup.updateOne({day: rollupDay}, {$set: roll})
     .then(result => {
         res.status(200).json({
             msg: "success",
@@ -180,8 +196,16 @@ exports.update = (req, res, next) => {
     })
 }
 
-exports.delete = (req, res, next) => {
+exports.delete = async (req, res, next) => {
     const {rollupDay} = req.params
+
+    const objRoll = await Rollup.find({day: rollupDay})
+
+    if(!objRoll[0]) {
+        return res.status(404).json({
+            msg: 'Roll day not found!'
+        })
+    }
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -189,7 +213,9 @@ exports.delete = (req, res, next) => {
         })
     }
 
-    Rollup.deleteOne({day: rollupDay})
+    await saveHistory(req.userData._id, 'rolls', 'manage', `Delete a roll: ${objRoll[0]._id}-${rollupDay}-${objRoll[0].coin}-${objRoll[0].item} | ${new Date()}`)
+
+    await Rollup.deleteOne({day: rollupDay})
     .then(result => {
         res.status(200).json({
             msg: 'success',

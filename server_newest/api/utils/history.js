@@ -48,7 +48,7 @@ exports.loadHistory = async (userId, type, effect) => {
         }
         case 'codes': {
 
-            result = await user.actions.codes[effect].map(his => his.split(' ')[0])
+            result = await user.actions.codes[effect].map(his => his.split(' ')[2])
             break
         }
     }

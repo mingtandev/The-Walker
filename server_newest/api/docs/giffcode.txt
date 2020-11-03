@@ -36,7 +36,7 @@ Auth: Yes
 Roles: Admin only
 Req.body {
 	"code": "12345678",
-	"type": "Vip", // Vip, Normal
+	"type": "Vip", [Vip, Normal]
 	"items": "5f9ac4ba98989a002e27c87a 5f9ac4ba98989a002e27c87a",
     expiresTime: 'Number (millisecond)'
 }
@@ -55,7 +55,7 @@ Method: POST
 Auth: Yes
 Roles: User or Admin
 Req.body {}
-URL: /giffcodes/:stringCode
+URL: /giffcodes/:code
 If 'success' => {
     msg: 'success'
 }
@@ -91,7 +91,7 @@ Method: DELETE
 Auth: Yes
 Roles: Admin only
 Req.params: _id
-URL: /giffcodes/:_id
+URL: /giffcodes/:code
 If 'success' => Obj {
     msg: 'success'
 }

@@ -1,3 +1,5 @@
+const {loadHistory, saveHistory} = require('./../utils/history')
+
 const Blog = require('../models/blog')
 
 exports.getAll = (req, res, next) => {
@@ -74,7 +76,7 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create = (req, res, next) => {
+exports.create = async (req, res, next) => {
     const {writer, title, content} = req.body
 
     if(!writer || !title || !content){
@@ -96,8 +98,11 @@ exports.create = (req, res, next) => {
         thumbnail: req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '')
     })
 
-    blog.save()
-    .then(blog => {
+    await blog.save()
+    .then(async blog => {
+
+        await saveHistory(writer, 'blogs', 'manage', `Create a blog: ${blog._id}-${writer}-${title} | ${new Date()}`)
+
         res.status(201).json({
             msg: "success",
             blog: {
@@ -123,7 +128,7 @@ exports.create = (req, res, next) => {
     })
 }
 
-exports.update = (req, res, next) => {
+exports.update = async (req, res, next) => {
     const {blogId: _id} = req.params
 
     if (req.userData.roles != 'admin'){
@@ -138,7 +143,9 @@ exports.update = (req, res, next) => {
         blog[ops.propName] = ops.value
     }
 
-    Blog.updateOne({_id}, {$set: blog})
+    await saveHistory(req.userData._id, 'blogs', 'manage', `Update a blog: ${_id}-${Object.keys(blog).join('-')} | ${new Date()}`)
+
+    await Blog.updateOne({_id}, {$set: blog})
     .then(result => {
         res.status(200).json({
             msg: "success",
@@ -157,7 +164,7 @@ exports.update = (req, res, next) => {
     })
 }
 
-exports.delete = (req, res, next) => {
+exports.delete = async (req, res, next) => {
     const {blogId: _id} = req.params
 
     if (req.userData.roles != 'admin'){
@@ -166,7 +173,17 @@ exports.delete = (req, res, next) => {
         })
     }
 
-    Blog.deleteOne({_id})
+    const blog = await Blog.findById(_id)
+
+    if(!blog) {
+        return res.status(404).json({
+            msg: 'Blog not found!'
+        })
+    }
+
+    await saveHistory(req.userData._id, 'blogs', 'manage', `Delete a blog: ${blog._id}-${blog.title} | ${new Date()}`)
+
+    await Blog.deleteOne({_id})
     .then(result => {
         res.status(200).json({
             msg: 'success',
