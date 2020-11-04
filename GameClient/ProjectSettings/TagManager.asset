@@ -17,6 +17,7 @@ TagManager:
   - BulletTrail
   - GunBarrel
   - TargetFollow
+  - CameraFreeLook
   layers:
   - Default
   - TransparentFX

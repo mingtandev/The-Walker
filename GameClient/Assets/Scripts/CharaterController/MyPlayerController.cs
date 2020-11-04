@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 // using SimpleJSON;
 using UnityEngine.Networking;
-using UnityEditor.Animations;
+using Cinemachine;
 
 public class MyPlayerController : MonoBehaviour
 {
@@ -12,6 +12,9 @@ public class MyPlayerController : MonoBehaviour
     public Animator rigController;
     Rigidbody rid;
     Camera cameraMain;
+
+    [HideInInspector]
+    public Cinemachine.CinemachineImpulseSource camShake;
 
 
     //Shoot
@@ -35,6 +38,7 @@ public class MyPlayerController : MonoBehaviour
     float moveSpeed = 1.5f;  // run is 4.5
     Quaternion rot;
     GameObject target;
+    int hashSprint = Animator.StringToHash("Run");
 
     //Jump
     bool isGround = true;
@@ -47,6 +51,10 @@ public class MyPlayerController : MonoBehaviour
     public Transform WeaponRightIK;
     public Transform WeasponSlot;
     public Transform WeaponHandle;
+    public Cinemachine.CinemachineFreeLook playerCamera;
+
+
+    public static MyPlayerController instance;
 
     //--------------------------------------------------------------------------------------------------------------------------------------------
     //NEW
@@ -55,6 +63,7 @@ public class MyPlayerController : MonoBehaviour
 
     private void Awake()
     {
+        MakeSigleton();
         cameraMain = Camera.main;
         Cursor.visible = false;
         ground = LayerMask.GetMask("GroundLayer");
@@ -63,14 +72,21 @@ public class MyPlayerController : MonoBehaviour
 
         moveDir = Vector3.forward;
         target = GameObject.FindGameObjectWithTag("TargetFollow");
+
+        camShake = GetComponent<CinemachineImpulseSource>();
     }
 
     void Start()
     {
         firstGun = SaveLoadManager.chooseGun[0].gun.GetComponent<Gun>();
         secondGun = SaveLoadManager.chooseGun[1].gun.GetComponent<Gun>();
-        secondGun.gameObject.SetActive(false);
+        secondGun.gameObject.transform.parent = WeasponSlot;
+        secondGun.transform.localPosition = Vector3.zero;
+        secondGun.transform.localRotation = Quaternion.identity;
         MyGun = firstGun;
+        MyGun.transform.localPosition = MyGun.posOfSlotGun;
+        rigController.Play(MyGun.type.ToString());
+
     }
 
     // Update is called once per frame
@@ -78,11 +94,13 @@ public class MyPlayerController : MonoBehaviour
     {
         Swap_HideGun();
         Movement_V2();
+        bool isAim = Input.GetMouseButton(1);
+        anim.SetBool("Aim", isAim);
     }
 
     private void FixedUpdate()
     {
-
+        MyGun.transform.localPosition = MyGun.posOfSlotGun;
     }
 
 
@@ -102,6 +120,21 @@ public class MyPlayerController : MonoBehaviour
         anim.SetFloat("PosY", input.y);
         anim.SetFloat("Mag", input.magnitude);
 
+        SprintUpdate(input);
+
+    }
+
+    void SprintUpdate(Vector2 input)
+    {
+        if (input.y <= 0)
+        {
+            anim.SetBool(hashSprint, false);
+            return;
+        }
+
+        bool sprint = Input.GetKey(KeyCode.LeftShift);
+        anim.SetBool(hashSprint, sprint);
+
     }
 
 
@@ -116,6 +149,7 @@ public class MyPlayerController : MonoBehaviour
             }
             if (Input.GetMouseButtonUp(0))
             {
+                MyGun.recoil.ResetIndex();
                 MyGun.muzzle.Stop();
             }
 
@@ -126,11 +160,15 @@ public class MyPlayerController : MonoBehaviour
                 {
 
                     MyGun.GunShotHandle();
+                    camShake.GenerateImpulse(Camera.main.transform.forward);
                     MyGun.curAmmo--;
+                    rigController.Play(MyGun.type.ToString() + "Recoil", 1, 0.0f);
                 }
             }
             MyGun.UpdateGravityBullets(Time.deltaTime);
         }
+
+
 
 
 
@@ -151,6 +189,7 @@ public class MyPlayerController : MonoBehaviour
             yield return new WaitForSeconds(rigController.GetCurrentAnimatorStateInfo(0).length - 0.05f);
         }
         MyGun = firstGun;
+        MyGun.transform.localPosition = MyGun.posOfSlotGun;
         activeIndexGun = 1;
 
         Reset_Animation();
@@ -175,6 +214,8 @@ public class MyPlayerController : MonoBehaviour
         }
 
         MyGun = secondGun;
+        MyGun.transform.localPosition = MyGun.posOfSlotGun;
+
         activeIndexGun = 2;
 
         Reset_Animation();
@@ -239,10 +280,10 @@ public class MyPlayerController : MonoBehaviour
                 EnableGun();
             }
 
-            if (Input.GetKeyDown(KeyCode.X) && changingWeapon == false)
-            {
-                StartCoroutine(HideAndShowAtGunIndex(activeIndexGun));
-            }
+            // if (Input.GetKeyDown(KeyCode.X) && changingWeapon == false)
+            // {
+            //     StartCoroutine(HideAndShowAtGunIndex(activeIndexGun));
+            // }
         }
     }
 
@@ -263,17 +304,17 @@ public class MyPlayerController : MonoBehaviour
 
 
     //Hàm này lưu lại mọi hoạt động "POSE" của player vào 1 audioClip . Đó cũng chính là mục đích của GameObjectRecoder
-    [ContextMenu("Save weapon pose")]
-    void SaveweaponPose()
-    {
-        GameObjectRecorder recoder = new GameObjectRecorder(gameObject);
-        recoder.BindComponentsOfType<Transform>(WeaponParent.gameObject, false);
-        recoder.BindComponentsOfType<Transform>(WeaponLeftIK.gameObject, false);
-        recoder.BindComponentsOfType<Transform>(WeaponRightIK.gameObject, false);
-        recoder.TakeSnapshot(0.0f);
-        recoder.SaveToClip(MyGun.weaponAnimation);
-        UnityEditor.AssetDatabase.SaveAssets();
-    }
+    // [ContextMenu("Save weapon pose")]
+    // void SaveweaponPose()
+    // {
+    //     GameObjectRecorder recoder = new GameObjectRecorder(gameObject);
+    //     recoder.BindComponentsOfType<Transform>(WeaponParent.gameObject, false);
+    //     recoder.BindComponentsOfType<Transform>(WeaponLeftIK.gameObject, false);
+    //     recoder.BindComponentsOfType<Transform>(WeaponRightIK.gameObject, false);
+    //     recoder.TakeSnapshot(0.0f);
+    //     recoder.SaveToClip(MyGun.weaponAnimation);
+    //     UnityEditor.AssetDatabase.SaveAssets();
+    // }
     void Jumping()
     {
         anim.SetBool("IsGround", isGround);
@@ -295,6 +336,14 @@ public class MyPlayerController : MonoBehaviour
         }
     }
 
+
+    void MakeSigleton()
+    {
+        if (instance == null)
+            instance = this;
+        else
+            Destroy(gameObject);
+    }
 
 }
 

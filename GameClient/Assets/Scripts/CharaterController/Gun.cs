@@ -57,11 +57,14 @@ public class Gun : MonoBehaviour
     public float bulletSpeed;
     public float bulletDrop;
 
+    public Vector3 posOfSlotGun;
+
     [HideInInspector]
     public bool readyToUse;
     public bool canShot;
     public bool isReaload;
     public bool canReload = true;
+    public GunRecoil recoil;
 
     List<BulletGravity> bullets = new List<BulletGravity>();
 
@@ -71,6 +74,7 @@ public class Gun : MonoBehaviour
         curAmmo = loadAmmo;
         myUI = GameObject.FindGameObjectWithTag("UIManager").GetComponent<UIManager>();
         crossHairTarget = GameObject.FindGameObjectWithTag("Player").GetComponent<MyPlayerController>().CrossHairTarget;
+        recoil = GetComponent<GunRecoil>();
         // readyToUse = true;
 
     }
@@ -84,19 +88,20 @@ public class Gun : MonoBehaviour
     void Start()
     {
         currenTime = timeDelay;
+        StartCoroutine(LockRotation());
     }
 
     // Update is called once per frame
     void Update()
     {
-            currenTime += Time.deltaTime;
-            if (currenTime > timeDelay)
-            {
-                canShot = true;
-                currenTime = timeDelay;
-            }
+        currenTime += Time.deltaTime;
+        if (currenTime > timeDelay)
+        {
+            canShot = true;
+            currenTime = timeDelay;
+        }
 
-            CheckAmmoAndReload();
+        CheckAmmoAndReload();
     }
 
     public void ResetTimeBullet()
@@ -133,13 +138,14 @@ public class Gun : MonoBehaviour
     {
         if (canReload && !isReaload)
         {
-
+               
             StartCoroutine(myUI.reloadUpdateFill(2f));
 
             canShot = false;
             readyToUse = false;
             isReaload = true;
             SoundManager.instance.Play("ReloadStart");
+            MyPlayerController.instance.rigController.SetTrigger("Reload");
 
             yield return new WaitForSeconds(2f);
 
@@ -165,6 +171,7 @@ public class Gun : MonoBehaviour
             }
             myUI.reload.transform.gameObject.SetActive(false);
             SoundManager.instance.Play("ReloadComplete");
+            MyPlayerController.instance.rigController.ResetTrigger("Reload");
         }
         yield return null;
     }
@@ -182,17 +189,41 @@ public class Gun : MonoBehaviour
     {
         PlaySoundGun();
         muzzle.Play();
+        recoil.GenerateRecoil();
+        if (type == typeGun.Shotgun)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                ray.origin = barrel.transform.position;
+                ray.direction = crossHairTarget.position - barrel.transform.position;
 
 
-        ray.origin = barrel.transform.position;
-        ray.direction = crossHairTarget.position - barrel.transform.position;
+                //GET ANGLE RANDOM
 
-        Vector3 vel = ray.direction.normalized * bulletSpeed;
-        var bullet = CreateBullet(ray.origin, vel);  //this bullet we will apply gravity
-        bullets.Add(bullet);
+                ray.direction = Quaternion.AngleAxis(Random.Range(-10, 10), Vector3.up) * Quaternion.AngleAxis(Random.Range(-10, 10), Vector3.right) * ray.direction;
+                Vector3 vel = ray.direction.normalized * bulletSpeed;
+                var bullet = CreateBullet(ray.origin, vel);  //this bullet we will apply gravity
+                bullets.Add(bullet);
+            }
+            ResetTimeBullet();
+
+        }
+        else
+        {
+            ray.origin = barrel.transform.position;
+            ray.direction = crossHairTarget.position - barrel.transform.position;
+
+            Vector3 vel = ray.direction.normalized * bulletSpeed;
+            var bullet = CreateBullet(ray.origin, vel);  //this bullet we will apply gravity
+            bullets.Add(bullet);
 
 
-        ResetTimeBullet();
+            ResetTimeBullet();
+        }
+
+
+
+
     }
 
     Vector3 GetPosition(BulletGravity bullet)
@@ -248,7 +279,6 @@ public class Gun : MonoBehaviour
                     hit.transform.gameObject.GetComponent<Enemy>().heath -= damage;
                     Destroy(Theblood, 1f);
                 }
-
             }
             else
             {
@@ -276,4 +306,16 @@ public class Gun : MonoBehaviour
         obj.SetActive(false);
 
     }
+
+
+    IEnumerator LockRotation()
+    {
+        transform.localRotation = Quaternion.Euler(0f,0f,0f);
+
+        yield return new WaitForSeconds(0.5f);
+
+        StartCoroutine(LockRotation());
+
+    }
+
 }
