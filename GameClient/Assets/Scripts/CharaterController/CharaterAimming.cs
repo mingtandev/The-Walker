@@ -10,6 +10,9 @@ public class CharaterAimming : MonoBehaviour
     Camera mainCamera;
     public Rig aimlayer;
     public MyPlayerController controller;
+    public Cinemachine.AxisState XAxis;
+    public Cinemachine.AxisState YAxis;
+    public Transform cameraLookAt;
 
     private void Awake()
     {
@@ -18,8 +21,8 @@ public class CharaterAimming : MonoBehaviour
     void Start()
     {
         mainCamera = Camera.main;
-        Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         aimlayer.weight = 1f;
         controller.isAiming = true;
 
@@ -33,13 +36,16 @@ public class CharaterAimming : MonoBehaviour
 
     private void FixedUpdate()
     {
+        //Quay nguoi theo camera
         float YamCam = mainCamera.transform.rotation.eulerAngles.y;
         transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, YamCam, 0), turnSpeed * Time.fixedDeltaTime);
+
+        XAxis.Update(Time.fixedDeltaTime);
+        YAxis.Update(Time.fixedDeltaTime);
+        cameraLookAt.eulerAngles = new Vector3(YAxis.Value , XAxis.Value , 0);
+
+        
     }
-
-
-
-
 
 
     void Aimming_RayCast()
