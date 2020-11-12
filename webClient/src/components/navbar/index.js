@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { NavLink, Link, useHistory } from "react-router-dom";
 import { loadUser, signOut } from "../../actions/authAction";
 import userApi from "../../api/userApi";
 import "./index.scss";
@@ -11,14 +11,7 @@ function Navbar() {
   let dispatch = useDispatch();
   let history = useHistory();
 
-  const changeNavStyle = () => {
-    if (window.scrollY >= 50) {
-      setNavStyle(true);
-    } else setNavStyle(false);
-  };
-
   useEffect(() => {
-    window.addEventListener("scroll", changeNavStyle);
     async function getUserInfo() {
       try {
         if (!localStorage.getItem("token")) return;
@@ -40,40 +33,41 @@ function Navbar() {
   };
 
   return (
-    <nav className={navStyle ? "nav--change" : "nav"}>
+    <nav className="nav">
       <Link to="/">
         <img
           className="nav__logo"
-          src="https://scontent.fsgn5-5.fna.fbcdn.net/v/t1.0-9/94262218_112321463790130_9162205595116240896_n.png?_nc_cat=111&ccb=2&_nc_sid=85a577&_nc_ohc=3HB_0Liu-vgAX8s4J5v&_nc_ht=scontent.fsgn5-5.fna&oh=0c027dcef0f6f6b269d7fec73f079967&oe=5FBC84B2"
+          src="https://r2wteam.files.wordpress.com/2020/04/cropped-cropped-cropped-cropped-3-1-2-1-2.png"
           alt="Home"
         />
+        <span className="nav__logo-text">r2w network</span>
       </Link>
       <div className="nav__links">
         <ul className="nav__links--pages">
           <li className="nav__link">
-            <Link to="/">
+            <NavLink exact to="/" activeClassName="nav__link--selected">
               <i class="fas fa-home"></i> HOME
-            </Link>
+            </NavLink>
           </li>
           <li className="nav__link">
-            <Link to="/blog">
+            <NavLink to="/blog" activeClassName="nav__link--selected">
               <i class="fab fa-blogger"></i> BLOGS
-            </Link>
+            </NavLink>
           </li>
           <li className="nav__link">
-            <Link to="/shop">
+            <NavLink to="/shop" activeClassName="nav__link--selected">
               <i class="fas fa-cart-plus"></i> SHOP
-            </Link>
+            </NavLink>
           </li>
           <li className="nav__link">
-            <Link to="/roll-up">
+            <NavLink to="/roll-up" activeClassName="nav__link--selected">
               <i class="fas fa-dharmachakra"></i> Roll Up
-            </Link>
+            </NavLink>
           </li>
           <li className="nav__link">
-            <Link to="/giftcode">
+            <NavLink to="/giftcode" activeClassName="nav__link--selected">
               <i class="fas fa-award"></i> GIFTCODE
-            </Link>
+            </NavLink>
           </li>
         </ul>
       </div>
@@ -82,14 +76,14 @@ function Navbar() {
           {!user.user && (
             <>
               <li className="nav__link">
-                <Link to="/sign-in">
+                <NavLink to="/sign-in" activeClassName="nav__link--selected">
                   <i class="fas fa-sign-in-alt"></i> Sign In
-                </Link>
+                </NavLink>
               </li>
               <li className="nav__link">
-                <Link to="/sign-up">
+                <NavLink to="/sign-up" activeClassName="nav__link--selected">
                   <i class="fas fa-user-plus"></i> Register
-                </Link>
+                </NavLink>
               </li>
             </>
           )}

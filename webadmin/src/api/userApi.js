@@ -1,12 +1,8 @@
 import axiosClient from "./axiosClient";
 
 const userApi = {
-  get: (params) => {
+  getAll: () => {
     const url = "/users";
-    return axiosClient.get(url, { params });
-  },
-  getOne: (id) => {
-    const url = "/users/" + id;
     return axiosClient.get(url);
   },
   getUserInfo: () => {
@@ -33,8 +29,8 @@ const userApi = {
     const url = "/users/forgot";
     return axiosClient.post(url, body);
   },
-  delete: (body) => {
-    const url = "/users/" + body;
+  delete: (userId) => {
+    const url = "/users/" + userId;
     return axiosClient.delete(url);
   },
 };

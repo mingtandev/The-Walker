@@ -1,28 +1,36 @@
 .form {
-  margin: auto;
-  padding: 2rem 2rem;
-  padding-bottom: 0;
-  width: 30%;
-  background-color: rgba($color: gray, $alpha: 0.7);
-  text-align: right;
-  border: 1px solid white;
-  a {
-    width: fit-content;
-    margin-left: auto;
-    padding: 2px 4px;
-    margin-right: 2rem;
-    font-family: sans-serif;
-    font-weight: bold;
-    transition: 0.3s all ease;
-    &:hover {
-      color: orange;
-    }
-  }
   &__container {
-    padding-top: 20rem;
-    &--smallertop {
-      padding-top: 15rem;
-    }
+    position: relative;
+    min-height: 100vh;
+    background: -webkit-linear-gradient(-135deg, #c850c0, #4158d0);
+  }
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  padding: 3rem;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 40%;
+  background-color: white;
+  text-align: right;
+  border-radius: 10px;
+  border: 1px solid white;
+  &__left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  &__logo {
+    margin-bottom: 2rem;
+    width: 15rem;
+    height: 15rem;
+  }
+  &__login {
+    flex: 0.8;
   }
   h1 {
     font-size: 3rem;
@@ -30,7 +38,7 @@
   }
   &__input {
     position: relative;
-    margin-top: 2rem;
+    margin-top: 3rem;
     width: 100%;
     border: 0;
     text-align: left;
@@ -41,12 +49,12 @@
       padding: 1rem;
       border: 0;
       outline: none;
-      color: white;
+      color: black;
       background-color: transparent;
       border-bottom: 1.5px solid black;
     }
     input::placeholder {
-      color: white;
+      color: black;
     }
     label {
       margin-left: 1rem;
@@ -97,8 +105,8 @@
     flex-direction: column;
     input[type="submit"] {
       color: white;
-      padding: 1.5rem 5rem;
-      margin: 2rem auto;
+      padding: 1.3rem 4rem;
+      margin: 4rem auto;
       width: fit-content;
       border-radius: 5rem;
       border: 0;

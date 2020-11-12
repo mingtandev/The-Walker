@@ -7,22 +7,15 @@ import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import { createStore } from "redux";
 import { Provider } from "react-redux";
-import store from "./reducers/store";
-import { createBrowserHistory } from "history";
-import restProvider from "ra-data-simple-rest";
+import reducers from "./reducers/store";
 
-const dataProvider = restProvider(process.env.REACT_APP_BASE_URL);
-const authProvider = () => Promise.resolve();
-const history = createBrowserHistory();
+const store = createStore(
+  reducers,
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__() //for CHROME REDUX DEVTOOLS extension
+);
 
 ReactDOM.render(
-  <Provider
-    store={store({
-      authProvider,
-      dataProvider,
-      history,
-    })}
-  >
+  <Provider store={store}>
     <App />
   </Provider>,
   document.getElementById("root")

@@ -1,0 +1,17 @@
+.blog {
+  &__form {
+    margin: auto;
+    width: 70%;
+  }
+}
+
+.bloglist {
+  &__option {
+    display: flex;
+    justify-content: flex-end;
+    margin: 2rem;
+    button {
+      display: inline-block;
+    }
+  }
+}
