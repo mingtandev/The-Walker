@@ -3,9 +3,6 @@ const {saveStatistic} = require('../utils/statistic')
 const {saveUserItem} = require('./../utils/userItem')
 
 const Code = require('../models/giffcode')
-const Item = require('../models/item')
-const UserItem = require('../models/userItem')
-
 
 exports.getAll = (req, res, next) => {
 
@@ -15,9 +12,36 @@ exports.getAll = (req, res, next) => {
         })
     }
 
+    const page = parseInt(req.query.page) || 1
+    const items_per_page = parseInt(req.query.limit) || 8
+
+    if (page < 1) page = 1
+
     Code.find({})
     .select('_id code type items isUsed expiresTime')
-    .then(codes => {
+    .skip((page - 1) * items_per_page)
+    .limit(items_per_page)
+    .then(async codes => {
+        const request = {}
+        const len = await Code.find({}).count()
+
+        request.currentPage = page
+        request.totalPages = Math.ceil(len / items_per_page)
+
+        if (page > 1) {
+            request.previous = {
+                page: page - 1,
+                limit: items_per_page
+            }
+        }
+
+        if (page * items_per_page < len) {
+            request.next = {
+                page: page + 1,
+                limit: items_per_page
+            }
+        }
+
         const response = {
             msg: 'success',
             length: codes.length,
@@ -34,7 +58,8 @@ exports.getAll = (req, res, next) => {
                         url: req.hostname + '/giffcodes/' + code._id
                     }
                 }
-            })
+            }),
+            request
         }
 
         res.set("x-total-count", codes.length);

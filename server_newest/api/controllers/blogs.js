@@ -5,9 +5,36 @@ const Blog = require('../models/blog')
 
 exports.getAll = (req, res, next) => {
 
+    const page = parseInt(req.query.page) || 1
+    const items_per_page = parseInt(req.query.limit) || 8
+
+    if (page < 1) page = 1
+
     Blog.find({})
     .select('_id date writer title content thumbnail')
-    .then(blogs => {
+    .skip((page - 1) * items_per_page)
+    .limit(items_per_page)
+    .then(async blogs => {
+        const request = {}
+        const len = await Blog.find({}).count()
+
+        request.currentPage = page
+        request.totalPages = Math.ceil(len / items_per_page)
+
+        if (page > 1) {
+            request.previous = {
+                page: page - 1,
+                limit: items_per_page
+            }
+        }
+
+        if (page * items_per_page < len) {
+            request.next = {
+                page: page + 1,
+                limit: items_per_page
+            }
+        }
+
         const response = {
             msg: 'success',
             length: blogs.length,
@@ -24,7 +51,8 @@ exports.getAll = (req, res, next) => {
                         url: req.hostname + '/blogs/' + blog._id
                     }
                 }
-            })
+            }),
+            request
         }
 
         res.set("x-total-count", blogs.length);

@@ -8,9 +8,36 @@ exports.getAll = (req, res, next) => {
         })
     }
 
+    const page = parseInt(req.query.page) || 1
+    const items_per_page = parseInt(req.query.limit) || 8
+
+    if (page < 1) page = 1
+
     History.find({})
     .select('userId actions')
-    .then(histories => {
+    .skip((page - 1) * items_per_page)
+    .limit(items_per_page)
+    .then(async histories => {
+        const request = {}
+        const len = await History.find({}).count()
+
+        request.currentPage = page
+        request.totalPages = Math.ceil(len / items_per_page)
+
+        if (page > 1) {
+            request.previous = {
+                page: page - 1,
+                limit: items_per_page
+            }
+        }
+
+        if (page * items_per_page < len) {
+            request.next = {
+                page: page + 1,
+                limit: items_per_page
+            }
+        }
+
         const response = {
             msg: 'success',
             length: histories.length,
@@ -24,10 +51,10 @@ exports.getAll = (req, res, next) => {
                         url: req.hostname + '/histories/' + history.userId
                     }
                 }
-            })
+            }),
+            request
         }
 
-        // res.set("x-total-count", codes.length);
         res.status(200).json(response)
     })
     .catch(error => {

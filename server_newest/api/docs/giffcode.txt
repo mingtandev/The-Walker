@@ -6,12 +6,26 @@ Method: GET
 Auth: Yes,
 Roles: Admin only
 Req.body: {}
-URL: /items
+URL: /giffcodes?page=2&limit=2
 If 'success' => {
     msg: 'success'.
     length: Number,
-    giffcodes: Array
+    giffcodes: Array,
+    request: {
+        currentPage: 2,
+        totalPages: 4,
+        previous: {
+            page: 1,
+            limit: 2
+        },
+        next: {
+            page: 3,
+            limit: 2
+        }
+    }
 }
+
+Note: ?page=2&limit=2 (option)
 
 ----------------------------------------------------------------------------
 
