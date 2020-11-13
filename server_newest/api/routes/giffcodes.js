@@ -6,10 +6,10 @@ const checkAuth = require('./../middleware/checkAuth')
 const router = express.Router()
 
 router.get('/', checkAuth, CodeController.getAll)
-router.get('/:codeId', checkAuth, CodeController.getOne)
 router.post('/', checkAuth, CodeController.create)
-router.post('/:code', checkAuth, CodeController.useOne)
+router.get('/:codeId', checkAuth, CodeController.getOne)
 router.patch('/:codeId', checkAuth, CodeController.update)
-router.delete('/:codeId', checkAuth, CodeController.delete)
+router.post('/:code', checkAuth, CodeController.useOne)
+router.delete('/:code', checkAuth, CodeController.delete)
 
 module.exports = router

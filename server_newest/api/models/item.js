@@ -4,6 +4,7 @@ const slug = require('mongoose-slug-generator')
 const itemScheme = mongoose.Schema({
     name: {
         type: String,
+        unique: true,
         required: true
     },
     slugName: {
@@ -35,6 +36,6 @@ const itemScheme = mongoose.Schema({
 
 // Add plugins
 mongoose.plugin(slug)
-itemScheme.set('timestamps', true) 
+itemScheme.set('timestamps', true)
 
 module.exports = mongoose.model('Item', itemScheme)

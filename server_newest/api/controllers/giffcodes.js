@@ -1,8 +1,8 @@
-const Code = require('../models/giffcode')
-const User = require('../models/user')
-const Item = require('../models/item')
-const UserItem = require('../models/userItem')
+const {saveHistory, loadHistory} = require('../utils/history')
+const {saveStatistic} = require('../utils/statistic')
+const {saveUserItem} = require('./../utils/userItem')
 
+const Code = require('../models/giffcode')
 
 exports.getAll = (req, res, next) => {
 
@@ -12,9 +12,36 @@ exports.getAll = (req, res, next) => {
         })
     }
 
+    const page = parseInt(req.query.page) || 1
+    const items_per_page = parseInt(req.query.limit) || 8
+
+    if (page < 1) page = 1
+
     Code.find({})
     .select('_id code type items isUsed expiresTime')
-    .then(codes => {
+    .skip((page - 1) * items_per_page)
+    .limit(items_per_page)
+    .then(async codes => {
+        const request = {}
+        const len = await Code.find({}).count()
+
+        request.currentPage = page
+        request.totalPages = Math.ceil(len / items_per_page)
+
+        if (page > 1) {
+            request.previous = {
+                page: page - 1,
+                limit: items_per_page
+            }
+        }
+
+        if (page * items_per_page < len) {
+            request.next = {
+                page: page + 1,
+                limit: items_per_page
+            }
+        }
+
         const response = {
             msg: 'success',
             length: codes.length,
@@ -31,7 +58,8 @@ exports.getAll = (req, res, next) => {
                         url: req.hostname + '/giffcodes/' + code._id
                     }
                 }
-            })
+            }),
+            request
         }
 
         res.set("x-total-count", codes.length);
@@ -88,7 +116,7 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create = (req, res, next) => {
+exports.create = async (req, res, next) => {
     const {code, type, items, expiresTime} = req.body
 
     if(!code || !items){
@@ -110,8 +138,11 @@ exports.create = (req, res, next) => {
         expiresTime
     })
 
-    codeObj.save()
-    .then(newCode => {
+    await codeObj.save()
+    .then(async newCode => {
+
+        await saveHistory(req.userData._id, 'codes', 'manage', `Create a gift code: ${newCode._id}-${code}-${codeObj.type.toLowerCase()}-${items.split(' ').join('-')}-${codeObj.expiresTime} | ${new Date()}`)
+
         res.status(201).json({
             msg: "success",
             code: {
@@ -140,8 +171,7 @@ exports.useOne = async (req, res, next) => {
     const {code} = req.params
     const {_id: userId} = req.userData
 
-    let validCode = await Code.find({code})
-    validCode = validCode[0]
+    let validCode = await Code.findOne({code})
 
     if(!validCode){
         return res.status(200).json({
@@ -149,136 +179,55 @@ exports.useOne = async (req, res, next) => {
         })
     }
 
-    let userItem = await UserItem.find({userId})
-    userItem = userItem[0]
-
-    if(!userItem){
-        return res.status(200).json({
-            msg: 'UserItem does not exist!'
-        })
-    }
-
     const {type, items, isUsed, expiresTime} = validCode
 
-    if (expiresTime < Date.now())
+    if (expiresTime < Date.now()) {
         return res.status(200).json({
             msg: 'The code has been expired!'
         })
+    }
 
-    if(type === 'Vip') {
-        if(isUsed) {
+    let historyCodes = await loadHistory(userId, 'codes', 'personal')
+    historyCodes = historyCodes.map(his => his.split(' ')[2])
 
-            return res.status(200).json({
-                msg: 'The code has been used!'
-            })
-        }
-        else {
+    if(type === 'Normal' && historyCodes.includes(code)) {
+        return res.status(200).json({
+            msg: 'You has been used this code!'
+        })
+    }
 
-            for(let i = 0; i < items.length; i++) {
-                const result  = await Item.findById(items[i])
-                await userItem.items[`${result.type}s`].push(result.name)
-            }
-        }
+    if(isUsed) {
+        return res.status(200).json({
+            msg: 'The code has been used!'
+        })
+    }
+    else {
+        await saveUserItem(userId, items)
+    }
 
-        console.log(userItem.items)
-        await userItem.save()
-
+    if (type === 'Vip') {
         validCode.isUsed = true
-        await validCode.save()
-        .then(async result => {
-
-            res.status(200).json({
-                msg: 'success'
-            })
-        })
-        .catch(error => {
-
-            res.status(500).json({
-                msg: 'Server error!',
-                error
-            })
-        })
-    }
-}
-
-// Updating
-exports.use = (req, res, next) => {
-    const {codeId} = req.params
-    const {_id} = req.body
-
-    let userItems = {
-        userId: '',
-        items: []
     }
 
-    User.findById({_id})
-    .then(user => {
-        if(!user){
-            return res.status(400).json({
-                msg: 'User not found!'
-            })
-        }
+    const result = await validCode.save()
 
-        userItems.userId = user._id
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-
-    Code.findById({_id: codeId})
-    .then(code => {
-        if(!code){
-            return res.status(400).json({
-                msg: 'Code not found!'
-            })
-        }
-
-        if(code.isUsed){
-            return res.status(400).json({
-                msg: 'The code has been used!'
-            })
-        }
-
-        // map
-        for (const _id of code.items){
-            Item.findById(_id)
-            .then(item => {
-                // can be change
-                if(item){
-                    userItems.items.push(item.name)
-
-                    // call model user-items .push item
-                }
-
-            })
-            .catch(error => {
-                return res.status(500).json({
-                    msg: 'Server error!',
-                    error
-                })
-            })
-        }
-
-        code.isUsed = true
-
-        code.save()
+    if(result) {
+        await saveHistory(userId, 'codes', 'personal', `Used code: ${code} | ${new Date()}`)
+        await saveStatistic(0, 0, 0, 1, 0, 0)
 
         res.status(200).json({
             msg: 'success'
         })
-    })
-    .catch(error => {
+    }
+    else {
         res.status(500).json({
             msg: 'Server error!',
             error
         })
-    })
+    }
 }
 
-exports.update = (req, res, next) => {
+exports.update = async (req, res, next) => {
     const {codeId: _id} = req.params
 
     if (req.userData.roles != 'admin'){
@@ -293,7 +242,9 @@ exports.update = (req, res, next) => {
         code[ops.propName] = ops.value
     }
 
-    Code.updateOne({_id}, {$set: code})
+    await saveHistory(req.userData._id, 'codes', 'manage', `Update a gift code: ${_id}-${Object.keys(code).join('-')} | ${new Date()}`)
+
+    await Code.updateOne({_id}, {$set: code})
     .then(result => {
         res.status(200).json({
             msg: "success",
@@ -311,8 +262,8 @@ exports.update = (req, res, next) => {
     })
 }
 
-exports.delete = (req, res, next) => {
-    const {codeId: _id} = req.params
+exports.delete = async (req, res, next) => {
+    const {code: _code} = req.params
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -320,7 +271,20 @@ exports.delete = (req, res, next) => {
         })
     }
 
-    Code.deleteOne({_id})
+    const objCode = await Code.find({code: _code})
+
+    if(!objCode[0]) {
+
+        return res.status(404).json({
+            msg: 'Code not found!'
+        })
+    }
+
+    const {_id, code, type, items, isUsed, expiresTime} = objCode[0]
+
+    await saveHistory(req.userData._id, 'codes', 'manage', `Delete a gift code: ${_id}-${code}-${type.toLowerCase()}-${items.join('-')}-${isUsed}-${expiresTime} | ${new Date()}`)
+
+    await Code.deleteOne({_id})
     .then(result => {
         res.status(200).json({
             msg: 'success',

@@ -1,16 +1,26 @@
 
 Each req call api => Check res.msg. If 'success' => OK else FAIL
 
-// Get all item
+// Get all item (pagination)
 Method: GET
 Auth: No
 Req.body: {}
-URL: /items
+URL: /items?page=2&limit=2
 If 'success' => {
     msg: 'success'.
     length: Number,
-    items: Array
+    items: Array,
+    request: {
+        currentPage: 2,
+        totalPages: 2,
+        previous: {
+            "page": 1,
+            "limit": 2
+        }
+    }
 }
+
+Note: ?page=2&limit=2 (option)
 
 ----------------------------------------------------------------------------
 

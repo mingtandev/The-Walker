@@ -5,12 +5,26 @@ Each req call api => Check res.msg. If 'success' => OK else FAIL
 Method: GET
 Auth: No
 Req.body: {}
-URL: /rolls
+URL: /rolls?page=2&limit=8
 If 'success' => {
     msg: 'success'.
     length: Number,
-    rolls: Array
+    rolls: Array,
+    request: {
+        currentPage: 2,
+        totalPages: 4,
+        previous: {
+            page: 1,
+            limit: 8
+        },
+        next: {
+            page: 3,
+            limit: 8
+        }
+    }
 }
+
+NOTE: ?page=2&limit=8 (option)
 
 ----------------------------------------------------------------------------
 
@@ -22,6 +36,21 @@ URL: /rolls/:rollupDay
 If 'success' => {
     msg: 'success',
     roll: {
+
+    }
+}
+
+----------------------------------------------------------------------------
+
+// Get prize roll
+Method: POST
+Auth: Yes,
+Roles: User or Admin
+Req.params: rollupDay (1 -> 31)
+URL: /rolls/:rollupDay
+If 'success' => {
+    msg: 'success',
+    userItem: {
 
     }
 }

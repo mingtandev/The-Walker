@@ -1,11 +1,42 @@
 const Rollup = require('../models/rollup')
 const Item = require('../models/item')
+const UserItem = require('../models/userItem')
+
+const {saveHistory, loadHistory} = require('./../utils/history')
+const {saveStatistic} = require('./../utils/statistic')
+const {saveUserItem} = require('./../utils/userItem')
 
 exports.getAll = (req, res, next) => {
+    const page = parseInt(req.query.page) || 1
+    const items_per_page = parseInt(req.query.limit) || 8
+
+    if (page < 1) page = 1
 
     Rollup.find({})
     .select('_id day thumbnail coin item')
-    .then(rolls => {
+    .skip((page - 1) * items_per_page)
+    .limit(items_per_page)
+    .then(async rolls => {
+        const request = {}
+        const len = await Rollup.find({}).count()
+
+        request.currentPage = page
+        request.totalPages = Math.ceil(len / items_per_page)
+
+        if (page > 1) {
+            request.previous = {
+                page: page - 1,
+                limit: items_per_page
+            }
+        }
+
+        if (page * items_per_page < len) {
+            request.next = {
+                page: page + 1,
+                limit: items_per_page
+            }
+        }
+
         const response = {
             msg: 'success',
             length: rolls.length,
@@ -21,7 +52,8 @@ exports.getAll = (req, res, next) => {
                         url: req.hostname + '/rolls/' + roll.day
                     }
                 }
-            })
+            }),
+            request
         }
 
         // res.set('Content-Range', ``);
@@ -34,6 +66,50 @@ exports.getAll = (req, res, next) => {
             error
         })
     })
+}
+
+exports.use = async (req, res, next) => {
+    const {rollupDay} = req.params
+    const userId = req.userData._id
+
+    if(rollupDay < 1 || rollupDay > 31) {
+        return res.status(500).json({
+            msg: 'Rollup day invalid!'
+        })
+    }
+
+    if(rollupDay != new Date().getDate()) {
+        return res.status(400).json({
+            msg: `Today is not ${rollupDay}!`
+        })
+    }
+
+    let his = await loadHistory(userId, 'rolls', 'personal')
+    his = his.map(his => his.split(' ')[2])
+
+    if (his.includes(rollupDay)) {
+        return res.status(400).json({
+            msg: 'You has been registered today!'
+        })
+    }
+
+    const roll = await Rollup.findOne({ day: rollupDay })
+
+    await saveHistory(userId, 'rolls', 'personal', `Roll up: ${rollupDay} | ${new Date()}`)
+    await saveStatistic(0, 1, 0, 0, 0, 0)
+
+    const result = await saveUserItem(userId, [roll.item])
+
+    if (result) {
+        res.status(200).json({
+            msg: 'success',
+            userItem: result
+        })
+    }
+    else {
+        msg: 'Server error!',
+        error
+    }
 }
 
 exports.getOne = (req, res, next) => {
@@ -122,15 +198,19 @@ exports.create = async (req, res, next) => {
     const rollObj = new Rollup(roll)
 
     await rollObj.save()
-    .then(newRoll => {
+    .then(async newRoll => {
+        const {_id, day, coin, item, thumbnail} = newRoll
+
+        await saveHistory(req.userData._id, 'rolls', 'manage', `Create a roll: ${_id}-${day}-${coin}-${item}} | ${new Date()}`)
+
         res.status(201).json({
             msg: "success",
             roll: {
-                _id: newRoll._id,
-                day: newRoll.day,
-                coin: newRoll.coin,
-                item: newRoll.item,
-                thumbnail: newRoll.thumbnail,
+                _id,
+                day,
+                coin,
+                item,
+                thumbnail,
                 request: {
                     type: 'GET',
                     url: req.hostname + '/rolls/' + newRoll.day
@@ -146,8 +226,16 @@ exports.create = async (req, res, next) => {
     })
 }
 
-exports.update = (req, res, next) => {
+exports.update = async (req, res, next) => {
     const {rollupDay} = req.params
+
+    const objRoll = await Rollup.find({day: rollupDay})
+
+    if(!objRoll[0]) {
+        return res.status(404).json({
+            msg: 'Roll day not found!'
+        })
+    }
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -161,7 +249,9 @@ exports.update = (req, res, next) => {
         roll[ops.propName] = ops.value
     }
 
-    Rollup.updateOne({day: rollupDay}, {$set: roll})
+    await saveHistory(req.userData._id, 'rolls', 'manage', `Update a roll: ${objRoll[0]._id}-${rollupDay}-${Object.keys(roll).join('-')} | ${new Date()}`)
+
+    await Rollup.updateOne({day: rollupDay}, {$set: roll})
     .then(result => {
         res.status(200).json({
             msg: "success",
@@ -180,8 +270,16 @@ exports.update = (req, res, next) => {
     })
 }
 
-exports.delete = (req, res, next) => {
+exports.delete = async (req, res, next) => {
     const {rollupDay} = req.params
+
+    const objRoll = await Rollup.find({day: rollupDay})
+
+    if(!objRoll[0]) {
+        return res.status(404).json({
+            msg: 'Roll day not found!'
+        })
+    }
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -189,7 +287,9 @@ exports.delete = (req, res, next) => {
         })
     }
 
-    Rollup.deleteOne({day: rollupDay})
+    await saveHistory(req.userData._id, 'rolls', 'manage', `Delete a roll: ${objRoll[0]._id}-${rollupDay}-${objRoll[0].coin}-${objRoll[0].item} | ${new Date()}`)
+
+    await Rollup.deleteOne({day: rollupDay})
     .then(result => {
         res.status(200).json({
             msg: 'success',

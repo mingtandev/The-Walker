@@ -3,8 +3,11 @@ const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 
 const User = require('./../models/user')
+const History = require('./../models/history')
 
-const { sendMail } =  require('./../config/nodemailer')
+const {sendMail} =  require('./../config/nodemailer')
+const {loadHistory, saveHistory} = require('./../utils/history')
+const {saveStatistic} = require('./../utils/statistic')
 
 const tokenLife = process.env.TOKEN_LIFE
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE
@@ -17,16 +20,58 @@ exports.getAll = (req, res, next) => {
         })
     }
 
+    const page = parseInt(req.query.page) || 1
+    const items_per_page = parseInt(req.query.limit) || 8
+
+    if (page < 1) page = 1
+
     User.find({})
     .select('name slugName email cash roles isVerified')
-    .then(users => {
+    .skip((page - 1) * items_per_page)
+    .limit(items_per_page)
+    .then(async users => {
+        const request = {}
+        const len = await User.find({}).count()
 
-        res.set("x-total-count", users.length);
-        res.status(200).json({
+        request.currentPage = page
+        request.totalPages = Math.ceil(len / items_per_page)
+
+        if (page > 1) {
+            request.previous = {
+                page: page - 1,
+                limit: items_per_page
+            }
+        }
+
+        if (page * items_per_page < len) {
+            request.next = {
+                page: page + 1,
+                limit: items_per_page
+            }
+        }
+
+        const response = {
             msg: 'success',
             length: users.length,
-            users
-        })
+            users: users.map(user => {
+                return {
+                    _id: user._id,
+                    name: user.name,
+                    slugName: user.slugName,
+                    email: user.email,
+                    cash: user.cash,
+                    roles: user.roles,
+                    isVerified: user.isVerified,
+                    request: {
+                        type: 'GET',
+                        url: req.hostname + '/users/' + user._id
+                    }
+                }
+            }),
+            request
+        }
+
+        res.status(200).json(response)
     })
     .catch(error => {
         res.status(500).json({
@@ -61,7 +106,7 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create =  (req, res, next) => {
+exports.create = async (req, res, next) => {
     const {name, email, password} = req.body
 
     if(!name || !email || !password) {
@@ -95,12 +140,13 @@ exports.create =  (req, res, next) => {
                 })
 
                 user.save()
-                .then(newUser => {
+                .then(async newUser => {
                     const token = jwt.sign( {_id: newUser._id}, jwtKey, {
                         expiresIn: tokenLife
                     })
 
                     sendMail(req, newUser.email, token, 'confirmation')
+                    await saveStatistic(1, 0, 0, 0, 0)
 
                     res.status(201).json({
                         msg: "success",
@@ -125,9 +171,8 @@ exports.create =  (req, res, next) => {
 }
 
 
-exports.update = (req, res, next) => {
+exports.update = async (req, res, next) => {
     const {userId: _id} = req.params
-    const {newPassword} = req.body
 
     let hasPassword = false
 
@@ -142,8 +187,8 @@ exports.update = (req, res, next) => {
     }
 
 
-    User.findById(_id)
-    .then(user => {
+    await User.findById(_id)
+    .then(async user => {
         if(!user){
             return res.status(500).json({
                 msg: 'User not found!'
@@ -151,7 +196,7 @@ exports.update = (req, res, next) => {
         }
 
         if(hasPassword){
-            bcrypt.hash(newUser.password, 10, (error, encryptedPassword) => {
+            await bcrypt.hash(newUser.password, 10, async (error, encryptedPassword) => {
                 if(error){
                     return res.status(500).json({
                         msg: 'Server error!',
@@ -162,8 +207,10 @@ exports.update = (req, res, next) => {
 
                 newUser.password = encryptedPassword
 
-                User.updateOne({_id}, {$set: newUser})
-                .then(result => {
+                await User.updateOne({_id}, {$set: newUser})
+                .then(async result => {
+
+                    await saveHistory(_id, 'accInfos', 'personal', `Update an account: ${_id}-${Object.keys(newUser).join('-')} | ${new Date()}`)
                     res.status(200).json({
                         msg: "success",
                         request: {
@@ -179,25 +226,14 @@ exports.update = (req, res, next) => {
                         error
                     })
                 })
-
-                // user.password = encryptedPassword
-                // user.save()
-                // .then(newUser => {
-                //     res.status(200).json({
-                //         msg: 'success'
-                //     })
-                // })
-                // .catch(error => {
-                //     res.status(500).json({
-                //         msg: 'Server error!',
-                //         error
-                //     })
-                // })
             })
 
         }else{
-            User.updateOne({_id}, {$set: newUser})
-            .then(result => {
+            await User.updateOne({_id}, {$set: newUser})
+            .then(async result => {
+
+                await saveHistory(_id, 'accInfos', 'personal', `Update an account: ${_id}-${Object.keys(newUser).join('-')} | ${new Date()}`)
+
                 res.status(200).json({
                     msg: "success",
                     request: {
@@ -223,7 +259,7 @@ exports.update = (req, res, next) => {
     })
 }
 
-exports.delete =  (req, res, next) => {
+exports.delete =  async (req, res, next) => {
     const {roles} = req.userData
     const {userId: _id} = req.params
 
@@ -239,8 +275,8 @@ exports.delete =  (req, res, next) => {
         })
     }
 
-    User.findById(_id)
-    .then(user => {
+    await User.findById(_id)
+    .then(async user => {
         if(!user){
             return res.status(404).json({
                 msg: 'User not found!'
@@ -253,8 +289,12 @@ exports.delete =  (req, res, next) => {
             })
         }
 
-        User.deleteOne({_id})
-        .then(result => {
+        await User.deleteOne({_id})
+        .then(async result => {
+
+            await saveHistory(req.userData._id, 'accInfos', 'manage', `Delete an account: ${_id}-${user.name}-${user.email} | ${new Date()}`)
+            await saveHistory(_id, 'accInfos', 'manage', `Account has been deleted by: ${_id}-${user.name}-${user.email} | ${new Date()}`)
+
             res.status(200).json({
                 msg: 'success'
             })
@@ -276,7 +316,7 @@ exports.delete =  (req, res, next) => {
 
 // --------------------------------------------------------------------
 
-exports.confirmation = (req, res, next) => {
+exports.confirmation = async (req, res, next) => {
     const {verifyToken: token} = req.params
 
     if(!token){
@@ -289,8 +329,8 @@ exports.confirmation = (req, res, next) => {
         const decoded = jwt.verify(token, jwtKey)
         const {_id} = decoded
 
-        User.findOne({_id})
-        .then(user => {
+        await User.findOne({_id})
+        .then(async user => {
             if(!user) {
                 return res.status(404).json({
                     msg: 'User not found!'
@@ -305,13 +345,15 @@ exports.confirmation = (req, res, next) => {
 
             user.isVerified = true
 
-            user.save((error) => {
+            await user.save(async error => {
                 if(error) {
                     return res.status(500).json({
                         msg: 'Server error!',
                         error
                     })
                 }
+
+                await saveHistory(_id, 'accInfos', 'manage', `Confirm this account | ${new Date()}`)
 
                 res.status(200).json({
                     msg: 'success'
@@ -332,7 +374,7 @@ exports.confirmation = (req, res, next) => {
     }
 }
 
-exports.resend = (req, res, next) => {
+exports.resend = async (req, res, next) => {
     const {email} = req.body
 
     if(!email) {
@@ -341,8 +383,8 @@ exports.resend = (req, res, next) => {
         })
     }
 
-    User.findOne({email})
-    .then(user => {
+    await User.findOne({email})
+    .then(async user => {
         if(!user) {
             return res.status(404).json({
                 msg: 'Email not found!'
@@ -360,6 +402,8 @@ exports.resend = (req, res, next) => {
         })
 
         sendMail(req, user.email, token, 'confirmation')
+
+        await saveHistory(user._id, 'accInfos', 'manage', `Resend confirm email: ${user._id}-${user.name}-${user.email} | ${new Date()}`)
 
         res.status(201).json({
             msg: "success"
@@ -466,7 +510,7 @@ exports.refresh = (req, res, next) => {
     }
 }
 
-exports.recovery = (req, res, next) => {
+exports.recovery = async (req, res, next) => {
     const {email} = req.body
 
     if(!email) {
@@ -475,22 +519,24 @@ exports.recovery = (req, res, next) => {
         })
     }
 
-    User.findOne({email})
-    .then(user => {
+    await User.findOne({email})
+    .then(async user => {
         if(!user) {
             return res.status(404).json({
                 msg: 'Email not found!'
             })
         }
 
-        bcrypt.hash(email, 10)
-        .then(hashed => {
+        await bcrypt.hash(email, 10)
+        .then(async hashed => {
             user.passwordResetToken = hashed
             user.passwordResetExpires = Date.now() + 7200000 // 2h
 
-            user.save()
-            .then(newUser => {
+            await user.save()
+            .then(async newUser => {
+
                 sendMail(req, newUser.email, newUser.passwordResetToken, 'recovery')
+                await saveHistory(user._id, 'accInfos', 'manage', `Send password reset token: ${user._id}-${user.email} | ${new Date()}`)
 
                 res.status(200).json({
                     msg: 'success'
@@ -512,7 +558,7 @@ exports.recovery = (req, res, next) => {
     })
 }
 
-exports.forgot = (req, res, next)  => {
+exports.forgot = async (req, res, next)  => {
     const {newPassword, passwordResetToken} = req.body
 
     if(!newPassword || ! passwordResetToken){
@@ -521,27 +567,29 @@ exports.forgot = (req, res, next)  => {
         })
     }
 
-    User.findOne({
+    await User.findOne({
         passwordResetToken,
         passwordResetExpires: {
             $gt: Date.now()
         }
     })
-    .then(user => {
+    .then(async user => {
         if(!user){
             return res.status(404).json({
                 msg: 'User not found or password reset token expires!'
             })
         }
 
-        bcrypt.hash(newPassword, 10)
-        .then(hashed => {
+        await bcrypt.hash(newPassword, 10)
+        .then(async hashed => {
             user.password = hashed
             user.passwordResetToken = ''
             user.passwordResetExpires = Date.now()
 
-            user.save()
-            .then(user => {
+            await user.save()
+            .then(async user => {
+
+                await saveHistory(user._id, 'accInfos', 'manage', `Recovery password: ${user._id}-${user.name}-${user.email} | ${new Date()}`)
                 res.status(200).json({
                     msg: 'success'
                 })
@@ -560,4 +608,49 @@ exports.forgot = (req, res, next)  => {
             error
         })
     })
+}
+
+exports.history = async (req, res, next)  => {
+    const {_id} = req.userData
+    const {type, effect} = req.body
+
+    const types = ['accInfos', 'items', 'rolls', 'codes', 'blogs']
+    const effects = ['personal', 'manage']
+
+    let result = []
+
+    if (!type && !effect) {
+        if (req.userData.roles != 'admin'){
+            return res.status(403).json({
+                msg: `You don't have the permission!`
+            })
+        }
+
+        result = await History.find({})
+
+        return res.status(200).json({
+            msg: 'success',
+            length: result.length,
+            history: result
+        })
+    }
+    else if (!types.includes(type) || !effects.includes(effect)) {
+        return res.status(400).json({
+            msg: 'Bad request body!'
+        })
+    }
+
+    result = await loadHistory(_id, type, effect)
+
+    if (result) {
+        res.status(200).json({
+            msg: 'success',
+            history: result
+        })
+    }
+    else {
+        re.status(500).json({
+            msg: 'Server error!',
+        })
+    }
 }
