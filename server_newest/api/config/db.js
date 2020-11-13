@@ -5,6 +5,7 @@ const password = process.env.ATLAS_PASSWORD
 const dbName = process.env.DB_NAME
 
 const URI = `mongodb+srv://${userName}:${password}@the-walker.bjuvv.mongodb.net/${dbName}?retryWrites=true&w=majority`
+// const URI = `mongodb+srv://${userName}:${password}@the-walker.bbjdo.mongodb.net/${dbName}?retryWrites=true&w=majority`
 
 const connectDB = async () => {
     try {

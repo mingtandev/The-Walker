@@ -5,7 +5,8 @@ const jwt = require('jsonwebtoken')
 const User = require('./../models/user')
 
 const {sendMail} =  require('./../config/nodemailer')
-const {saveHistory, loadHistory} = require('./../utils/history')
+const {saveHistory} = require('./../utils/history')
+const {saveStatistic} = require('./../utils/statistic')
 
 const tokenLife = process.env.TOKEN_LIFE
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE
@@ -62,7 +63,7 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create =  (req, res, next) => {
+exports.create = async (req, res, next) => {
     const {name, email, password} = req.body
 
     if(!name || !email || !password) {
@@ -96,12 +97,13 @@ exports.create =  (req, res, next) => {
                 })
 
                 user.save()
-                .then(newUser => {
+                .then(async newUser => {
                     const token = jwt.sign( {_id: newUser._id}, jwtKey, {
                         expiresIn: tokenLife
                     })
 
                     sendMail(req, newUser.email, token, 'confirmation')
+                    await saveStatistic(1, 0, 0, 0, 0)
 
                     res.status(201).json({
                         msg: "success",

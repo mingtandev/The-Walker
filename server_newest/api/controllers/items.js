@@ -4,7 +4,8 @@ const Item = require('../models/item')
 const User = require('../models/user')
 const UserItem = require('../models/userItem')
 
-const {saveHistory, loadHistory} = require('./../utils/history')
+const {saveHistory} = require('./../utils/history')
+const {saveStatistic} = require('./../utils/statistic')
 
 exports.getAll = (req, res, next) => {
 
@@ -130,14 +131,15 @@ exports.buyOne = async (req, res, next) => {
     }
 
     userItem[0].items[`${type}s`].push(name)
-    user.cash = cash - price
+    user.cash = cash - salePrice
 
     const result_1 = await userItem[0].save()
     const result_2 = await user.save()
 
     if(result_1 && result_2) {
 
-        await saveHistory(_id, 'items', 'personal', `Buy a item: ${name}-${type}-${price}-${sale}-${saleExpiresTime}} | ${new Date()}`)
+        await saveHistory(_id, 'items', 'personal', `Buy a item: ${name}-${type}-${price}-${salePrice}-${sale}-${saleExpiresTime}} | ${new Date()}`)
+        await saveStatistic(0, 0, 1, 0, 0, salePrice)
 
         res.status(200).json({
             msg: 'success',

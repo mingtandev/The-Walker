@@ -5,7 +5,7 @@ exports.saveHistory = async (userId, type, effect, msg) => {
     let user = await History.find({userId})
     user = user[0]
 
-    if(!user) {
+    if(!user) { 
 
         console.log('User not found!')
         return
@@ -43,7 +43,7 @@ exports.loadHistory = async (userId, type, effect) => {
         }
         case 'rolls': {
 
-
+            result = await user.actions.rolls[effect].map(his => his.split(' ')[2])
             break
         }
         case 'codes': {

@@ -28,6 +28,21 @@ If 'success' => {
 
 ----------------------------------------------------------------------------
 
+// Get prize roll
+Method: POST
+Auth: Yes,
+Roles: User or Admin
+Req.params: rollupDay (1 -> 31)
+URL: /rolls/:rollupDay
+If 'success' => {
+    msg: 'success',
+    userItem: {
+
+    }
+}
+
+----------------------------------------------------------------------------
+
 // Create a new roll
 Method: POST
 Auth: Yes

@@ -1,7 +1,9 @@
 const Rollup = require('../models/rollup')
 const Item = require('../models/item')
+const UserItem = require('../models/userItem')
 
 const {saveHistory, loadHistory} = require('./../utils/history')
+const {saveStatistic} = require('./../utils/statistic')
 
 exports.getAll = (req, res, next) => {
 
@@ -35,6 +37,58 @@ exports.getAll = (req, res, next) => {
             msg: 'Server error!',
             error
         })
+    })
+}
+
+exports.use = async (req, res, next) => {
+    const {rollupDay} = req.params
+    const userId = req.userData._id
+
+    if(rollupDay < 1 || rollupDay > 31) {
+        return res.status(500).json({
+            msg: 'Rollup day invalid!'
+        })
+    }
+
+    if(rollupDay != new Date().getDate()) {
+        return res.status(400).json({
+            msg: `Today is not ${rollupDay}!`
+        })
+    }
+
+    const his = await loadHistory(userId, 'rolls', 'personal')
+    if (his.includes(rollupDay)) {
+        return res.status(400).json({
+            msg: 'You has been registered today!'
+        })
+    }
+
+    const roll = await Rollup.findOne({ day: rollupDay })
+    const item = await Item.findById(roll.item)
+    const userItem = await UserItem.findOne({ userId })
+
+    console.log(item)
+
+    if(!item) {
+        return res.status(500).json({
+            msg: 'Prize not found!'
+        })
+    }
+
+    await saveHistory(userId, 'rolls', 'personal', `Roll up: ${rollupDay} | ${new Date()}`)
+    await saveStatistic(0, 1, 0, 0, 0)
+
+    await userItem.items[`${item.type}s`].push(item.name)
+    await userItem.save()
+    .then(updated => {
+        res.status(200).json({
+            msg: 'success',
+            userItem: updated
+        })
+    })
+    .catch(error => {
+        msg: 'Server error!',
+        error
     })
 }
 

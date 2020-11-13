@@ -1,7 +1,7 @@
 const {saveHistory, loadHistory} = require('../utils/history')
+const {saveStatistic} = require('../utils/statistic')
 
 const Code = require('../models/giffcode')
-const User = require('../models/user')
 const Item = require('../models/item')
 const UserItem = require('../models/userItem')
 
@@ -209,6 +209,7 @@ exports.useOne = async (req, res, next) => {
     if(result_1 && result_2) {
 
         await saveHistory(userId, 'codes', 'personal', `Used code: ${code} | ${new Date()}`)
+        await saveStatistic(0, 0, 0, 1, 0, 0)
 
         res.status(200).json({
             msg: 'success'

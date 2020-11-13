@@ -1,4 +1,5 @@
-const {loadHistory, saveHistory} = require('./../utils/history')
+const {saveHistory} = require('./../utils/history')
+const {saveStatistic} = require('./../utils/statistic')
 
 const Blog = require('../models/blog')
 
@@ -102,6 +103,7 @@ exports.create = async (req, res, next) => {
     .then(async blog => {
 
         await saveHistory(writer, 'blogs', 'manage', `Create a blog: ${blog._id}-${writer}-${title} | ${new Date()}`)
+        await saveStatistic(0, 0, 0, 0, 1, 0)
 
         res.status(201).json({
             msg: "success",
