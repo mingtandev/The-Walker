@@ -75,63 +75,63 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create = (req, res, next) => {
-    const {userId} = req.body
+// exports.create = (req, res, next) => {
+//     const {userId} = req.body
 
-    if(!userId){
-        return res.status(400).json({
-            msg: 'Bad request body!'
-        })
-    }
+//     if(!userId){
+//         return res.status(400).json({
+//             msg: 'Bad request body!'
+//         })
+//     }
 
-    const history = new History({
-        userId,
-        actions: {
-            accInfos: {
-                personal: [],
-                manage: []
-            },
-            items:  {
-                personal: [],
-                manage: []
-            },
-            rolls:  {
-                personal: [],
-                manage: []
-            },
-            codes:  {
-                personal: [],
-                manage: []
-            },
-            blogs:  {
-                personal: [],
-                manage: []
-            }
-        }
-    })
+//     const history = new History({
+//         userId,
+//         actions: {
+//             accInfos: {
+//                 personal: [],
+//                 manage: []
+//             },
+//             items:  {
+//                 personal: [],
+//                 manage: []
+//             },
+//             rolls:  {
+//                 personal: [],
+//                 manage: []
+//             },
+//             codes:  {
+//                 personal: [],
+//                 manage: []
+//             },
+//             blogs:  {
+//                 personal: [],
+//                 manage: []
+//             }
+//         }
+//     })
 
-    history.save()
-    .then(his => {
-        res.status(201).json({
-            msg: "success",
-            history: {
-                _id: his._id,
-                userId: his.userId,
-                actions: his.actions,
-                request: {
-                    type: 'GET',
-                    url: req.hostname + '/histories/' + his.userId
-                }
-            }
-        })
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+//     history.save()
+//     .then(his => {
+//         res.status(201).json({
+//             msg: "success",
+//             history: {
+//                 _id: his._id,
+//                 userId: his.userId,
+//                 actions: his.actions,
+//                 request: {
+//                     type: 'GET',
+//                     url: req.hostname + '/histories/' + his.userId
+//                 }
+//             }
+//         })
+//     })
+//     .catch(error => {
+//         res.status(500).json({
+//             msg: 'Server error!',
+//             error
+//         })
+//     })
+// }
 
 // // Updating
 // exports.use = (req, res, next) => {

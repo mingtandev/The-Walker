@@ -4,6 +4,7 @@ const UserItem = require('../models/userItem')
 
 const {saveHistory, loadHistory} = require('./../utils/history')
 const {saveStatistic} = require('./../utils/statistic')
+const {saveUserItem} = require('./../utils/userItem')
 
 exports.getAll = (req, res, next) => {
 
@@ -56,7 +57,9 @@ exports.use = async (req, res, next) => {
         })
     }
 
-    const his = await loadHistory(userId, 'rolls', 'personal')
+    let his = await loadHistory(userId, 'rolls', 'personal')
+    his = his.map(his => his.split(' ')[2])
+
     if (his.includes(rollupDay)) {
         return res.status(400).json({
             msg: 'You has been registered today!'
@@ -64,32 +67,22 @@ exports.use = async (req, res, next) => {
     }
 
     const roll = await Rollup.findOne({ day: rollupDay })
-    const item = await Item.findById(roll.item)
-    const userItem = await UserItem.findOne({ userId })
-
-    console.log(item)
-
-    if(!item) {
-        return res.status(500).json({
-            msg: 'Prize not found!'
-        })
-    }
 
     await saveHistory(userId, 'rolls', 'personal', `Roll up: ${rollupDay} | ${new Date()}`)
-    await saveStatistic(0, 1, 0, 0, 0)
+    await saveStatistic(0, 1, 0, 0, 0, 0)
 
-    await userItem.items[`${item.type}s`].push(item.name)
-    await userItem.save()
-    .then(updated => {
+    const result = await saveUserItem(userId, [roll.item])
+
+    if (result) {
         res.status(200).json({
             msg: 'success',
-            userItem: updated
+            userItem: result
         })
-    })
-    .catch(error => {
+    }
+    else {
         msg: 'Server error!',
         error
-    })
+    }
 }
 
 exports.getOne = (req, res, next) => {

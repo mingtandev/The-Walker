@@ -158,6 +158,28 @@ If 'success' => {
 
 ----------------------------------------------------------------------------
 
+// Get history
+Method: POST
+Auth: Yes
+Roles: User or Admin
+Req.body 2 use case:
+1:  {}
+    ----> Get all (Admin only)
+
+2:  {
+        "type": "rolls",
+        "effect": "personal"
+    }
+    -----> Get one (User or Admin)
+
+*Note:
+    type in ['accInfos', 'items', 'rolls', 'codes', 'blogs']
+    effect in ['personal', 'manage']
+
+URL: /users/history
+
+----------------------------------------------------------------------------
+
 
 Resources:
 

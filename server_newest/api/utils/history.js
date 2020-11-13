@@ -1,57 +1,51 @@
 const History = require('../models/history')
 
 exports.saveHistory = async (userId, type, effect, msg) => {
+    let user = await History.findOne({userId})
 
-    let user = await History.find({userId})
-    user = user[0]
-
-    if(!user) { 
-
-        console.log('User not found!')
-        return
+    if (!user) {
+        user = new History({
+            userId,
+            actions: {
+                accInfos: {
+                    personal: [],
+                    manage: []
+                },
+                items:  {
+                    personal: [],
+                    manage: []
+                },
+                rolls:  {
+                    personal: [],
+                    manage: []
+                },
+                codes:  {
+                    personal: [],
+                    manage: []
+                },
+                blogs:  {
+                    personal: [],
+                    manage: []
+                }
+            }
+        })
     }
 
     await user.actions[type][effect].push(msg)
     await user.save()
 
-    return
+    return []
 }
 
 exports.loadHistory = async (userId, type, effect) => {
-
-    let user = await History.find({userId})
-    user = user[0]
-
+    let user = await History.findOne({userId})
     let result = []
 
-    if(!user) {
-
-        console.log('User not found!')
-        return []
+    if (!user) {
+        return result
     }
 
-    switch (type) {
-        case 'accInfos': {
-
-
-            break
-        }
-        case 'items': {
-
-
-            break
-        }
-        case 'rolls': {
-
-            result = await user.actions.rolls[effect].map(his => his.split(' ')[2])
-            break
-        }
-        case 'codes': {
-
-            result = await user.actions.codes[effect].map(his => his.split(' ')[2])
-            break
-        }
-    }
+    result = await user.actions[type][effect]
 
     return result
 }

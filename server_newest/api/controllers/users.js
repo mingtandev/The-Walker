@@ -3,9 +3,10 @@ const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 
 const User = require('./../models/user')
+const History = require('./../models/history')
 
 const {sendMail} =  require('./../config/nodemailer')
-const {saveHistory} = require('./../utils/history')
+const {loadHistory, saveHistory} = require('./../utils/history')
 const {saveStatistic} = require('./../utils/statistic')
 
 const tokenLife = process.env.TOKEN_LIFE
@@ -565,4 +566,49 @@ exports.forgot = async (req, res, next)  => {
             error
         })
     })
+}
+
+exports.history = async (req, res, next)  => {
+    const {_id} = req.userData
+    const {type, effect} = req.body
+
+    const types = ['accInfos', 'items', 'rolls', 'codes', 'blogs']
+    const effects = ['personal', 'manage']
+
+    let result = []
+
+    if (!type && !effect) {
+        if (req.userData.roles != 'admin'){
+            return res.status(403).json({
+                msg: `You don't have the permission!`
+            })
+        }
+
+        result = await History.find({})
+
+        return res.status(200).json({
+            msg: 'success',
+            length: result.length,
+            history: result
+        })
+    }
+    else if (!types.includes(type) || !effects.includes(effect)) {
+        return res.status(400).json({
+            msg: 'Bad request body!'
+        })
+    }
+
+    result = await loadHistory(_id, type, effect)
+
+    if (result) {
+        res.status(200).json({
+            msg: 'success',
+            history: result
+        })
+    }
+    else {
+        re.status(500).json({
+            msg: 'Server error!',
+        })
+    }
 }

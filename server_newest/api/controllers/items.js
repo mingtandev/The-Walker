@@ -6,6 +6,7 @@ const UserItem = require('../models/userItem')
 
 const {saveHistory} = require('./../utils/history')
 const {saveStatistic} = require('./../utils/statistic')
+const {saveUserItem} = require('./../utils/userItem')
 
 exports.getAll = (req, res, next) => {
 
@@ -90,27 +91,13 @@ exports.buyOne = async (req, res, next) => {
     const {_id} = req.userData
 
     const user = await User.findById(_id)
-    const userItem = await UserItem.find({userId: _id})
     const item = await Item.findById(itemId)
 
-    {
-        if(!user) {
-            return res.status(404).json({
-                msg: 'User not found!',
-            })
-        }
-        if(!userItem[0]) {
-            return res.status(404).json({
-                msg: 'UserItem not found!',
-            })
-        }
-        if(!item) {
-            return res.status(404).json({
-                msg: 'Item not found!',
-            })
-        }
+    if(!user) {
+        return res.status(404).json({
+            msg: 'User not found!',
+        })
     }
-
 
     const {cash} = user
     const {name, type, price, sale, saleExpiresTime} = item
@@ -130,44 +117,24 @@ exports.buyOne = async (req, res, next) => {
         })
     }
 
-    userItem[0].items[`${type}s`].push(name)
+    await saveHistory(_id, 'items', 'personal', `Buy a item: ${name}-${type}-${price}-${salePrice}-${sale}-${saleExpiresTime}} | ${new Date()}`)
+    await saveStatistic(0, 0, 1, 0, 0, salePrice)
+    await saveUserItem(_id, [itemId])
+
     user.cash = cash - salePrice
+    const result = await user.save()
 
-    const result_1 = await userItem[0].save()
-    const result_2 = await user.save()
-
-    if(result_1 && result_2) {
-
-        await saveHistory(_id, 'items', 'personal', `Buy a item: ${name}-${type}-${price}-${salePrice}-${sale}-${saleExpiresTime}} | ${new Date()}`)
-        await saveStatistic(0, 0, 1, 0, 0, salePrice)
-
+    if(result) {
         res.status(200).json({
-            msg: 'success',
-            userItem
+            msg: 'success'
         })
-    } else {
-
+    }
+    else {
         res.status(500).json({
             msg: 'Server error!',
             error
         })
     }
-
-    // await userItem[0].save()
-    // .then(async userItem => {
-    //     await user.save()
-
-    //     res.status(200).json({
-    //         msg: 'success',
-    //         userItem
-    //     })
-    // })
-    // .catch(error => {
-    //     res.status(500).json({
-    //         msg: 'Server error!',
-    //         error
-    //     })
-    // })
 }
 
 exports.create = async (req, res, next) => {

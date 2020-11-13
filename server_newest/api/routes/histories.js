@@ -7,7 +7,7 @@ const router = express.Router()
 
 router.get('/', checkAuth, HistoryController.getAll)
 router.get('/:userId', checkAuth, HistoryController.getOne)
-router.post('/', HistoryController.create)
+// router.post('/', HistoryController.create)
 // router.patch('/:codeId', checkAuth, HistoryController.update)
 // router.delete('/:codeId', checkAuth, HistoryController.delete)
 
