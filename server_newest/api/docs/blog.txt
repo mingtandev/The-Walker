@@ -5,12 +5,22 @@ Each req call api => Check res.msg. If 'success' => OK else FAIL
 Method: GET
 Auth: No
 Req.body: {}
-URL: /blogs
+URL: /blogs?page=2&limit=2
 If 'success' => {
     msg: 'success'.
     length: Number,
-    blogs: Array
+    blogs: Array,
+    request: {
+        currentPage: 2,
+        totalPages: 2,
+        previous: {
+            "page": 1,
+            "limit": 2
+        }
+    }
 }
+
+Note: ?page=2&limit=2 (option)
 
 ----------------------------------------------------------------------------
 

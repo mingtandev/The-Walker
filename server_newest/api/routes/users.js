@@ -7,7 +7,7 @@ const router = express.Router()
 
 
 router.get('/', checkAuth, UsersController.getAll)
-router.get('/:userId', checkAuth, UsersController.getOne)
+router.get('/:userId([a-fA-F]{24})', checkAuth, UsersController.getOne)
 router.post('/', UsersController.create)
 router.patch('/:userId', checkAuth, UsersController.update)
 router.delete('/:userId', checkAuth, UsersController.delete)
@@ -18,5 +18,7 @@ router.post('/login', UsersController.login)
 router.post('/login/refresh', UsersController.refresh)
 router.post('/recovery', UsersController.recovery)
 router.post('/forgot', UsersController.forgot)
+
+router.post('/history', checkAuth, UsersController.history)
 
 module.exports = router

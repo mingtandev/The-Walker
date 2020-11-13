@@ -72,44 +72,44 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create = (req, res, next) => {
+// exports.create = (req, res, next) => {
 
-    const {userId} = req.body
+//     const {userId} = req.body
 
-    // if (req.userData.roles != 'admin'){
-    //     return res.status(403).json({
-    //         msg: `You don't have the permission!`
-    //     })
-    // }
+//     if (req.userData.roles != 'admin'){
+//         return res.status(403).json({
+//             msg: `You don't have the permission!`
+//         })
+//     }
 
-    const userItem = new UserItem({
-        userId
-    })
+//     const userItem = new UserItem({
+//         userId
+//     })
 
-    userItem.save()
-    .then(userItem => {
-        res.status(201).json({
-            msg: "success",
-            userItem: {
-                _id: userItem._id,
-                userId: userItem.userId,
-                coin: userItem.coin,
-                items: userItem.items,
-                request: {
-                    type: 'GET',
-                    url: req.hostname + '/user-items/' + userItem.userId
-                }
-            }
-        })
-    })
-    .catch(error => {
-        console.log(error)
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+//     userItem.save()
+//     .then(userItem => {
+//         res.status(201).json({
+//             msg: "success",
+//             userItem: {
+//                 _id: userItem._id,
+//                 userId: userItem.userId,
+//                 coin: userItem.coin,
+//                 items: userItem.items,
+//                 request: {
+//                     type: 'GET',
+//                     url: req.hostname + '/user-items/' + userItem.userId
+//                 }
+//             }
+//         })
+//     })
+//     .catch(error => {
+//         console.log(error)
+//         res.status(500).json({
+//             msg: 'Server error!',
+//             error
+//         })
+//     })
+// }
 
 exports.update = (req, res, next) => {
     const {userId} = req.params

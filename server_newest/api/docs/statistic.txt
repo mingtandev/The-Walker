@@ -1,0 +1,20 @@
+Each req call api => Check res.msg. If 'success' => OK else FAIL
+
+Statistics nay chac phai dung 1 cai Date time picker
+
+// Get statistics
+Method: GET
+Auth: No
+Req.query: yyyy-mm-dd
+Req.body: {}
+URL: /statistics
+If 'success' => {
+    msg: 'success'.
+    statistics
+}
+
+Sample url:     /statistics
+                /statistics?day=2020-11-13
+                /statistics?start_day=2020-11-13&end_day=2020-11-14
+
+----------------------------------------------------------------------------

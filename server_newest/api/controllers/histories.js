@@ -2,15 +2,42 @@ const History = require('../models/history')
 
 exports.getAll = (req, res, next) => {
 
-    // if (req.userData.roles != 'admin'){
-    //     return res.status(403).json({
-    //         msg: `You don't have the permission!`
-    //     })
-    // }
+    if (req.userData.roles != 'admin'){
+        return res.status(403).json({
+            msg: `You don't have the permission!`
+        })
+    }
+
+    const page = parseInt(req.query.page) || 1
+    const items_per_page = parseInt(req.query.limit) || 8
+
+    if (page < 1) page = 1
 
     History.find({})
     .select('userId actions')
-    .then(histories => {
+    .skip((page - 1) * items_per_page)
+    .limit(items_per_page)
+    .then(async histories => {
+        const request = {}
+        const len = await History.find({}).count()
+
+        request.currentPage = page
+        request.totalPages = Math.ceil(len / items_per_page)
+
+        if (page > 1) {
+            request.previous = {
+                page: page - 1,
+                limit: items_per_page
+            }
+        }
+
+        if (page * items_per_page < len) {
+            request.next = {
+                page: page + 1,
+                limit: items_per_page
+            }
+        }
+
         const response = {
             msg: 'success',
             length: histories.length,
@@ -24,10 +51,10 @@ exports.getAll = (req, res, next) => {
                         url: req.hostname + '/histories/' + history.userId
                     }
                 }
-            })
+            }),
+            request
         }
 
-        // res.set("x-total-count", codes.length);
         res.status(200).json(response)
     })
     .catch(error => {
@@ -41,12 +68,6 @@ exports.getAll = (req, res, next) => {
 
 exports.getOne = (req, res, next) => {
     const {userId} = req.params
-
-    // if (req.userData.roles != 'admin'){
-    //     return res.status(403).json({
-    //         msg: `You don't have the permission!`
-    //     })
-    // }
 
     History.find({userId})
     .select('_id userId actions')
@@ -81,53 +102,63 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create = (req, res, next) => {
-    const {userId} = req.body
+// exports.create = (req, res, next) => {
+//     const {userId} = req.body
 
-    if(!userId){
-        return res.status(400).json({
-            msg: 'Bad request body!'
-        })
-    }
+//     if(!userId){
+//         return res.status(400).json({
+//             msg: 'Bad request body!'
+//         })
+//     }
 
-    // if (req.userData.roles != 'admin'){
-    //     return res.status(403).json({
-    //         msg: `You don't have the permission!`
-    //     })
-    // }
+//     const history = new History({
+//         userId,
+//         actions: {
+//             accInfos: {
+//                 personal: [],
+//                 manage: []
+//             },
+//             items:  {
+//                 personal: [],
+//                 manage: []
+//             },
+//             rolls:  {
+//                 personal: [],
+//                 manage: []
+//             },
+//             codes:  {
+//                 personal: [],
+//                 manage: []
+//             },
+//             blogs:  {
+//                 personal: [],
+//                 manage: []
+//             }
+//         }
+//     })
 
-    const history = new History({
-        userId,
-        actions: {
-            accInfos: [],
-            items: [],
-            rolls: [],
-            codes: []
-        }
-    })
-
-    history.save()
-    .then(his => {
-        res.status(201).json({
-            msg: "success",
-            history: {
-                _id: his._id,
-                userId: his.userId,
-                actions: his.actions,
-                request: {
-                    type: 'GET',
-                    url: req.hostname + '/histories/' + his.userId
-                }
-            }
-        })
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+//     history.save()
+//     .then(his => {
+//         res.status(201).json({
+//             msg: "success",
+//             history: {
+//                 _id: his._id,
+//                 userId: his.userId,
+//                 actions: his.actions,
+//                 request: {
+//                     type: 'GET',
+//                     url: req.hostname + '/histories/' + his.userId
+//                 }
+//             }
+//         })
+//     })
+//     .catch(error => {
+//         res.status(500).json({
+//             msg: 'Server error!',
+//             error
+//         })
+//     })
+// }
 
 // // Updating
 // exports.use = (req, res, next) => {

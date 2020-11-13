@@ -6,12 +6,22 @@ Method: GET
 Auth: Yes
 Roles: Admin only
 Req.body: {}
-URL: /users
+URL: /users?page=1&limit=2
 If 'success' => {
     msg: 'success'.
     length: Number,
-    users: Array
+    users: Array,
+    request: {
+        currentPage: 1,
+        totalPages: 2,
+        next: {
+            page: 2,
+            limit: 1
+        }
+    }
 }
+
+NOTE: ?page=1&limit=2 (option)
 
 ----------------------------------------------------------------------------
 
@@ -36,7 +46,7 @@ Req.body:
 	email: String
 	password: String
 }
-URL: /users/signup
+URL: /users
 If 'success' => Check email => Verify
 
 ----------------------------------------------------------------------------
@@ -155,6 +165,28 @@ URL: /users/forgot
 If 'success' => {
     msg: 'success'
 }
+
+----------------------------------------------------------------------------
+
+// Get history
+Method: POST
+Auth: Yes
+Roles: User or Admin
+Req.body 2 use case:
+1:  {}
+    ----> Get all (Admin only)
+
+2:  {
+        "type": "rolls",
+        "effect": "personal"
+    }
+    -----> Get one (User or Admin)
+
+*Note:
+    type in ['accInfos', 'items', 'rolls', 'codes', 'blogs']
+    effect in ['personal', 'manage']
+
+URL: /users/history
 
 ----------------------------------------------------------------------------
 

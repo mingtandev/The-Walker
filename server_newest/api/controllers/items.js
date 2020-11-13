@@ -4,11 +4,41 @@ const Item = require('../models/item')
 const User = require('../models/user')
 const UserItem = require('../models/userItem')
 
+const {saveHistory} = require('./../utils/history')
+const {saveStatistic} = require('./../utils/statistic')
+const {saveUserItem} = require('./../utils/userItem')
+
 exports.getAll = (req, res, next) => {
+    const page = parseInt(req.query.page) || 1
+    const items_per_page = parseInt(req.query.limit) || 8
+
+    if (page < 1) page = 1
 
     Item.find({})
     .select('_id name slugName thumbnail type price sale saleExpiresTime')
-    .then(items => {
+    .skip((page - 1) * items_per_page)
+    .limit(items_per_page)
+    .then(async items => {
+        const request = {}
+        const len = await Item.find({}).count()
+
+        request.currentPage = page
+        request.totalPages = Math.ceil(len / items_per_page)
+
+        if (page > 1) {
+            request.previous = {
+                page: page - 1,
+                limit: items_per_page
+            }
+        }
+
+        if (page * items_per_page < len) {
+            request.next = {
+                page: page + 1,
+                limit: items_per_page
+            }
+        }
+
         const response = {
             msg: 'success',
             length: items.length,
@@ -27,7 +57,8 @@ exports.getAll = (req, res, next) => {
                         url: req.hostname + '/items/' + item._id
                     }
                 }
-            })
+            }),
+            request
         }
 
         res.set('Content-Range', `items 0-4/${items.length}`)
@@ -84,31 +115,16 @@ exports.getOne = (req, res, next) => {
 
 exports.buyOne = async (req, res, next) => {
     const {itemId} = req.params
-
     const {_id} = req.userData
 
     const user = await User.findById(_id)
-    const userItem = await UserItem.find({userId: _id})
     const item = await Item.findById(itemId)
 
-    {
-        if(!user) {
-            return res.status(404).json({
-                msg: 'User not found!',
-            })
-        }
-        if(!userItem[0]) {
-            return res.status(404).json({
-                msg: 'UserItem not found!',
-            })
-        }
-        if(!item) {
-            return res.status(404).json({
-                msg: 'Item not found!',
-            })
-        }
+    if(!user) {
+        return res.status(404).json({
+            msg: 'User not found!',
+        })
     }
-
 
     const {cash} = user
     const {name, type, price, sale, saleExpiresTime} = item
@@ -128,27 +144,27 @@ exports.buyOne = async (req, res, next) => {
         })
     }
 
-    userItem[0].items[`${type}s`].push(name)
-    user.cash = cash - price
+    await saveHistory(_id, 'items', 'personal', `Buy a item: ${name}-${type}-${price}-${salePrice}-${sale}-${saleExpiresTime}} | ${new Date()}`)
+    await saveStatistic(0, 0, 1, 0, 0, salePrice)
+    await saveUserItem(_id, [itemId])
 
-    await userItem[0].save()
-    .then(async userItem => {
-        await user.save()
+    user.cash = cash - salePrice
+    const result = await user.save()
 
+    if(result) {
         res.status(200).json({
-            msg: 'success',
-            userItem
+            msg: 'success'
         })
-    })
-    .catch(error => {
+    }
+    else {
         res.status(500).json({
             msg: 'Server error!',
             error
         })
-    })
+    }
 }
 
-exports.create = (req, res, next) => {
+exports.create = async (req, res, next) => {
     const {name, type, price, sale, saleExpiresTime} = req.body
 
     if(!name || !type || !price){
@@ -172,11 +188,14 @@ exports.create = (req, res, next) => {
 
     if(+sale > 0){
         item['sale'] = +sale,
-        item['saleExpiresTime'] = Date.now() + +saleExpiresTime ||  Date.now() + 259200000 // 3 days
+        item['saleExpiresTime'] = Date.now() + +saleExpiresTime || Date.now() + 259200000 // 3 days
     }
 
-    item.save()
-    .then(newItem => {
+    await item.save()
+    .then(async newItem => {
+
+        await saveHistory(req.userData._id, 'items', 'manage', `Create a new item: ${newItem._id}-${name}-${type}-${price}-${newItem.sale}-${newItem.saleExpiresTime} | ${new Date()}`)
+
         res.status(201).json({
             msg: "success",
             item: {
@@ -204,7 +223,7 @@ exports.create = (req, res, next) => {
     })
 }
 
-exports.update = (req, res, next) => {
+exports.update = async (req, res, next) => {
     const {itemId: _id} = req.params
 
     if (req.userData.roles != 'admin'){
@@ -223,7 +242,9 @@ exports.update = (req, res, next) => {
         }
     }
 
-    Item.updateOne({_id}, {$set: item})
+    await saveHistory(req.userData._id, 'items', 'manage', `Update a item: ${_id}-${Object.keys(item).join('-')} | ${new Date()}`)
+
+    await Item.updateOne({_id}, {$set: item})
     .then(result => {
         res.status(200).json({
             msg: "success",
@@ -242,8 +263,8 @@ exports.update = (req, res, next) => {
     })
 }
 
-exports.delete = (req, res, next) => {
-    const {productID: _id} = req.params
+exports.delete = async (req, res, next) => {
+    const {itemId: _id} = req.params
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -251,7 +272,20 @@ exports.delete = (req, res, next) => {
         })
     }
 
-    Item.deleteOne({_id})
+    const item = await Item.findById(_id)
+
+    if(!item) {
+
+        return res.status(404).json({
+            msg: 'Item not found!'
+        })
+    }
+
+    const {name, type, price, sale, saleExpiresTime} = item
+
+    await saveHistory(req.userData._id, 'items', 'manage', `Delete a item: ${_id}-${name}-${type}-${price}-${sale}-${saleExpiresTime} | ${new Date()}`)
+
+    await Item.deleteOne({_id})
     .then(result => {
         res.status(200).json({
             msg: 'success',
