@@ -26,13 +26,12 @@ export const signUp = ({ email, password, username }) => {
 export const signOut = () => {
   return {
     type: "LOGOUT_SUCCESS",
-    payload: null,
   };
 };
 
 export const loadUser = (user) => {
   return {
-    type: "USER_LOADED",
+    type: "USER_LOAD",
     payload: user,
   };
 };

@@ -8,9 +8,9 @@ export const loadItems = (items) => {
   };
 };
 
-export const deleteUser = (id) => {
+export const deleteItem = (id) => {
   return {
-    type: "USERS_DELETE",
+    type: actionType.ITEM_DELETE,
     payload: id,
   };
 };

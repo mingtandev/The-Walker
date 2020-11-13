@@ -7,3 +7,10 @@ export const loadBlogs = (blogs) => {
     payload: blogs,
   };
 };
+
+export const deleteBlog = (idArray) => {
+  return {
+    type: actionType.BLOGS_DELETE,
+    payload: idArray,
+  };
+};

@@ -7,13 +7,7 @@ console.log(initialState);
 
 const authReducer = (state = initialState, action) => {
   switch (action.type) {
-    case "USER_LOADING":
-      return {
-        ...state,
-        isLoading: true,
-        user: null,
-      };
-    case "USER_LOADED":
+    case "USER_LOAD":
       return {
         ...state,
         user: action.payload,
@@ -36,7 +30,7 @@ const authReducer = (state = initialState, action) => {
       localStorage.removeItem("refreshToken");
       return {
         ...state,
-        user: action.payload,
+        user: null,
       };
     default:
       return { ...state };

@@ -1,74 +1,79 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-// import { Button } from "react-bootstrap";
-import { Button } from "@material-ui/core";
-import AddIcon from "@material-ui/icons/Add";
-
-import { useHistory } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-
+import BlogEditDialog from "../../components/dialog/blogEdit";
 import blogApi from "../../api/blogApi";
 import * as blogsAction from "../../actions/blogsAction";
-
+import * as dataColumns from "../../utils/dataColumns";
+import { Button } from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
 import MaterialTable from "material-table";
 import "./index.scss";
 
 function BlogList() {
-  const columns = [
-    { field: "id", title: "No." },
-    { field: "_id", title: "ID" },
-    { field: "title", title: "Title" },
-    { field: "content", title: "Content" },
-    { field: "thumbnail", title: "Thumbnail" },
-    {
-      field: "writer",
-      title: "Writer",
-    },
-  ];
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [rowData, setRowData] = useState(null);
 
   const blogs = useSelector((state) => state.blogs);
 
   const dispatch = useDispatch();
 
-  const history = useHistory();
+  async function getAllBlogs() {
+    try {
+      let res = await blogApi.getAll();
+      console.log(res);
+      let blogArray = res.blogs;
+      blogArray.map((item, i) => (item.id = i));
+      dispatch(blogsAction.loadBlogs(blogArray));
+      console.log(blogArray);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   useEffect(() => {
-    async function fetchAllBlogs() {
-      try {
-        let res = await blogApi.getAll();
-        console.log(res);
-        let blogArray = res.blogs;
-        blogArray.map((item, i) => (item.id = i));
-        dispatch(blogsAction.loadBlogs(blogArray));
-        console.log(blogArray);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    fetchAllBlogs();
+    getAllBlogs();
   }, []);
 
-  const handleDelete = (data) => {
-    try {
-      let deleteIDs = [];
+  const handleDialogOpen = (rowData) => {
+    setRowData(rowData);
+    setDialogOpen(true);
+  };
 
-      async function deleteItems() {
-        await Promise.all(
-          data.map(async (item) => {
-            let res = await blogApi.delete(item._id);
-            if (res && res.msg === "success") {
-              console.log(res);
-              deleteIDs.push(item._id);
-            }
-          })
-        );
-        //  dispatch(itemsAction(deleteIDs));
-      }
-      deleteItems();
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
+
+  const handleDelete = async (data) => {
+    try {
+      let res = await blogApi.delete(data._id);
+      console.log(res);
+      if (res && res.msg === "success")
+        dispatch(blogsAction.deleteBlog(data._id));
+      else alert("Cannot delete blog");
     } catch (error) {
       console.log(error);
     }
   };
+
+  const handleUpdateBlog = async (object, blogId) => {
+    let body = [];
+    for (const property in object) {
+      if (object[property])
+        body.push({ propName: property, value: object[property] });
+    }
+    try {
+      let res = await blogApi.update(blogId, body);
+      console.log(res);
+      if (res && res.msg === "success") {
+        setDialogOpen(false);
+        getAllBlogs();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="bloglist">
       <div className="bloglist__option">
@@ -82,11 +87,11 @@ function BlogList() {
       <div className="bloglist__main">
         <div style={{ maxWidth: "100%" }}>
           <MaterialTable
-            columns={columns}
+            columns={dataColumns.BLOG_COLUMNS}
             data={blogs.blogs}
-            title="Demo Title"
+            title="BLOGS"
             options={{
-              selection: true,
+              actionsColumnIndex: -1,
             }}
             actions={[
               {
@@ -100,13 +105,19 @@ function BlogList() {
                 tooltip: "Edit",
                 icon: "edit",
                 onClick: (evt, data) => {
-                  history.push("/dashboard");
+                  handleDialogOpen(data);
                 },
               },
             ]}
           />
         </div>
       </div>
+      <BlogEditDialog
+        onsubmit={handleUpdateBlog}
+        data={rowData}
+        show={dialogOpen}
+        onclose={handleDialogClose}
+      />
     </div>
   );
 }

@@ -3,7 +3,7 @@ import axiosClient from "./axiosClient";
 const blogApi = {
   getAll: () => {
     const url = "/blogs";
-    return axiosClient.get(url);
+    return axiosClient.get(url, { params: { limit: 1000000000 } });
   },
   getOne: (id) => {
     const url = `/blogs/${id}`;

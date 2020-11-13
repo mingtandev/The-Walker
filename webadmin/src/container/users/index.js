@@ -1,74 +1,72 @@
 import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 
 import userApi from "../../api/userApi";
 import * as usersAction from "../../actions/usersAction";
 
 import MaterialTable from "material-table";
+import UserEditDialog from "../../components/dialog/user";
+
+import * as dataColumns from "../../utils/dataColumns";
 
 function UsersList() {
-  const columns = [
-    { field: "id", title: "No." },
-    { field: "_id", title: "ID" },
-    { field: "name", title: "Name" },
-    { field: "slugName", title: "Slug Name" },
-    { field: "email", title: "Email" },
-    {
-      field: "cash",
-      title: "Cash",
-    },
-    {
-      field: "roles",
-      title: "Role",
-    },
-    {
-      field: "isVerified",
-      title: "Is Verified",
-    },
-  ];
+  const [open, setOpen] = useState(false);
+  const [rowData, setRowData] = useState(null);
 
   const users = useSelector((state) => state.users);
 
   const dispatch = useDispatch();
 
-  const history = useHistory();
-
-  useEffect(() => {
-    async function fetchAllUsers() {
-      try {
-        let res = await userApi.getAll();
-        console.log(res);
+  async function fetchAllUsers() {
+    try {
+      let res = await userApi.getAll();
+      console.log(res);
+      if (res && res.msg === "success") {
         let usersArray = res.users;
-        usersArray.map((item, i) => (item.id = 2 * i + 1));
         dispatch(usersAction.loadUser(usersArray));
-      } catch (error) {
-        console.log(error);
       }
+    } catch (error) {
+      console.log(error);
     }
+  }
+  useEffect(() => {
     fetchAllUsers();
   }, []);
 
-  const handleDelete = (data) => {
-    try {
-      let deleteIDs = [];
+  const handleClickOpen = (rowData) => {
+    setRowData(rowData);
+    setOpen(true);
+  };
 
-      async function deleteUsers() {
-        await Promise.all(
-          data.map(async (item) => {
-            let res = await userApi.delete(item._id);
-            if (res && res.msg === "success") {
-              console.log(res);
-              deleteIDs.push(item._id);
-            }
-          })
-        );
-        dispatch(usersAction.deleteUser(deleteIDs));
-        setTimeout(() => {
-          console.log(users.users);
-        }, 5000);
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleDelete = async (data) => {
+    try {
+      let res = await userApi.delete(data._id);
+      if (res && res.msg === "success")
+        dispatch(usersAction.deleteUser(data._id));
+      else alert("Cannot delete user");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleUpdateUser = async (object, userId) => {
+    console.log("neee", object, userId);
+    let body = [];
+    for (const property in object) {
+      if (object[property])
+        body.push({ propName: property, value: object[property] });
+    }
+    try {
+      console.log("cll");
+      let res = await userApi.update(userId, body);
+      console.log(res);
+      if (res && res.msg === "success") {
+        fetchAllUsers();
       }
-      deleteUsers();
     } catch (error) {
       console.log(error);
     }
@@ -78,11 +76,11 @@ function UsersList() {
     <>
       <div style={{ maxWidth: "100%" }}>
         <MaterialTable
-          columns={columns}
+          columns={dataColumns.USER_COLUMNS}
           data={users.users}
-          title="Demo Title"
+          title="USERS"
           options={{
-            selection: true,
+            actionsColumnIndex: -1,
           }}
           actions={[
             {
@@ -92,16 +90,22 @@ function UsersList() {
                 handleDelete(data);
               },
             },
-            {
-              tooltip: "Edit",
+            (rowData) => ({
               icon: "edit",
-              onClick: (evt, data) => {
-                history.push("/dashboard");
+              tooltip: "Edit",
+              onClick: (event, rowData) => {
+                handleClickOpen(rowData);
               },
-            },
+            }),
           ]}
         />
       </div>
+      <UserEditDialog
+        onsubmit={handleUpdateUser}
+        data={rowData}
+        show={open}
+        onclose={handleClose}
+      />
     </>
   );
 }

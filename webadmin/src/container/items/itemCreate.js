@@ -1,39 +1,30 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
-
-import blogApi from "../../api/blogApi";
-import jwt_decode from "jwt-decode";
 import { Button } from "@material-ui/core";
-
+import itemApi from "../../api/itemApi";
 import "./index.scss";
 
-function BlogCreate() {
+function ItemCreate() {
   const history = useHistory();
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(e.target);
-    const { title, content, thumbnail } = e.target;
-    console.log(title.value, content.value, thumbnail.files[0]);
+    const { name, type, price, thumbnail } = e.target;
+    console.log(thumbnail.files[0]);
 
     let formData = new FormData();
-    formData.append(
-      "writer",
-      localStorage.getItem("token")
-        ? jwt_decode(localStorage.getItem("token"))._id
-        : null
-    );
-    formData.append("title", title.value);
-    formData.append("content", content.value);
+    formData.append("name", name.value);
+    formData.append("type", type.value);
+    formData.append("price", price.value);
     formData.append("thumbnail", thumbnail.files[0]);
-    console.log(formData);
 
-    blogApi
+    itemApi
       .create(formData)
       .then((res) => {
         console.log(res);
         if (res && res.msg === "success") {
-          console.log("rrr", res);
-          history.push("/blogs");
+          console.log(res);
+          history.push("/items");
           return;
         }
         alert("error creating blog");
@@ -47,10 +38,17 @@ function BlogCreate() {
     <>
       <form onSubmit={handleSubmit} className="blogs__create">
         <div class="input-focus-effect">
-          <input type="text" name="title" />
-          <label>Title</label>
+          <input type="text" name="name" />
+          <label>Name</label>
         </div>
-        <textarea name="content" rows="5" placeholder="Content..."></textarea>
+        <div class="input-focus-effect">
+          <input type="text" name="type" />
+          <label>Type</label>
+        </div>
+        <div class="input-focus-effect">
+          <input type="number" name="price" />
+          <label>Price</label>
+        </div>
         <label className="blogs__label">
           Item Thumbnail (accepted: JPEG, JPG, PNG)
         </label>
@@ -68,4 +66,4 @@ function BlogCreate() {
   );
 }
 
-export default BlogCreate;
+export default ItemCreate;

@@ -1,23 +1,56 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useHistory } from "react-router-dom";
+
 import { IconButton } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
+import userApi from "../../api/userApi";
+
+import jwt_decode from "jwt-decode";
+
+import * as authActions from "../../actions/authAction";
+
 import "./index.scss";
-import { Link } from "react-router-dom";
 
 function Header(props) {
-  const [buttonShow, setButtonShow] = useState(true);
+  const history = useHistory();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    async function getUserInfo() {
+      try {
+        if (!localStorage.getItem("token")) return;
+        const id = jwt_decode(localStorage.getItem("token"))._id;
+        console.log("id: ", id);
+        let res = await userApi.getUserInfo(id);
+        console.log(res);
+        if (res && res.msg === "success") {
+          dispatch(authActions.loadUser(res.user));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    getUserInfo();
+  }, []);
   const [submenuShow, setSubmenuShow] = useState(false);
 
   const { onToggleSidebar } = props;
 
   const toggleSidebar = () => {
     if (onToggleSidebar) onToggleSidebar();
-    setButtonShow((prevState) => !prevState);
   };
 
   const handleSubmenuShow = () => {
     setSubmenuShow((prevState) => !prevState);
   };
+
+  const handleLogOut = () => {
+    dispatch(authActions.signOut());
+    history.push("/login");
+  };
+
   return (
     <div className="header">
       <div className="header__left">
@@ -42,11 +75,14 @@ function Header(props) {
               submenuShow ? "header__submenu" : "header__submenu--hide"
             }
           >
-            <span className="submenu__link">Log Out</span>
+            <span className="submenu__link" onClick={handleLogOut}>
+              Log Out
+            </span>
           </div>
         </div>
-
-        <span className="header__user-name">ADMIN</span>
+        <span className="header__user-name">
+          {user.user ? user.user.name : "Admin"}
+        </span>
       </div>
     </div>
   );

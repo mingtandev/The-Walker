@@ -3,11 +3,15 @@ import axiosClient from "./axiosClient";
 const userApi = {
   getAll: () => {
     const url = "/users";
+    return axiosClient.get(url, { params: { limit: 1000000000 } });
+  },
+  getUserInfo: (id) => {
+    const url = "/users/" + id;
     return axiosClient.get(url);
   },
-  getUserInfo: () => {
-    const url = "/users/information";
-    return axiosClient.get(url);
+  update: (userId, body) => {
+    const url = "/users/" + userId;
+    return axiosClient.patch(url, body);
   },
   signIn: (body) => {
     const url = "/users/login";

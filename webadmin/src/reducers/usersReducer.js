@@ -14,11 +14,9 @@ const usersReducer = (state = initialState, action) => {
       };
     case "USERS_DELETE":
       let newUsers = [...state.users];
-      let deleteIDs = action.payload;
-      console.log("object", deleteIDs);
-      console.log("old", newUsers);
+      let deleteID = action.payload;
       newUsers = newUsers.filter(function (item) {
-        return !deleteIDs.includes(item._id);
+        return item._id !== deleteID;
       });
       console.log("new", newUsers);
       return {

@@ -42,11 +42,15 @@ function Login() {
         setLoginErr("Email or Password is not correct");
       }
       if (res.msg === "success") {
+        let user = jwt_decode(res.token);
+        if (user.roles !== "admin") {
+          console.log("NOT ADMIN");
+          return;
+        }
         localStorage.setItem("token", res.token);
         localStorage.setItem("refreshToken", res.refreshToken);
-        console.log(localStorage.getItem("token"));
-        let user = jwt_decode(res.token);
         dispatch(signIn(user));
+
         history.push("/dashboard");
       }
     } catch (error) {

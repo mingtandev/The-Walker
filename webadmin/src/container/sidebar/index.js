@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import DashboardIcon from "@material-ui/icons/Dashboard";
 import PeopleAltIcon from "@material-ui/icons/PeopleAlt";
 import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
@@ -19,28 +19,40 @@ function Sidebar(props) {
     <div className={`${"sidebar"}${show ? "" : " sidebar--hide"}`}>
       <ul className="sidebar__nav">
         <li className="sidebar__nav-link">
-          <Link to="/dashboard">
+          <NavLink activeClassName="sidebar__nav-link--active" to="/dashboard">
             <DashboardIcon className="sidebar__nav-icon" fontSize="large" />
             Dashboard
-          </Link>
+          </NavLink>
         </li>
         <li className="sidebar__nav-link">
-          <Link to="/users">
+          <NavLink activeClassName="sidebar__nav-link--active" to="/users">
             <PeopleAltIcon className="sidebar__nav-icon" fontSize="large" />
             Users
-          </Link>
+          </NavLink>
         </li>
         <li className="sidebar__nav-link">
-          <Link to="/items">
+          <NavLink activeClassName="sidebar__nav-link--active" to="/items">
             <StoreIcon className="sidebar__nav-icon" fontSize="large" />
             Items
-          </Link>
+          </NavLink>
         </li>
         <li className="sidebar__nav-link">
-          <Link to="/blogs">
+          <NavLink activeClassName="sidebar__nav-link--active" to="/giftcode">
+            <StoreIcon className="sidebar__nav-icon" fontSize="large" />
+            GiftCode
+          </NavLink>
+        </li>
+        <li className="sidebar__nav-link">
+          <NavLink activeClassName="sidebar__nav-link--active" to="/rollup">
+            <StoreIcon className="sidebar__nav-icon" fontSize="large" />
+            Roll Up
+          </NavLink>
+        </li>
+        <li className="sidebar__nav-link">
+          <NavLink activeClassName="sidebar__nav-link--active" to="/blogs">
             <LibraryBooksIcon className="sidebar__nav-icon" fontSize="large" />
             Blogs
-          </Link>
+          </NavLink>
         </li>
       </ul>
     </div>
