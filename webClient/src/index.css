@@ -43,6 +43,7 @@ h1 {
 
 form input {
   font-size: 1.6rem;
+  letter-spacing: 0.2rem;
 }
 form input[type="submit"] {
   cursor: pointer;

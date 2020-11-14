@@ -7,7 +7,6 @@ import "./index.scss";
 import UserMenu from "../user/userMenu";
 
 function Navbar() {
-  const [navStyle, setNavStyle] = useState(false);
   let dispatch = useDispatch();
   let history = useHistory();
 
@@ -40,18 +39,13 @@ function Navbar() {
           src="https://r2wteam.files.wordpress.com/2020/04/cropped-cropped-cropped-cropped-3-1-2-1-2.png"
           alt="Home"
         />
-        <span className="nav__logo-text">r2w network</span>
+        <span className="nav__logo-text">r2w fly team</span>
       </Link>
       <div className="nav__links">
         <ul className="nav__links--pages">
           <li className="nav__link">
             <NavLink exact to="/" activeClassName="nav__link--selected">
               <i class="fas fa-home"></i> HOME
-            </NavLink>
-          </li>
-          <li className="nav__link">
-            <NavLink to="/blog" activeClassName="nav__link--selected">
-              <i class="fab fa-blogger"></i> BLOGS
             </NavLink>
           </li>
           <li className="nav__link">
@@ -67,6 +61,11 @@ function Navbar() {
           <li className="nav__link">
             <NavLink to="/giftcode" activeClassName="nav__link--selected">
               <i class="fas fa-award"></i> GIFTCODE
+            </NavLink>
+          </li>
+          <li className="nav__link">
+            <NavLink to="/blog" activeClassName="nav__link--selected">
+              <i class="fab fa-blogger"></i> BLOGS
             </NavLink>
           </li>
         </ul>

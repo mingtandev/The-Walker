@@ -1,13 +1,13 @@
 import axiosClient from "./axiosClient";
 
 const rollApi = {
-  get: () => {
+  get: (params) => {
     const url = "/rolls";
-    return axiosClient.get(url);
+    return axiosClient.get(url, { params });
   },
-  getOne: (rollDay) => {
+  use: (rollDay) => {
     const url = `/rolls/${rollDay}`;
-    return axiosClient.get(url);
+    return axiosClient.post(url);
   },
 };
 

@@ -10,9 +10,14 @@ function GiftcodeForm() {
     console.log(giftcode.value);
     try {
       giftcodeApi.useOne(giftcode.value).then((res) => {
-        if (res.msg === "success")
-          toastr.success("Successfully", "Check Your Items Now");
-        else toastr.error("Oops!", "Code does not exist or has been Expired");
+        console.log(res);
+        if (res) {
+          if (res.msg === "success")
+            toastr.success("Successfully", "Check Your Items Now");
+          else toastr.error("Oops!", "Code does not exist or has been Expired");
+          return;
+        }
+        toastr.error("Please Login and Try again!");
       });
     } catch (error) {
       console.log("error in code: ", error);

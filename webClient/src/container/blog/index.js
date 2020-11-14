@@ -1,21 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import "./index.scss";
-import itemApi from "../../api/blogApi";
-
+import { useHistory } from "react-router-dom";
+import Pagination from "@material-ui/lab/Pagination";
+import blogApi from "../../api/blogApi";
 import Loading from "../../components/loading";
 import Blog from "../../components/blog";
-import { useHistory } from "react-router-dom";
+import "./index.scss";
 
 function Blogs() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
   const history = useHistory();
 
   useEffect(() => {
     async function getBlogs() {
       try {
-        let res = await itemApi.getAll();
+        const params = {
+          page: currentPage,
+        };
+        let res = await blogApi.getAll(params);
         console.log(res);
         if (res.msg === "success") {
           setBlogs(res.blogs);
@@ -26,11 +30,16 @@ function Blogs() {
       }
     }
     getBlogs();
-  }, []);
+  }, [currentPage]);
 
   const showDetail = (id) => {
     console.log(id);
     history.push(`/blog/${id}`);
+  };
+
+  const handlePaginationChange = (e, value) => {
+    console.log(e, value);
+    setCurrentPage(value);
   };
 
   return (
@@ -48,6 +57,15 @@ function Blogs() {
       ) : (
         <Loading />
       )}
+      <div className="items__pagination">
+        <Pagination
+          count={totalPage}
+          page={currentPage}
+          onChange={handlePaginationChange}
+          variant="outlined"
+          shape="rounded"
+        />
+      </div>
     </>
   );
 }

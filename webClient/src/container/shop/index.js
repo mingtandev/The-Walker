@@ -1,38 +1,40 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import "./index.scss";
+import Pagination from "@material-ui/lab/Pagination";
 import itemApi from "../../api/itemApi";
-import {
-  itemsLoading,
-  itemsLoaded,
-  itemsFailLoaded,
-} from "../../actions/itemsAction";
 import Loading from "../../components/loading";
 import Item from "../../components/item";
 import userApi from "../../api/userApi";
 import { loadUser } from "../../actions/authAction";
+import "./index.scss";
 
 function Shop() {
   const [items, setItems] = useState([]);
-  const itemStatus = useSelector((state) => state.items.status);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
   const dispatch = useDispatch();
 
   useEffect(() => {
     async function getItems() {
+      const params = {
+        page: currentPage,
+      };
       try {
-        let res = await itemApi.getAll();
-        if (res.msg === "success") {
+        let res = await itemApi.getAll(params);
+        console.log(res);
+        if (res && res.msg === "success") {
           setItems(res.products);
-          dispatch(itemsLoaded());
+          setTotalPage(res.request.totalPages);
         }
+        setLoading(false);
       } catch (error) {
         console.log(error);
-        dispatch(itemsFailLoaded());
       }
     }
     getItems();
-  }, [itemStatus]);
+  }, [currentPage]);
 
   const handleBuyItem = async (id) => {
     try {
@@ -56,26 +58,38 @@ function Shop() {
     }
   };
 
-  if (itemStatus === "idle") {
-    dispatch(itemsLoading());
-  }
+  const handlePaginationChange = (e, value) => {
+    console.log(e, value);
+    setCurrentPage(value);
+  };
 
   return (
     <>
-      {itemStatus === "loading" && <Loading />}
-      {itemStatus === "fail" && <div>FAIL TO FETCH SHOP ITEMS</div>}
-      <div className="items__container">
-        {itemStatus === "success" && items.length ? (
-          items.map((item, id) => (
-            <Item
-              onPurchase={() => handleBuyItem(item._id)}
-              key={id}
-              {...item}
-            />
-          ))
-        ) : (
-          <div>NO ITEMS</div>
-        )}
+      {!loading ? (
+        <div className="items__container">
+          {items.length ? (
+            items.map((item, id) => (
+              <Item
+                onPurchase={() => handleBuyItem(item._id)}
+                key={id}
+                {...item}
+              />
+            ))
+          ) : (
+            <div>NO ITEMS</div>
+          )}
+        </div>
+      ) : (
+        <Loading />
+      )}
+      <div className="items__pagination">
+        <Pagination
+          count={2}
+          page={currentPage}
+          onChange={handlePaginationChange}
+          variant="outlined"
+          shape="rounded"
+        />
       </div>
     </>
   );

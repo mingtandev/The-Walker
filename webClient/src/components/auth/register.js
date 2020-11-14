@@ -2,9 +2,7 @@ import React, { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Link, useHistory } from "react-router-dom";
 import userApi from "../../api/userApi";
-import userItemApi from "../../api/userItemApi";
 import { toastr } from "react-redux-toastr";
-import historyApi from "../../api/historyApi";
 
 function Register() {
   const recaptchaRef = React.createRef();
@@ -95,21 +93,24 @@ function Register() {
       .signUp({ name, email, password })
       .then((res) => {
         console.log(res);
-        if (res && res.msg === "success") {
-          toastr.success(
-            "Sign Up Successfully",
-            "Check your email for validation"
-          );
-          userItemApi
-            .create(res.user._id)
-            .then((res) => console.log("userItem", res))
-            .catch((error) => console.log("userItem", error));
-          historyApi
-            .create(res.user._id)
-            .then((res) => console.log("history", res))
-            .catch((error) => console.log("history", error));
-          history.push("/sign-in");
+        if (res) {
+          if (res.msg === "success") {
+            toastr.success(
+              "Sign Up Successfully",
+              "Check your email for validation"
+            );
+            history.push("/sign-in");
+          } else if (res.msg === "Email has been used!")
+            toastr.error("Register Failed", "Email has been used");
+          else if (res.msg === "Fields: name, email and password are required!")
+            toastr.error(
+              "Register Failed",
+              "Fields: name, email and password are required!"
+            );
+          else toastr.warning("Register Failed", "Try Again Later");
+          return;
         }
+        toastr.warning("Register Failed", "Try Again Later");
       })
       .catch((error) => {
         alert("Error in Register! Please Try again");
