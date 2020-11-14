@@ -1,0 +1,11 @@
+.blogs {
+  &__container {
+    margin: 10rem auto;
+    padding: 2rem;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    width: 65%;
+    cursor: pointer;
+  }
+}

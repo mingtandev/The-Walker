@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Table from "react-bootstrap/Table";
 import userApi from "../../api/userApi";
 import "./user.scss";
 
@@ -18,61 +19,10 @@ function UserInfo() {
     getUserInfo();
   }, []);
 
-  const togglePassword = (e) => {
-    e.preventDefault();
-
-    let password = document.querySelector(".password");
-    let passwordEye = document.getElementById("togglePassword");
-    password.type === "password"
-      ? (password.type = "text")
-      : (password.type = "password");
-    passwordEye.classList.toggle("fa-eye-slash");
-  };
-
-  const togglePasswordConfirm = (e) => {
-    e.preventDefault();
-
-    let password = document.querySelector(".passwordConfirm");
-    let passwordEye = document.getElementById("togglePasswordConfirm");
-    password.type === "password"
-      ? (password.type = "text")
-      : (password.type = "password");
-    passwordEye.classList.toggle("fa-eye-slash");
-  };
-
-  const handleChangePassword = (e) => {
-    e.preventDefault();
-    let { password, passwordConfirm } = e.target;
-    console.log("e", password.value, passwordConfirm.value);
-
-    if (!password.value.trim()) {
-      alert("no password filled out");
-      return;
-    }
-
-    if (password.value.trim() !== passwordConfirm.value.trim()) {
-      alert("Confirmed password doesn't match");
-      return;
-    }
-
-    if (password.value.length < 6 || password.value.length > 20) {
-      alert("Password length must be between 6-20 characters");
-      return;
-    }
-    try {
-      let res = userApi.changePass({ newPassword: password.value });
-      console.log(res);
-      alert("Change Password Successfully");
-    } catch (error) {
-      alert("Fail in Changing Pasword :((");
-      console.log(error);
-    }
-  };
-
   return (
     user && (
       <div className="user__container">
-        <div className="user">
+        {/* <div className="user">
           <div className="user__info">
             <span>ID: </span>
             <span>{user._id}</span>
@@ -86,45 +36,33 @@ function UserInfo() {
           <div className="user__info">
             <span>Cash: </span> <span>{user.cash}</span>
           </div>
-        </div>
-        <div className="form">
-          <form onSubmit={handleChangePassword}>
-            <h1>Change Password</h1>
-            <div className="form__input">
-              <input
-                name="password"
-                type="password"
-                className="password"
-                placeholder="New Password"
-              />
-              <span class="form__input--focus"></span>
-              <button
-                className="form__input--eye"
-                type="button"
-                onClick={togglePassword}
-              >
-                <i class="far fa-eye" id="togglePassword"></i>
-              </button>
-            </div>
-            <div className="form__input">
-              <input
-                name="passwordConfirm"
-                type="password"
-                className="passwordConfirm"
-                placeholder="Confirm new password"
-              />
-              <span class="form__input--focus"></span>
-              <button
-                className="form__input--eye"
-                type="button"
-                onClick={togglePasswordConfirm}
-              >
-                <i class="far fa-eye" id="togglePasswordConfirm"></i>
-              </button>
-            </div>
-            <input type="submit" value="Confirm Changing" />
-          </form>
-        </div>
+        </div> */}
+        <Table striped bordered hover>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ID</td>
+              <td>{user._id}</td>
+            </tr>
+            <tr>
+              <td>Email</td>
+              <td>{user.email}</td>
+            </tr>
+            <tr>
+              <td>Username</td>
+              <td>{user.name}</td>
+            </tr>
+            <tr>
+              <td>Cash</td>
+              <td>{user.cash}</td>
+            </tr>
+          </tbody>
+        </Table>
       </div>
     )
   );

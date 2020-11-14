@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Link, useHistory } from "react-router-dom";
 import userApi from "../../api/userApi";
+import { toastr } from "react-redux-toastr";
 
 function Register() {
-  const [avatar, setAvatar] = useState(null);
   const recaptchaRef = React.createRef();
   const [error, setError] = useState({
     email: "",
@@ -57,33 +57,27 @@ function Register() {
     e.preventDefault();
     let x = document.getElementById("password");
     let passwordEye = document.getElementById("togglePassword");
-    console.log("jsdkjkdafj", x.value);
     x.type === "password" ? (x.type = "text") : (x.type = "password");
     passwordEye.classList.toggle("fa-eye-slash");
-  };
-
-  const imgAvatarUpload = (e) => {
-    // setAvatar(e.target.files[0]);
   };
 
   const register = (e) => {
     e.preventDefault();
     let { email, name, password } = e.target;
-    console.log("e", email.value, name.value, password.value);
     const recaptchaValue = recaptchaRef.current.getValue();
 
     if (!email.value) {
-      alert("Please Fill out email");
+      toastr.error("Oops!", "Please Fill out email");
       return;
     }
 
     if (name.value.length < 6 || name.value.length > 15) {
-      alert("Username length must be from 6-15 characters");
+      toastr.error("Oops!", "Name must be from 6-15 characters");
       return;
     }
 
     if (password.value.length < 6 || password.value.length > 20) {
-      alert("Password length must be from 6-20 characters");
+      toastr.error("Oops!", "Password length must be from 6-20 characters");
       return;
     }
 
@@ -92,7 +86,6 @@ function Register() {
       return;
     }
 
-    avatar && console.log(avatar, " ", avatar.name);
     email = email.value;
     name = name.value;
     password = password.value;
@@ -100,8 +93,24 @@ function Register() {
       .signUp({ name, email, password })
       .then((res) => {
         console.log(res);
-        alert("Check your email for validation");
-        history.push("/sign-in");
+        if (res) {
+          if (res.msg === "success") {
+            toastr.success(
+              "Sign Up Successfully",
+              "Check your email for validation"
+            );
+            history.push("/sign-in");
+          } else if (res.msg === "Email has been used!")
+            toastr.error("Register Failed", "Email has been used");
+          else if (res.msg === "Fields: name, email and password are required!")
+            toastr.error(
+              "Register Failed",
+              "Fields: name, email and password are required!"
+            );
+          else toastr.warning("Register Failed", "Try Again Later");
+          return;
+        }
+        toastr.warning("Register Failed", "Try Again Later");
       })
       .catch((error) => {
         alert("Error in Register! Please Try again");
@@ -161,10 +170,6 @@ function Register() {
             <small className="form__input--error">{error.password}</small>
           )}
 
-          <div className="form__input">
-            <label>Your Avatar (Not required)</label>
-            <input type="file" name="avatar" onChange={imgAvatarUpload} />
-          </div>
           <div className="recaptcha">
             <ReCAPTCHA
               ref={recaptchaRef}

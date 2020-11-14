@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import jwt_decode from "jwt-decode";
 import blogApi from "../../api/blogApi";
-import "./blog.scss";
+import "./index.scss";
 
 function BlogCreate() {
   const [blogInput, setBlogInput] = useState({
