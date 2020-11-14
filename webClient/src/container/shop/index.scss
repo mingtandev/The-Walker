@@ -1,0 +1,66 @@
+.items__container {
+  margin: 0 auto;
+  padding-top: 12rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  flex-wrap: wrap;
+  width: 50%;
+}
+
+.items__pagination {
+  margin-top: 5rem;
+}
+
+.MuiPagination-ul {
+  display: flex;
+  justify-content: center;
+  color: black;
+  button {
+    background-color: white;
+    opacity: 1 !important;
+  }
+  .Mui-selected {
+    background-color: #337ab7 !important;
+    color: white;
+    font-weight: bold;
+  }
+}
+
+// .item {
+//   position: relative;
+//   width: 30%;
+//   background-color: #f5f5f5;
+//   border: 1px solid #e3e3e3;
+//   &__img {
+//     width: 100%;
+//   }
+//   &__add {
+//     padding: 10px;
+//     border: 0;
+//     outline: none;
+//     border-radius: 20px;
+//     background-color: #7b78f8;
+//     cursor: pointer;
+//   }
+//   &__delete {
+//     position: absolute;
+//     padding: 1rem 1.2rem;
+//     top: 2%;
+//     right: 2%;
+//     border: 0;
+//     outline: none;
+//     background-color: rgba($color: #ffffff, $alpha: 0.5);
+//     border-radius: 50%;
+//     cursor: pointer;
+//     &:hover {
+//       background-color: white;
+//     }
+//   }
+// }
+
+.form {
+  &__items {
+    width: 100%;
+  }
+}

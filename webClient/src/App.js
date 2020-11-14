@@ -8,19 +8,24 @@ import {
   Redirect,
 } from "react-router-dom";
 
-import Navbar from "./components/navbar/navbar";
-import Home from "./components/home/home";
+import Navbar from "./components/navbar";
+import Home from "./pages/home";
 import Login from "./components/auth/login";
 import Register from "./components/auth/register";
-import Blog from "./components/blog/blogsite";
-import blogDetail from "./components/blog/blogDetail";
+import Blog from "./pages/blog";
+import BlogDetail from "./components/blog/blogDetail";
 import Users from "./components/admin/users";
-import Items from "./components/shop/items";
+import ChangePassword from "./components/user/changePassword";
+import Shop from "./pages/shop";
 import Item from "./components/shop/item";
-import Admin from "./components/admin/admin";
 import PrivateRoute from "./routes/privateRoute";
-import Loading from "./components/loading/loading";
-import NotFound from "./components/notFound/notFound";
+import Loading from "./components/loading";
+import NotFound from "./components/notFound";
+import AdminPage from "./pages/admin/";
+import RollUp from "./pages/rollup";
+import GiftcodePage from "./pages/giftcode";
+
+import ReduxToastr from "react-redux-toastr";
 
 const UserInfo = React.lazy(() => import("./components/user/info"));
 const BlogCreate = React.lazy(() => import("./components/blog/blogCreate"));
@@ -36,9 +41,20 @@ function App() {
   return (
     <div>
       <div className="app">
+        <ReduxToastr
+          timeOut={7000}
+          newestOnTop={false}
+          preventDuplicates
+          position="top-right"
+          getState={(state) => state.toastr} // This is the default
+          transitionIn="bounceIn"
+          transitionOut="bounceOut"
+          progressBar
+          closeOnToastrClick
+        />
+
         <Suspense fallback={<Loading />}>
           <Router>
-            <Navbar />
             <Switch>
               <Route path="/" exact component={Home} />
 
@@ -93,14 +109,18 @@ function App() {
                 role="admin"
                 component={Users}
               />
-              <PrivateRoute
+              <Route
                 path="/admin"
                 exact
-                role="admin"
-                component={Admin}
+                // role="admin"
+                component={AdminPage}
               />
 
-              <Route path="/shop" exact component={Items} />
+              <Route path="/shop" exact component={Shop} />
+
+              <Route path="/roll-up" exact component={RollUp} />
+
+              <Route path="/giftcode" exact component={GiftcodePage} />
 
               <PrivateRoute
                 path="/shop/create"
@@ -116,12 +136,17 @@ function App() {
                 role="admin"
                 component={BlogCreate}
               />
-              <Route path={`/blog/:id`} component={blogDetail} />
+              <Route path={`/blog/:id`} component={BlogDetail} />
 
-              <PrivateRoute path="/user" component={UserInfo} />
+              <PrivateRoute path="/user" exact component={UserInfo} />
+              <PrivateRoute
+                path="/user/change-password"
+                component={ChangePassword}
+              />
 
               <Route component={NotFound} />
             </Switch>
+            <Navbar />
           </Router>
         </Suspense>
       </div>

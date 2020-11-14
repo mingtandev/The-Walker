@@ -1,0 +1,120 @@
+.blogs {
+  // &__container {
+  //   margin: 0 auto;
+  //   min-height: 100vh;
+  //   padding-top: 15rem;
+  //   background-image: url("../../images/wallpaper.png");
+  //   background-size: cover;
+  // }
+  &__blog {
+    margin-bottom: 2rem;
+    padding: 2rem 2rem;
+    background-color: whitesmoke;
+    border-radius: 20px;
+  }
+  &__create,
+  &__update {
+    margin: auto;
+    padding: 2rem 2rem;
+    padding-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba($color: #f9f2cd, $alpha: 0.8);
+    border-radius: 20px;
+    input,
+    textarea {
+      margin-bottom: 2rem;
+      padding: 2rem;
+      background-color: rgba($color: whitesmoke, $alpha: 0.3);
+      border-radius: 20px;
+      border: 2px solid black;
+      font-family: inherit;
+      outline: none;
+    }
+    input[type="submit"] {
+      color: white;
+      padding: 1.5rem 5rem;
+      margin: auto;
+      margin-bottom: 2rem;
+      width: fit-content;
+      border-radius: 5rem;
+      border: 0;
+      outline: none;
+      font-weight: 500;
+      letter-spacing: 2px;
+      background-color: #7b78f8;
+      box-shadow: 0 10px 20px 0 rgba(123, 120, 248, 0.5);
+    }
+  }
+}
+
+.blog {
+  margin-bottom: 2rem;
+  padding: 2rem;
+  width: calc(33.33% - 20px);
+  max-height: 500px;
+  overflow: hidden;
+  background-color: white;
+  transition: 0.4s ease-in-out;
+  &__title {
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  &__thumbnail {
+    width: 100px;
+    height: 100px;
+  }
+  &__caption {
+    font-size: 1.4rem;
+  }
+  &__content {
+    width: 100%;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    font-size: 1.6rem;
+    p {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+  &__seemore {
+    text-align: right;
+    color: blue;
+  }
+  &:hover {
+    box-shadow: 0px 2px 7px white;
+    transform: translateY(-10px);
+  }
+}
+
+.blogDetail {
+  width: 70%;
+  margin: auto;
+  margin-top: 12rem;
+  padding: 2rem;
+  min-height: 50vh;
+  background-color: white;
+  &__title {
+    font-size: 3rem;
+  }
+  &__caption {
+    font-size: 1.6rem;
+  }
+  &__thumbnail {
+    width: 20rem;
+    margin: 2rem;
+  }
+  &__content {
+    font-size: 2rem;
+  }
+}
+
+.blogpost {
+  width: 60%;
+  padding: 2rem;
+  margin: auto;
+  background-color: whitesmoke;
+  border-radius: 20px;
+}

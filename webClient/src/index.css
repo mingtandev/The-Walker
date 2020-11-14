@@ -14,9 +14,11 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Khand", sans-serif;
+  letter-spacing: 1px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-image: url("../src/img/background.png");
+  background-image: url("../src/images/wall.png");
   background-size: cover;
 }
 code {
@@ -41,6 +43,7 @@ h1 {
 
 form input {
   font-size: 1.6rem;
+  letter-spacing: 0.2rem;
 }
 form input[type="submit"] {
   cursor: pointer;

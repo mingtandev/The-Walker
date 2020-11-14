@@ -7,7 +7,7 @@ const userItemApi = {
   },
   create: (userID) => {
     const url = "/user-items";
-    return axiosClient.post(url, userID);
+    return axiosClient.post(url, { userId: userID });
   },
 };
 
