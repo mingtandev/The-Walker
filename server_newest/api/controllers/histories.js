@@ -9,7 +9,7 @@ exports.getAll = (req, res, next) => {
     }
 
     const page = parseInt(req.query.page) || 1
-    const items_per_page = parseInt(req.query.limit) || 8
+    const items_per_page = parseInt(req.query.limit) || 100
 
     if (page < 1) page = 1
 
@@ -72,7 +72,6 @@ exports.getOne = (req, res, next) => {
     History.find({userId})
     .select('_id userId actions')
     .then(history => {
-
         if(!history[0]){
             return res.status(404).json({
                 msg: 'History not found!'

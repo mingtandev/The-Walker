@@ -1,7 +1,7 @@
 const UserItem = require('../models/userItem')
 const Item = require('../models/item')
 
-exports.saveUserItem = async (userId, items) => {
+exports.saveUserItem = async (userId, items, coin) => {
     let userItem = await UserItem.findOne({userId})
 
     if (!userItem) {
@@ -13,6 +13,8 @@ exports.saveUserItem = async (userId, items) => {
         if (!result) break
         await userItem.items[`${result.type}s`].push(result.name)
     }
+
+    userItem.coin += +coin
 
     await userItem.save()
 

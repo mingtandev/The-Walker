@@ -1,6 +1,7 @@
+const mongoose = require('mongoose')
+
 const Rollup = require('../models/rollup')
 const Item = require('../models/item')
-const UserItem = require('../models/userItem')
 
 const {saveHistory, loadHistory} = require('./../utils/history')
 const {saveStatistic} = require('./../utils/statistic')
@@ -8,7 +9,7 @@ const {saveUserItem} = require('./../utils/userItem')
 
 exports.getAll = (req, res, next) => {
     const page = parseInt(req.query.page) || 1
-    const items_per_page = parseInt(req.query.limit) || 8
+    const items_per_page = parseInt(req.query.limit) || 100
 
     if (page < 1) page = 1
 
@@ -72,12 +73,6 @@ exports.use = async (req, res, next) => {
     const {rollupDay} = req.params
     const userId = req.userData._id
 
-    if(rollupDay < 1 || rollupDay > 31) {
-        return res.status(500).json({
-            msg: 'Rollup day invalid!'
-        })
-    }
-
     if(rollupDay != new Date().getDate()) {
         return res.status(400).json({
             msg: `Today is not ${rollupDay}!`
@@ -98,7 +93,7 @@ exports.use = async (req, res, next) => {
     await saveHistory(userId, 'rolls', 'personal', `Roll up: ${rollupDay} | ${new Date()}`)
     await saveStatistic(0, 1, 0, 0, 0, 0)
 
-    const result = await saveUserItem(userId, [roll.item])
+    const result = await saveUserItem(userId, [roll.item], roll.coin)
 
     if (result) {
         res.status(200).json({
@@ -115,16 +110,15 @@ exports.use = async (req, res, next) => {
 exports.getOne = (req, res, next) => {
     const {rollupDay} = req.params
 
-    Rollup.find({day: rollupDay})
+    Rollup.findOne({day: rollupDay})
     .select('_id day thumbnail coin item')
-    .then(rolls => {
-        const roll = rolls[0]
-
+    .then(roll => {
         if(!roll){
             return res.status(404).json({
                 msg: 'Roll not found!'
             })
         }
+
         res.status(200).json({
             msg: 'success',
             roll: {
@@ -149,14 +143,8 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create = async (req, res, next) => {
+exports.create = (req, res, next) => {
     const {day, coin, item} = req.body
-
-    if(!day){
-        return res.status(400).json({
-            msg: 'Day is required!'
-        })
-    }
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -165,21 +153,15 @@ exports.create = async (req, res, next) => {
     }
 
     let roll = {
-        day
+        day,
+        coin,
+        item
     }
 
-    if(item){
-        roll['item'] = item
-
-        await Item.findById(item)
+    if (mongoose.Types.ObjectId.isValid(item)) {
+        Item.findById(item)
         .then(item => {
-            if(!item) {
-                return res.status(404).json({
-                    msg: 'Item not found!'
-                })
-            }
-
-            roll['thumbnail'] = item.thumbnail
+            item ? item.thumbnail ? roll.thumbnail = item.thumbnail : '' : ''
         })
         .catch(error => {
             res.status(500).json({
@@ -189,15 +171,11 @@ exports.create = async (req, res, next) => {
         })
     }
 
-    if(coin){
-        roll['coin'] = coin
-    }
-
     console.log(roll)
 
     const rollObj = new Rollup(roll)
 
-    await rollObj.save()
+    rollObj.save()
     .then(async newRoll => {
         const {_id, day, coin, item, thumbnail} = newRoll
 
@@ -219,23 +197,19 @@ exports.create = async (req, res, next) => {
         })
     })
     .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
+        let respond = {}
+        error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+
+        res.status(422).json({
+            msg: 'ValidatorError',
+            errors: respond
         })
     })
 }
 
 exports.update = async (req, res, next) => {
     const {rollupDay} = req.params
-
     const objRoll = await Rollup.find({day: rollupDay})
-
-    if(!objRoll[0]) {
-        return res.status(404).json({
-            msg: 'Roll day not found!'
-        })
-    }
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -249,10 +223,26 @@ exports.update = async (req, res, next) => {
         roll[ops.propName] = ops.value
     }
 
-    await saveHistory(req.userData._id, 'rolls', 'manage', `Update a roll: ${objRoll[0]._id}-${rollupDay}-${Object.keys(roll).join('-')} | ${new Date()}`)
+    if (roll.item) {
+        if (mongoose.Types.ObjectId.isValid(roll.item)) {
+            await Item.findById(roll.item)
+            .then(item => {
+                item ? item.thumbnail ? roll.thumbnail = item.thumbnail : '' : ''
+            })
+            .catch(error => {
+                res.status(500).json({
+                    msg: 'Server error!',
+                    error
+                })
+            })
+        }
+    }
 
-    await Rollup.updateOne({day: rollupDay}, {$set: roll})
-    .then(result => {
+    Rollup.updateOne({day: rollupDay}, {$set: roll}, {runValidators: true})
+    .then(async result => {
+
+        await saveHistory(req.userData._id, 'rolls', 'manage', `Update a roll: ${objRoll[0]._id}-${rollupDay}-${Object.keys(roll).join('-')} | ${new Date()}`)
+
         res.status(200).json({
             msg: "success",
             request: {
@@ -262,10 +252,12 @@ exports.update = async (req, res, next) => {
         })
     })
     .catch(error => {
-        console.log(error)
-        res.status(500).json({
-            msg: 'Server error!',
-            error
+        let respond = {}
+        error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+
+        res.status(422).json({
+            msg: 'ValidatorError',
+            errors: respond
         })
     })
 }
@@ -273,13 +265,8 @@ exports.update = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
     const {rollupDay} = req.params
 
-    const objRoll = await Rollup.find({day: rollupDay})
-
-    if(!objRoll[0]) {
-        return res.status(404).json({
-            msg: 'Roll day not found!'
-        })
-    }
+    const rollObj = await Rollup.findOne({day: rollupDay})
+    const {_id, coin, item} = rollObj
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -287,9 +274,9 @@ exports.delete = async (req, res, next) => {
         })
     }
 
-    await saveHistory(req.userData._id, 'rolls', 'manage', `Delete a roll: ${objRoll[0]._id}-${rollupDay}-${objRoll[0].coin}-${objRoll[0].item} | ${new Date()}`)
+    await saveHistory(req.userData._id, 'rolls', 'manage', `Delete a roll: ${_id}-${rollupDay}-${coin}-${item} | ${new Date()}`)
 
-    await Rollup.deleteOne({day: rollupDay})
+    Rollup.deleteOne({day: rollupDay})
     .then(result => {
         res.status(200).json({
             msg: 'success',

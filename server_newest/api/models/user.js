@@ -1,6 +1,11 @@
 const mongoose = require('mongoose')
 const slug = require('mongoose-slug-updater')
 
+const enu = {
+    values: ['user', 'admin'],
+    message: `Roles must be 'user' or 'admin'!`
+}
+
 const userScheme = mongoose.Schema({
     name: {
         type: String,
@@ -15,7 +20,7 @@ const userScheme = mongoose.Schema({
     },
     roles: {
         type: String,
-        enum: ['user', 'admin'],
+        enum: enu,
         default: 'user'
     },
     isVerified: {
@@ -55,12 +60,6 @@ userScheme.path('email').validate(async (value) => {
     return !emailCount
 
 }, 'Email already exists!')
-
-userScheme.path('roles').validate(async (value) => {
-    const isValid = ['user', 'admin'].includes(value)
-    return isValid
-
-}, `Roles must be 'user' or 'admin'!`)
 
 // Add plugins
 mongoose.plugin(slug)

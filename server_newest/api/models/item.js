@@ -1,28 +1,32 @@
 const mongoose = require('mongoose')
 const slug = require('mongoose-slug-generator')
 
+const enu = {
+    values: ['gun', 'hat', 'outfit'],
+    message: `Type must be 'gun', 'hat' or 'outfit'!`
+}
+
 const itemScheme = mongoose.Schema({
     name: {
         type: String,
         unique: true,
-        required: true
+        required: [true, 'Name is required!']
     },
     slugName: {
         type: String,
-        slug: 'name',
-        unique: true
+        slug: 'name'
     },
     type: {
         type: String,
-        required: true
+        enum: enu,
+        required: [true, 'Type is required!']
     },
     thumbnail: {
-        type: String,
-        required: true
+        type: String
     },
     price: {
         type: Number,
-        required: true
+        required: [true, 'Price is required!']
     },
     sale: {
         type: Number,
@@ -33,6 +37,12 @@ const itemScheme = mongoose.Schema({
         default: Date.now()
     }
 })
+
+itemScheme.path('name').validate(async (value) => {
+    const nameCount = await mongoose.models.Item.countDocuments({name: value })
+    return !nameCount
+
+}, 'Name already exists!')
 
 // Add plugins
 mongoose.plugin(slug)

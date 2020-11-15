@@ -10,7 +10,7 @@ const {saveUserItem} = require('./../utils/userItem')
 
 exports.getAll = (req, res, next) => {
     const page = parseInt(req.query.page) || 1
-    const items_per_page = parseInt(req.query.limit) || 8
+    const items_per_page = parseInt(req.query.limit) || 100
 
     if (page < 1) page = 1
 
@@ -79,7 +79,6 @@ exports.getOne = (req, res, next) => {
     Item.findById(itemId)
     .select('_id name slugName thumbnail type price sale saleExpiresTime')
     .then(item => {
-
         if(!item){
             return res.status(404).json({
                 msg: 'Item not found!'
@@ -117,14 +116,10 @@ exports.buyOne = async (req, res, next) => {
     const {itemId} = req.params
     const {_id} = req.userData
 
-    const user = await User.findById(_id)
-    const item = await Item.findById(itemId)
-
-    if(!user) {
-        return res.status(404).json({
-            msg: 'User not found!',
-        })
-    }
+    const [user, item] = await Promise.all([
+        User.findById(_id),
+        Item.findById(itemId)
+    ])
 
     const {cash} = user
     const {name, type, price, sale, saleExpiresTime} = item
@@ -144,34 +139,37 @@ exports.buyOne = async (req, res, next) => {
         })
     }
 
-    await saveHistory(_id, 'items', 'personal', `Buy a item: ${name}-${type}-${price}-${salePrice}-${sale}-${saleExpiresTime}} | ${new Date()}`)
-    await saveStatistic(0, 0, 1, 0, 0, salePrice)
-    await saveUserItem(_id, [itemId])
+    await Promise.all([
+        saveHistory(_id, 'items', 'personal', `Buy a item: ${name}-${type}-${price}-${salePrice}-${sale}-${saleExpiresTime}} | ${new Date()}`),
+        saveStatistic(0, 0, 1, 0, 0, salePrice),
+        saveUserItem(_id, [itemId], 0)
+    ])
 
     user.cash = cash - salePrice
-    const result = await user.save()
-
-    if(result) {
+    User.updateOne({_id: user._id}, {$set: user})
+    .then(result => {
         res.status(200).json({
-            msg: 'success'
+            msg: 'success',
+            user: {
+                _id: user._id,
+                roles: user.roles,
+                name: user.name,
+                slugName: user.slugName,
+                email: user.email,
+                cash: user.cash
+            }
         })
-    }
-    else {
+    })
+    .catch(error => {
         res.status(500).json({
             msg: 'Server error!',
             error
         })
-    }
+    })
 }
 
-exports.create = async (req, res, next) => {
+exports.create = (req, res, next) => {
     const {name, type, price, sale, saleExpiresTime} = req.body
-
-    if(!name || !type || !price){
-        return res.status(400).json({
-            msg: 'Name, type, price are required!'
-        })
-    }
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -179,19 +177,21 @@ exports.create = async (req, res, next) => {
         })
     }
 
+    const thumbnail = req.file ? req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '') : ''
+
     const item = new Item({
         name,
         type,
         price,
-        thumbnail: req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '')
+        thumbnail
     })
 
     if(+sale > 0){
         item['sale'] = +sale,
-        item['saleExpiresTime'] = Date.now() + +saleExpiresTime || Date.now() + 259200000 // 3 days
+        +saleExpiresTime > 0 ? item['saleExpiresTime'] = Date.now() + +saleExpiresTime*24*60*60*1000 : item['saleExpiresTime'] = Date.now() + 259200000
     }
 
-    await item.save()
+    item.save()
     .then(async newItem => {
 
         await saveHistory(req.userData._id, 'items', 'manage', `Create a new item: ${newItem._id}-${name}-${type}-${price}-${newItem.sale}-${newItem.saleExpiresTime} | ${new Date()}`)
@@ -215,11 +215,22 @@ exports.create = async (req, res, next) => {
         })
     })
     .catch(error => {
-        console.log(error)
-        res.status(500).json({
-            msg: 'Server error!',
-            error
+        let respond = {}
+        error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+
+        res.status(422).json({
+            msg: 'ValidatorError',
+            errors: respond
         })
+
+        // {
+        //     "msg": "ValidatorError",
+        //     "errors": {
+        //         "name": "Name is required!",
+        //         "type": "Type is required!",
+        //         "price": "Price is required!"
+        //     }
+        // }
     })
 }
 
@@ -242,9 +253,13 @@ exports.update = async (req, res, next) => {
         }
     }
 
+    if(+item.sale > 0){
+        +item.saleExpiresTime > 0 ? item['saleExpiresTime'] = Date.now() + +item.saleExpiresTime*24*60*60*1000 : item['saleExpiresTime'] = Date.now() + 259200000
+    }
+
     await saveHistory(req.userData._id, 'items', 'manage', `Update a item: ${_id}-${Object.keys(item).join('-')} | ${new Date()}`)
 
-    await Item.updateOne({_id}, {$set: item})
+    Item.updateOne({_id}, {$set: item}, {runValidators: true})
     .then(result => {
         res.status(200).json({
             msg: "success",
@@ -255,10 +270,12 @@ exports.update = async (req, res, next) => {
         })
     })
     .catch(error => {
-        console.log(error)
-        res.status(500).json({
-            msg: 'Server error!',
-            error
+        let respond = {}
+        error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+
+        res.status(422).json({
+            msg: 'ValidatorError',
+            errors: respond
         })
     })
 }
@@ -273,19 +290,11 @@ exports.delete = async (req, res, next) => {
     }
 
     const item = await Item.findById(_id)
-
-    if(!item) {
-
-        return res.status(404).json({
-            msg: 'Item not found!'
-        })
-    }
-
     const {name, type, price, sale, saleExpiresTime} = item
 
     await saveHistory(req.userData._id, 'items', 'manage', `Delete a item: ${_id}-${name}-${type}-${price}-${sale}-${saleExpiresTime} | ${new Date()}`)
 
-    await Item.deleteOne({_id})
+    Item.deleteOne({_id})
     .then(result => {
         res.status(200).json({
             msg: 'success',
