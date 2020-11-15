@@ -50,9 +50,9 @@ Auth: Yes
 Roles: Admin only
 Req.body {
 	"code": "12345678",
-	"type": "Vip", [Vip, Normal]
+	"type": "Vip", type in ["Vip", "Normal"]
 	"items": "5f9ac4ba98989a002e27c87a 5f9ac4ba98989a002e27c87a",
-    expiresTime: 'Number (millisecond)'
+    "expiresTime": Number (day) ----> option
 }
 URL: /giffcodes
 If 'success' => {

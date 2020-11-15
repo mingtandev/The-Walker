@@ -10,6 +10,7 @@ exports.saveUserItem = async (userId, items) => {
 
     for(let i = 0; i < items.length; i++) {
         const result  = await Item.findById(items[i])
+        if (!result) break
         await userItem.items[`${result.type}s`].push(result.name)
     }
 

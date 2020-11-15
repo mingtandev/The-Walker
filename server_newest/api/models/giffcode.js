@@ -24,7 +24,7 @@ const codeSchema = mongoose.Schema({
     },
     expiresTime: {
         type: Date,
-        default: Date.now() + 259200000 // 3 days
+        default: Date.now() + 259200000 // 3 days 
     }
 })
 

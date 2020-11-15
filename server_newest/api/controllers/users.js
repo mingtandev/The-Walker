@@ -82,10 +82,15 @@ exports.getAll = (req, res, next) => {
 }
 
 exports.getOne = (req, res, next) => {
-    const _id = req.userData._id
+    const _id = req.params.userId
+
+    let selectStr = ''
+
+    if(_id === req.userData._id) selectStr = 'name email roles cash isVerified'
+    else selectStr = 'name email roles'
 
     User.findById(_id)
-    .select('name email roles cash isVerified')
+    .select(selectStr)
     .then(user => {
         if(!user){
             return res.status(404).json({
@@ -106,7 +111,7 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create = async (req, res, next) => {
+exports.create = (req, res, next) => {
     const {name, email, password} = req.body
 
     if(!name || !email || !password) {
@@ -115,68 +120,71 @@ exports.create = async (req, res, next) => {
         })
     }
 
-    User.find({email})
-    .then(user => {
-        if(user.length >= 1){
-            return res.status(409).json({
-                msg: "Email has been used!"
+    bcrypt.hash(password, 10, (error, encryptedPassword) => {
+        if(error){
+            return res.status(500).json({
+                msg: 'Server error!',
+                error
+            })
+
+        }else{
+            const passwordResetToken = crypto.randomBytes(16).toString('hex')
+            const user = new User({
+                name,
+                email,
+                password: encryptedPassword,
+                passwordResetToken
+            })
+
+            user.save()
+            .then(async newUser => {
+                const token = jwt.sign( {_id: newUser._id}, jwtKey, {
+                    expiresIn: tokenLife
+                })
+
+                sendMail(req, newUser.email, token, 'confirmation')
+                await saveStatistic(1, 0, 0, 0, 0, 0)
+
+                res.status(201).json({
+                    msg: "success",
+                    user: newUser
+                })
+            })
+            .catch(error => {
+                let respond = {}
+                error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+
+                res.status(422).json({
+                    msg: 'ValidatorError',
+                   errors: respond
+                })
+
+                // res
+                // {
+                //     "msg": "ValidatorError",
+                //     "errors": {
+                //         "name": "Name already exists!",
+                //         "email": "Email already exists!"
+                //     }
+                // }
             })
         }
-
-        bcrypt.hash(password, 10, (error, encryptedPassword) => {
-            if(error){
-                return res.status(500).json({
-                    msg: 'Server error!',
-                    error
-                })
-
-            }else{
-                const passwordResetToken = crypto.randomBytes(16).toString('hex')
-                const user = new User({
-                    name,
-                    email,
-                    password: encryptedPassword,
-                    passwordResetToken
-                })
-
-                user.save()
-                .then(async newUser => {
-                    const token = jwt.sign( {_id: newUser._id}, jwtKey, {
-                        expiresIn: tokenLife
-                    })
-
-                    sendMail(req, newUser.email, token, 'confirmation')
-                    await saveStatistic(1, 0, 0, 0, 0)
-
-                    res.status(201).json({
-                        msg: "success",
-                        user: newUser
-                    })
-                })
-                .catch(error => {
-                    res.status(500).json({
-                        msg: 'Server error!',
-                        error
-                    })
-                })
-            }
-        })
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: "Server error!",
-            error
-        })
     })
 }
 
-
-exports.update = async (req, res, next) => {
+exports.update = (req, res, next) => {
     const {userId: _id} = req.params
+    const {roles} = req.userData
+
+    if(roles != 'admin' && _id != req.userData._id){
+        return res.status(403).json({
+            msg: `You don't have the permission!`
+        })
+    }
 
     let hasPassword = false
 
-    const newUser = {}
+    let newUser = {}
 
     for (const ops of req.body) {
         newUser[ops.propName] = ops.value
@@ -186,9 +194,18 @@ exports.update = async (req, res, next) => {
         }
     }
 
+    if (roles != 'admin') {
+        for (const key of Object.keys(newUser)) {
+            if (!['name', 'password'].includes(key)) {
+                return res.status(403).json({
+                    msg: `You are only allowed to change the name and password!`
+                })
+            }
+        }
+    }
 
-    await User.findById(_id)
-    .then(async user => {
+    User.findById(_id)
+    .then(user => {
         if(!user){
             return res.status(500).json({
                 msg: 'User not found!'
@@ -196,23 +213,23 @@ exports.update = async (req, res, next) => {
         }
 
         if(hasPassword){
-            await bcrypt.hash(newUser.password, 10, async (error, encryptedPassword) => {
+            bcrypt.hash(newUser.password, 10, (error, encryptedPassword) => {
                 if(error){
                     return res.status(500).json({
                         msg: 'Server error!',
                         error
                     })
-
                 }
 
                 newUser.password = encryptedPassword
 
-                await User.updateOne({_id}, {$set: newUser})
+                User.updateOne({_id}, {$set: newUser}, { runValidators: true })
                 .then(async result => {
 
                     await saveHistory(_id, 'accInfos', 'personal', `Update an account: ${_id}-${Object.keys(newUser).join('-')} | ${new Date()}`)
+
                     res.status(200).json({
-                        msg: "success",
+                        msg: 'success',
                         request: {
                             type: 'GET',
                             url: req.hostname + '/users/' + _id
@@ -220,16 +237,25 @@ exports.update = async (req, res, next) => {
                     })
                 })
                 .catch(error => {
-                    console.log(error)
-                    res.status(500).json({
-                        msg: 'Server error!',
-                        error
+                    let respond = {}
+                    error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+
+                    res.status(422).json({
+                        msg: 'ValidatorError',
+                        errors: respond
                     })
+
+                    // {
+                    //     "msg": "ValidatorError",
+                    //     "errors": {
+                    //         "name": "Name already exists!"
+                    //     }
+                    // }
                 })
             })
-
-        }else{
-            await User.updateOne({_id}, {$set: newUser})
+        }
+        else{
+            User.updateOne({_id}, {$set: newUser}, {runValidators: true})
             .then(async result => {
 
                 await saveHistory(_id, 'accInfos', 'personal', `Update an account: ${_id}-${Object.keys(newUser).join('-')} | ${new Date()}`)
@@ -243,11 +269,20 @@ exports.update = async (req, res, next) => {
                 })
             })
             .catch(error => {
-                console.log(error)
-                res.status(500).json({
-                    msg: 'Server error!',
-                    error
+                let respond = {}
+                error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+
+                res.status(422).json({
+                    msg: 'ValidatorError',
+                    errors: respond
                 })
+
+                // {
+                //     "msg": "ValidatorError",
+                //     "errors": {
+                //         "name": "Name already exists!"
+                //     }
+                // }
             })
         }
     })
@@ -259,7 +294,7 @@ exports.update = async (req, res, next) => {
     })
 }
 
-exports.delete =  async (req, res, next) => {
+exports.delete =  (req, res, next) => {
     const {roles} = req.userData
     const {userId: _id} = req.params
 
@@ -275,8 +310,8 @@ exports.delete =  async (req, res, next) => {
         })
     }
 
-    await User.findById(_id)
-    .then(async user => {
+    User.findById(_id)
+    .then(user => {
         if(!user){
             return res.status(404).json({
                 msg: 'User not found!'
@@ -289,7 +324,7 @@ exports.delete =  async (req, res, next) => {
             })
         }
 
-        await User.deleteOne({_id})
+        User.deleteOne({_id})
         .then(async result => {
 
             await saveHistory(req.userData._id, 'accInfos', 'manage', `Delete an account: ${_id}-${user.name}-${user.email} | ${new Date()}`)
@@ -316,7 +351,7 @@ exports.delete =  async (req, res, next) => {
 
 // --------------------------------------------------------------------
 
-exports.confirmation = async (req, res, next) => {
+exports.confirmation = (req, res, next) => {
     const {verifyToken: token} = req.params
 
     if(!token){
@@ -329,8 +364,8 @@ exports.confirmation = async (req, res, next) => {
         const decoded = jwt.verify(token, jwtKey)
         const {_id} = decoded
 
-        await User.findOne({_id})
-        .then(async user => {
+        User.findOne({_id})
+        .then(user => {
             if(!user) {
                 return res.status(404).json({
                     msg: 'User not found!'
@@ -345,7 +380,7 @@ exports.confirmation = async (req, res, next) => {
 
             user.isVerified = true
 
-            await user.save(async error => {
+            user.save(async error => {
                 if(error) {
                     return res.status(500).json({
                         msg: 'Server error!',
@@ -374,7 +409,7 @@ exports.confirmation = async (req, res, next) => {
     }
 }
 
-exports.resend = async (req, res, next) => {
+exports.resend = (req, res, next) => {
     const {email} = req.body
 
     if(!email) {
@@ -383,7 +418,7 @@ exports.resend = async (req, res, next) => {
         })
     }
 
-    await User.findOne({email})
+    User.findOne({email})
     .then(async user => {
         if(!user) {
             return res.status(404).json({
@@ -510,7 +545,7 @@ exports.refresh = (req, res, next) => {
     }
 }
 
-exports.recovery = async (req, res, next) => {
+exports.recovery = (req, res, next) => {
     const {email} = req.body
 
     if(!email) {
@@ -519,20 +554,20 @@ exports.recovery = async (req, res, next) => {
         })
     }
 
-    await User.findOne({email})
-    .then(async user => {
+    User.findOne({email})
+    .then(user => {
         if(!user) {
             return res.status(404).json({
                 msg: 'Email not found!'
             })
         }
 
-        await bcrypt.hash(email, 10)
-        .then(async hashed => {
+        bcrypt.hash(email, 10)
+        .then(hashed => {
             user.passwordResetToken = hashed
             user.passwordResetExpires = Date.now() + 7200000 // 2h
 
-            await user.save()
+            user.save()
             .then(async newUser => {
 
                 sendMail(req, newUser.email, newUser.passwordResetToken, 'recovery')
@@ -558,7 +593,7 @@ exports.recovery = async (req, res, next) => {
     })
 }
 
-exports.forgot = async (req, res, next)  => {
+exports.forgot = (req, res, next)  => {
     const {newPassword, passwordResetToken} = req.body
 
     if(!newPassword || ! passwordResetToken){
@@ -567,26 +602,26 @@ exports.forgot = async (req, res, next)  => {
         })
     }
 
-    await User.findOne({
+    User.findOne({
         passwordResetToken,
         passwordResetExpires: {
             $gt: Date.now()
         }
     })
-    .then(async user => {
+    .then(user => {
         if(!user){
             return res.status(404).json({
                 msg: 'User not found or password reset token expires!'
             })
         }
 
-        await bcrypt.hash(newPassword, 10)
-        .then(async hashed => {
+        bcrypt.hash(newPassword, 10)
+        .then(hashed => {
             user.password = hashed
             user.passwordResetToken = ''
             user.passwordResetExpires = Date.now()
 
-            await user.save()
+            user.save()
             .then(async user => {
 
                 await saveHistory(user._id, 'accInfos', 'manage', `Recovery password: ${user._id}-${user.name}-${user.email} | ${new Date()}`)

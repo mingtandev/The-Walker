@@ -117,7 +117,8 @@ exports.getOne = (req, res, next) => {
 }
 
 exports.create = async (req, res, next) => {
-    const {code, type, items, expiresTime} = req.body
+    const {code, type, items} = req.body
+    let {expiresTime} = req.body
 
     if(!code || !items){
         return res.status(400).json({
@@ -130,6 +131,8 @@ exports.create = async (req, res, next) => {
             msg: `You don't have the permission!`
         })
     }
+
+    if (expiresTime) expiresTime = Date.now() + +expiresTime*24*60*60*1000
 
     const codeObj = new Code({
         code,

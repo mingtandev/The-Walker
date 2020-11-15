@@ -2,6 +2,7 @@ const {saveHistory} = require('./../utils/history')
 const {saveStatistic} = require('./../utils/statistic')
 
 const Blog = require('../models/blog')
+const user = require('../models/user')
 
 exports.getAll = (req, res, next) => {
 
@@ -11,7 +12,7 @@ exports.getAll = (req, res, next) => {
     if (page < 1) page = 1
 
     Blog.find({})
-    .select('_id date writer title content thumbnail')
+    .select('_id date writer name title content thumbnail')
     .skip((page - 1) * items_per_page)
     .limit(items_per_page)
     .then(async blogs => {
@@ -43,6 +44,7 @@ exports.getAll = (req, res, next) => {
                     _id: blog._id,
                     date: blog.date,
                     writer: blog.writer,
+                    name: blog.name,
                     title: blog.title,
                     content: blog.content,
                     thumbnail: blog.thumbnail,
@@ -71,7 +73,7 @@ exports.getOne = (req, res, next) => {
     const {blogId} = req.params
 
     Blog.findById(blogId)
-    .select('_id date writer title content thumbnail')
+    .select('_id date writer name title content thumbnail')
     .then(blog => {
 
         if(!blog){
@@ -86,6 +88,7 @@ exports.getOne = (req, res, next) => {
                 _id: blog._id,
                 date: blog.date,
                 writer: blog.writer,
+                name: blog.name,
                 title: blog.title,
                 content: blog.content,
                 thumbnail: blog.thumbnail,
@@ -106,11 +109,11 @@ exports.getOne = (req, res, next) => {
 }
 
 exports.create = async (req, res, next) => {
-    const {writer, title, content} = req.body
+    const {title, content} = req.body
 
-    if(!writer || !title || !content){
+    if(!title || !content){
         return res.status(400).json({
-            msg: 'Writer, title, content are required!'
+            msg: 'Title, content are required!'
         })
     }
 
@@ -121,7 +124,8 @@ exports.create = async (req, res, next) => {
     }
 
     const blog = new Blog({
-        writer,
+        writer: req.userData._id,
+        name: req.userData.name,
         title,
         content,
         thumbnail: req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '')
@@ -130,7 +134,7 @@ exports.create = async (req, res, next) => {
     await blog.save()
     .then(async blog => {
 
-        await saveHistory(writer, 'blogs', 'manage', `Create a blog: ${blog._id}-${writer}-${title} | ${new Date()}`)
+        await saveHistory(req.userData._id, 'blogs', 'manage', `Create a blog: ${blog._id}-${title} | ${new Date()}`)
         await saveStatistic(0, 0, 0, 0, 1, 0)
 
         res.status(201).json({
@@ -138,7 +142,8 @@ exports.create = async (req, res, next) => {
             blog: {
                 _id: blog._id,
                 date: blog.date,
-                writer: blog.writer,
+                writer: req.userData._id,
+                name: req.userData.name,
                 title: blog.title,
                 content: blog.content,
                 thumbnail: blog.thumbnail,

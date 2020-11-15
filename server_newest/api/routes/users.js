@@ -7,7 +7,7 @@ const router = express.Router()
 
 
 router.get('/', checkAuth, UsersController.getAll)
-router.get('/:userId([a-fA-F]{24})', checkAuth, UsersController.getOne)
+router.get('/:userId', checkAuth, UsersController.getOne)
 router.post('/', UsersController.create)
 router.patch('/:userId', checkAuth, UsersController.update)
 router.delete('/:userId', checkAuth, UsersController.delete)
