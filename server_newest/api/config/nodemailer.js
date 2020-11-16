@@ -33,7 +33,7 @@ exports.sendMail = (req, receiver, token, type) => {
         to: receiver, // list of receivers
         subject: "Recovery password", // Subject line
         text: `Your token here. Please copy and paste to form to reset password account! \n\n`, // plain text body
-        html: `<b>Token: </b> <hr> ${token} \n\n <p>If you don't do this, ignore this email!</p>`, // html body
+        html: `<b>Token: </b> ${token} \n\n <p>If you don't do this, ignore this email!</p>`, // html body
     }
 
     // send mail with defined transport object

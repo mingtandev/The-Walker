@@ -4,12 +4,15 @@ exports.getAll = (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
     const page = parseInt(req.query.page) || 1
-    const items_per_page = parseInt(req.query.limit) || 8
+    const items_per_page = parseInt(req.query.limit) || 100
 
     if (page < 1) page = 1
 
@@ -72,10 +75,12 @@ exports.getOne = (req, res, next) => {
     History.find({userId})
     .select('_id userId actions')
     .then(history => {
-
         if(!history[0]){
             return res.status(404).json({
-                msg: 'History not found!'
+                msg: 'ValidatorError',
+                errors: {
+                    user: `History not found!`
+                }
             })
         }
 

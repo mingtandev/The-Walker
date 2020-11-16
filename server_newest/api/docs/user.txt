@@ -42,8 +42,8 @@ Method: POST
 Auth: No
 Req.body:
 {
-	name: String
-	email: String
+	name: String        ---> unique
+	email: String       ---> unique
 	password: String
 }
 URL: /users
@@ -54,7 +54,7 @@ If 'success' => Check email => Verify
 // Update user
 Method: PATCH
 Auth: Yes
-Roles: Admin only
+Roles: User or Admin
 Req.body:
 [
 	{

@@ -52,6 +52,10 @@ GameClient/sysinfo.txt
 
 # Server
 server_newest/node_modules
+<<<<<<< HEAD
 server_newest/.env
 
 
+=======
+server_newest/.env
+>>>>>>> server

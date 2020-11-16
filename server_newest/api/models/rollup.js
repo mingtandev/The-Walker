@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const rollupSchema = mongoose.Schema({
     day: {
         type: Number,
-        required: true,
+        required: [true, 'Day is required!'],
         unique: true
     },
     coin: {
@@ -11,15 +11,21 @@ const rollupSchema = mongoose.Schema({
         default: 1000
     },
     item: {
-        type: mongoose.Types.ObjectId,
-        ref: 'Item',
-        default: null
+        type: mongoose.Schema.Types.ObjectId,
+        required: [true, 'Item is required!'],
+        ref: 'Item'
     },
     thumbnail: {
         type: String,
         default: ''
     }
 })
+
+rollupSchema.path('day').validate(async (value) => {
+    const dayCount = await mongoose.models.Rollup.countDocuments({day: value })
+    return !dayCount
+
+}, 'Day already exists!')
 
 // Add plugins
 rollupSchema.set('timestamps', true)

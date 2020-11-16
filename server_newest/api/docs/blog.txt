@@ -43,10 +43,9 @@ Method: POST
 Auth: Yes
 Roles: Admin only
 Req.body form data {
-    writer: 'ObjectId',
     title: 'String',
     content: 'String',
-    thumbnail: File (accepted: JPEG, JPG, PNG)
+    thumbnail: 'File (accepted: JPEG, JPG, PNG)'
 }
 URL: /blogs
 If 'success' => {
