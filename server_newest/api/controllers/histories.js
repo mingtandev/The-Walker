@@ -4,7 +4,10 @@ exports.getAll = (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
@@ -74,7 +77,10 @@ exports.getOne = (req, res, next) => {
     .then(history => {
         if(!history[0]){
             return res.status(404).json({
-                msg: 'History not found!'
+                msg: 'ValidatorError',
+                errors: {
+                    user: `History not found!`
+                }
             })
         }
 

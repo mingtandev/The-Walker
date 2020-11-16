@@ -8,7 +8,10 @@ exports.getAll = (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
@@ -78,7 +81,10 @@ exports.getOne = (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
@@ -87,7 +93,10 @@ exports.getOne = (req, res, next) => {
     .then(code => {
         if (!code) {
             return res.status(404).json({
-                msg: 'Code not found!'
+                msg: 'ValidatorError',
+                errors: {
+                    user: `Code not found!`
+                }
             })
         }
 
@@ -173,16 +182,22 @@ exports.useOne = async (req, res, next) => {
     let validCode = await Code.findOne({code})
 
     if(!validCode){
-        return res.status(200).json({
-            msg: 'Code does not exist!'
+        return res.status(404).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `Code does not exist!`
+            }
         })
     }
 
     const {type, items, isUsed, expiresTime} = validCode
 
     if (expiresTime < Date.now()) {
-        return res.status(200).json({
-            msg: 'The code has been expired!'
+        return res.status(404).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `The code has been expired!`
+            }
         })
     }
 
@@ -190,14 +205,20 @@ exports.useOne = async (req, res, next) => {
     historyCodes = historyCodes.map(his => his.split(' ')[2])
 
     if(type === 'Normal' && historyCodes.includes(code)) {
-        return res.status(200).json({
-            msg: 'You has been used this code!'
+        return res.status(403).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `You has been using this code!`
+            }
         })
     }
 
     if(isUsed) {
         return res.status(200).json({
-            msg: 'The code has been used!'
+            msg: 'ValidatorError',
+            errors: {
+                user: `The code has been expired!`
+            }
         })
     }
     else {
@@ -231,7 +252,10 @@ exports.update = (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
@@ -270,7 +294,10 @@ exports.delete = async (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
@@ -278,7 +305,10 @@ exports.delete = async (req, res, next) => {
 
     if(!objCode) {
         return res.status(404).json({
-            msg: 'Code not found!'
+            msg: 'ValidatorError',
+            errors: {
+                user: `Code not found!`
+            }
         })
     }
 

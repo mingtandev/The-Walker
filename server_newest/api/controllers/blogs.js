@@ -76,7 +76,10 @@ exports.getOne = (req, res, next) => {
     .then(blog => {
         if(!blog){
             return res.status(404).json({
-                msg: 'Blog not found!'
+                msg: 'ValidatorError',
+                errors: {
+                    user: `Blog not found!`
+                }
             })
         }
 
@@ -111,7 +114,10 @@ exports.create = (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
@@ -164,7 +170,10 @@ exports.update = (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
@@ -176,7 +185,7 @@ exports.update = (req, res, next) => {
 
     Blog.updateOne({_id}, {$set: blog}, {runValidators: true})
     .then(async result => {
-
+ 
         await saveHistory(req.userData._id, 'blogs', 'manage', `Update a blog: ${_id}-${Object.keys(blog).join('-')} | ${new Date()}`)
 
         res.status(200).json({
@@ -203,7 +212,10 @@ exports.delete = async (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 

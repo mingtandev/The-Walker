@@ -16,12 +16,15 @@ const jwtKey = process.env.JWT_KEY
 exports.getAll = (req, res, next) => {
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
     const page = parseInt(req.query.page) || 1
-    const items_per_page = parseInt(req.query.limit) || 8
+    const items_per_page = parseInt(req.query.limit) || 100
 
     if (page < 1) page = 1
 
@@ -93,8 +96,11 @@ exports.getOne = (req, res, next) => {
     .select(selectStr)
     .then(user => {
         if(!user){
-            return res.status(404).json({
-                msg: 'User not found!'
+            return res.status(403).json({
+                msg: 'ValidatorError',
+                errors: {
+                    user: `User not found!`
+                }
             })
         }else{
             res.status(200).json({
@@ -113,12 +119,6 @@ exports.getOne = (req, res, next) => {
 
 exports.create = (req, res, next) => {
     const {name, email, password} = req.body
-
-    if(!name || !email || !password) {
-        return res.status(404).json({
-            msg: "Fields: name, email and password are required!"
-        })
-    }
 
     bcrypt.hash(password, 10, (error, encryptedPassword) => {
         if(error){
@@ -156,7 +156,7 @@ exports.create = (req, res, next) => {
 
                 res.status(422).json({
                     msg: 'ValidatorError',
-                   errors: respond
+                    errors: respond
                 })
 
                 // res
@@ -178,7 +178,10 @@ exports.update = (req, res, next) => {
 
     if(roles != 'admin' && _id != req.userData._id){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
@@ -194,11 +197,14 @@ exports.update = (req, res, next) => {
         }
     }
 
-    if (roles != 'admin') {
+    if (roles === 'user') {
         for (const key of Object.keys(newUser)) {
             if (!['name', 'password'].includes(key)) {
-                return res.status(403).json({
-                    msg: `You are only allowed to change the name and password!`
+                return res.status(400).json({
+                    msg: 'ValidatorError',
+                    errors: {
+                        user: `You are only allowed to change the name and password!`
+                    }
                 })
             }
         }
@@ -207,8 +213,11 @@ exports.update = (req, res, next) => {
     User.findById(_id)
     .then(user => {
         if(!user){
-            return res.status(500).json({
-                msg: 'User not found!'
+            return res.status(403).json({
+                msg: 'ValidatorError',
+                errors: {
+                    user: `User not found!`
+                }
             })
         }
 
@@ -300,27 +309,21 @@ exports.delete =  (req, res, next) => {
 
     if(roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
-        })
-    }
-
-    if(!_id){
-        return res.status(404).json({
-            msg: 'UserID is required!'
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
     User.findById(_id)
     .then(user => {
         if(!user){
-            return res.status(404).json({
-                msg: 'User not found!'
-            })
-        }
-
-        if(user.roles === 'admin'){
-            return res.status(404).json({
-                msg: `You don't have the permission!`
+            return res.status(403).json({
+                msg: 'ValidatorError',
+                errors: {
+                    user: `User not found!`
+                }
             })
         }
 
@@ -354,12 +357,6 @@ exports.delete =  (req, res, next) => {
 exports.confirmation = (req, res, next) => {
     const {verifyToken: token} = req.params
 
-    if(!token){
-        return res.status(404).json({
-            msg: 'Invalid token!'
-        })
-    }
-
     try {
         const decoded = jwt.verify(token, jwtKey)
         const {_id} = decoded
@@ -368,7 +365,10 @@ exports.confirmation = (req, res, next) => {
         .then(user => {
             if(!user) {
                 return res.status(404).json({
-                    msg: 'User not found!'
+                    msg: 'ValidatorError',
+                    errors: {
+                        user: 'User not found!'
+                    }
                 })
             }
 
@@ -380,18 +380,18 @@ exports.confirmation = (req, res, next) => {
 
             user.isVerified = true
 
-            user.save(async error => {
-                if(error) {
-                    return res.status(500).json({
-                        msg: 'Server error!',
-                        error
-                    })
-                }
-
+            User.updateOne({_id}, {$set: user})
+            .then (async result => {
                 await saveHistory(_id, 'accInfos', 'manage', `Confirm this account | ${new Date()}`)
 
                 res.status(200).json({
                     msg: 'success'
+                })
+            })
+            .catch(error => {
+                res.status(500).json({
+                    msg: 'Server error!',
+                    error
                 })
             })
         })
@@ -401,10 +401,13 @@ exports.confirmation = (req, res, next) => {
                 error
             })
         })
-
-    } catch (error) {
+    }
+    catch (error) {
         res.status(404).json({
-            msg: 'Token has expires. Please click resend confirmation email!'
+            msg: 'ValidatorError',
+            errors: {
+                user: 'Token is invalid or has been expired. Please click resend confirmation email!'
+            }
         })
     }
 }
@@ -412,17 +415,14 @@ exports.confirmation = (req, res, next) => {
 exports.resend = (req, res, next) => {
     const {email} = req.body
 
-    if(!email) {
-        res.status(404).json({
-            msg: 'Email is required!'
-        })
-    }
-
     User.findOne({email})
     .then(async user => {
         if(!user) {
             return res.status(404).json({
-                msg: 'Email not found!'
+                msg: 'ValidatorError',
+                errors: {
+                    user: 'User not found!'
+                }
             })
         }
 
@@ -455,29 +455,27 @@ exports.resend = (req, res, next) => {
 exports.login = (req, res, next) => {
     const {email, password} = req.body
 
-    if(!email || !password){
-        return res.status(404).json({
-            msg: 'Email and password are required!'
-        })
-    }
-
-    User.find({email})
+    User.findOne({email})
     .then(user => {
-        if(user.length < 1){
+        if(!user){
             return res.status(404).json({
-                msg: 'Auth failed!'
+                msg: 'ValidatorError',
+                errors: {
+                    user: 'User not found!'
+                }
             })
 
         }else{
-            bcrypt.compare(password, user[0].password, (error, matched) => {
+            bcrypt.compare(password, user.password, (error, matched) => {
                 if(error){
-                    return res.status(404).json({
-                        msg: 'Auth failed!'
+                    return res.status(500).json({
+                        msg: 'Server error!',
+                        error
                     })
 
                 }else{
                     if(matched){
-                        const { email, _id, isVerified, name, cash, slugName, roles } = user[0]
+                        const { email, _id, isVerified, name, cash, slugName, roles } = user
                         const payloadToken = { _id, roles, name, cash, slugName, email }
                         const token = jwt.sign( payloadToken, jwtKey, {
                             expiresIn: tokenLife
@@ -488,7 +486,10 @@ exports.login = (req, res, next) => {
 
                         if(!isVerified) {
                             return res.status(401).json({
-                                msg: "Your account has not been verified!"
+                                msg: 'ValidatorError',
+                                errors: {
+                                    user: 'Your account has not been verified!'
+                                }
                             })
                         }
 
@@ -499,8 +500,11 @@ exports.login = (req, res, next) => {
                         })
 
                     }else{
-                        res.status(404).json({
-                            msg: 'Auth failed!'
+                        return res.status(401).json({
+                            msg: 'ValidatorError',
+                            errors: {
+                                user: 'Email or password does not match!'
+                            }
                         })
                     }
                 }
@@ -518,12 +522,6 @@ exports.login = (req, res, next) => {
 exports.refresh = (req, res, next) => {
     const { refreshToken } = req.body
 
-    if(!refreshToken){
-        return res.status(404).json({
-            msg: 'RefreshToken is required!'
-        })
-    }
-
     try {
         const decoded = jwt.verify(refreshToken, jwtKey)
         const { _id, roles, name, cash, slugName, email} = decoded
@@ -539,8 +537,11 @@ exports.refresh = (req, res, next) => {
         })
 
     } catch (error) {
-        res.status(401).json({
-            msg: 'Refresh token expires. Please login!'
+        return res.status(401).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: 'Token has been expired. Please login!'
+            }
         })
     }
 }
@@ -548,29 +549,26 @@ exports.refresh = (req, res, next) => {
 exports.recovery = (req, res, next) => {
     const {email} = req.body
 
-    if(!email) {
-        return res.status(404).json({
-            msg: 'Email is required!'
-        })
-    }
-
     User.findOne({email})
     .then(user => {
         if(!user) {
-            return res.status(404).json({
-                msg: 'Email not found!'
+            return res.status(401).json({
+                msg: 'ValidatorError',
+                errors: {
+                    user: 'Email not found!'
+                }
             })
         }
 
         bcrypt.hash(email, 10)
         .then(hashed => {
             user.passwordResetToken = hashed
-            user.passwordResetExpires = Date.now() + 7200000 // 2h
+            user.passwordResetExpires = Date.now() + 5*60*1000 // 5h
 
-            user.save()
+            User.updateOne({_id: user._id}, {$set: user})
             .then(async newUser => {
 
-                sendMail(req, newUser.email, newUser.passwordResetToken, 'recovery')
+                sendMail(req, email, hashed, 'recovery')
                 await saveHistory(user._id, 'accInfos', 'manage', `Send password reset token: ${user._id}-${user.email} | ${new Date()}`)
 
                 res.status(200).json({
@@ -596,12 +594,6 @@ exports.recovery = (req, res, next) => {
 exports.forgot = (req, res, next)  => {
     const {newPassword, passwordResetToken} = req.body
 
-    if(!newPassword || ! passwordResetToken){
-        return res.status(404).json({
-            msg: 'newPassword and passwordResetToken are required!'
-        })
-    }
-
     User.findOne({
         passwordResetToken,
         passwordResetExpires: {
@@ -609,22 +601,27 @@ exports.forgot = (req, res, next)  => {
         }
     })
     .then(user => {
+        console.log(user)
         if(!user){
-            return res.status(404).json({
-                msg: 'User not found or password reset token expires!'
+            return res.status(401).json({
+                msg: 'ValidatorError',
+                errors: {
+                    user: 'User not found or reset password token has been expired!'
+                }
             })
         }
 
         bcrypt.hash(newPassword, 10)
         .then(hashed => {
             user.password = hashed
-            user.passwordResetToken = ''
+            user.passwordResetToken = 'randomStringHere'
             user.passwordResetExpires = Date.now()
 
-            user.save()
-            .then(async user => {
+            User.updateOne({_id: user._id}, {$set: user})
+            .then(async newUser => {
+                console.log(newUser._id)
+                await saveHistory(user._id, 'accInfos', 'personal', `Recovery password: ${user._id}-${user.name}-${user.email} | ${new Date()}`)
 
-                await saveHistory(user._id, 'accInfos', 'manage', `Recovery password: ${user._id}-${user.name}-${user.email} | ${new Date()}`)
                 res.status(200).json({
                     msg: 'success'
                 })
@@ -657,7 +654,10 @@ exports.history = async (req, res, next)  => {
     if (!type && !effect) {
         if (req.userData.roles != 'admin'){
             return res.status(403).json({
-                msg: `You don't have the permission!`
+                msg: 'ValidatorError',
+                errors: {
+                    user: `You don't have the permission!`
+                }
             })
         }
 
@@ -669,9 +669,28 @@ exports.history = async (req, res, next)  => {
             history: result
         })
     }
+    else if (!types) {
+        return res.status(400).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `Request body have to include 'type'!`
+            }
+        })
+    }
+    else if (!effect) {
+        return res.status(400).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `Request body have to include 'effect'!`
+            }
+        })
+    }
     else if (!types.includes(type) || !effects.includes(effect)) {
         return res.status(400).json({
-            msg: 'Bad request body!'
+            msg: 'ValidatorError',
+            errors: {
+                user: `Value of 'type' and 'effect' must be valid!`
+            }
         })
     }
 

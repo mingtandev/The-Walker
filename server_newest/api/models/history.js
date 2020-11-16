@@ -5,7 +5,6 @@ const historySchema = mongoose.Schema({
     userId: {
         type: mongoose.Types.ObjectId,
         ref: 'User',
-        unique: true,
         required: [true, 'UserId is required!']
     },
     actions: {

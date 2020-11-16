@@ -45,7 +45,10 @@ exports.getOne = (req, res, next) => {
 
         if(!userItem){
             return res.status(404).json({
-                msg: 'User not found!'
+                msg: 'ValidatorError',
+                errors: {
+                    user: `User not found!`
+                }
             })
         }
 
@@ -113,20 +116,10 @@ exports.getOne = (req, res, next) => {
 
 exports.update = (req, res, next) => {
     const {userId} = req.params
-
-    // if (req.userData.roles != 'admin'){
-    //     return res.status(403).json({
-    //         msg: `You don't have the permission!`
-    //     })
-    // }
-
     const {coin, items} = req.body
 
-    if(!coin){
-        return res.status(401).json({
-            msg: 'Coin is required!'
-        })
-    }
+    if (!coin) coin = 0
+    if (!items) items = null
 
     UserItem.updateOne({userId}, {
         $inc: {
@@ -159,11 +152,14 @@ exports.update = (req, res, next) => {
 exports.delete = (req, res, next) => {
     const {userId} = req.params
 
-    // if (req.userData.roles != 'admin'){
-    //     return res.status(403).json({
-    //         msg: `You don't have the permission!`
-    //     })
-    // }
+    if (req.userData.roles != 'admin'){
+        return res.status(403).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
+        })
+    }
 
     UserItem.deleteOne({userId})
     .then(result => {

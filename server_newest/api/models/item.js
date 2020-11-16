@@ -5,7 +5,7 @@ const enu = {
     values: ['gun', 'hat', 'outfit'],
     message: `Type must be 'gun', 'hat' or 'outfit'!`
 }
-
+ 
 const itemScheme = mongoose.Schema({
     name: {
         type: String,

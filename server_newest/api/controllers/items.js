@@ -2,7 +2,6 @@ const mongoose = require('mongoose')
 
 const Item = require('../models/item')
 const User = require('../models/user')
-const UserItem = require('../models/userItem')
 
 const {saveHistory} = require('./../utils/history')
 const {saveStatistic} = require('./../utils/statistic')
@@ -81,7 +80,10 @@ exports.getOne = (req, res, next) => {
     .then(item => {
         if(!item){
             return res.status(404).json({
-                msg: 'Item not found!'
+                msg: 'ValidatorError',
+                errors: {
+                    user: `Item not found!`
+                }
             })
         }
 
@@ -134,8 +136,11 @@ exports.buyOne = async (req, res, next) => {
     }
 
     if(cash < salePrice) {
-        return res.status(404).json({
-            msg: 'Cash not enough!'
+        return res.status(200).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `Cash not enough!`
+            }
         })
     }
 
@@ -173,7 +178,10 @@ exports.create = (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
@@ -239,7 +247,10 @@ exports.update = async (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
@@ -285,7 +296,10 @@ exports.delete = async (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 

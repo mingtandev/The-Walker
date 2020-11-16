@@ -69,44 +69,6 @@ exports.getAll = (req, res, next) => {
     })
 }
 
-exports.use = async (req, res, next) => {
-    const {rollupDay} = req.params
-    const userId = req.userData._id
-
-    if(rollupDay != new Date().getDate()) {
-        return res.status(400).json({
-            msg: `Today is not ${rollupDay}!`
-        })
-    }
-
-    let his = await loadHistory(userId, 'rolls', 'personal')
-    his = his.map(his => his.split(' ')[2])
-
-    if (his.includes(rollupDay)) {
-        return res.status(400).json({
-            msg: 'You has been registered today!'
-        })
-    }
-
-    const roll = await Rollup.findOne({ day: rollupDay })
-
-    await saveHistory(userId, 'rolls', 'personal', `Roll up: ${rollupDay} | ${new Date()}`)
-    await saveStatistic(0, 1, 0, 0, 0, 0)
-
-    const result = await saveUserItem(userId, [roll.item], roll.coin)
-
-    if (result) {
-        res.status(200).json({
-            msg: 'success',
-            userItem: result
-        })
-    }
-    else {
-        msg: 'Server error!',
-        error
-    }
-}
-
 exports.getOne = (req, res, next) => {
     const {rollupDay} = req.params
 
@@ -115,7 +77,10 @@ exports.getOne = (req, res, next) => {
     .then(roll => {
         if(!roll){
             return res.status(404).json({
-                msg: 'Roll not found!'
+                msg: 'ValidatorError',
+                errors: {
+                    user: `Roll not found!`
+                }
             })
         }
 
@@ -143,12 +108,54 @@ exports.getOne = (req, res, next) => {
     })
 }
 
+exports.use = async (req, res, next) => {
+    const {rollupDay} = req.params
+    const userId = req.userData._id
+
+    if(rollupDay != new Date().getDate()) {
+        return res.status(400).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `Today is not ${rollupDay}!`
+            }
+        })
+    }
+
+    const history = await loadHistory(userId, 'rolls', 'personal')
+    const historyRollupDays = history.map(his => his.split(' ')[2])
+
+    if (historyRollupDays.includes(rollupDay)) {
+        return res.status(200).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `You has been registered today!`
+            }
+        })
+    }
+
+    const roll = await Rollup.findOne({ day: rollupDay })
+
+    const [ , , result] = await Promise.all([
+        saveHistory(userId, 'rolls', 'personal', `Roll up: ${rollupDay} | ${new Date()}`),
+        saveStatistic(0, 1, 0, 0, 0, 0),
+        saveUserItem(userId, [roll.item], roll.coin)
+    ])
+
+    res.status(200).json({
+        msg: 'success',
+        userItem: result
+    })
+}
+
 exports.create = (req, res, next) => {
     const {day, coin, item} = req.body
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
@@ -213,7 +220,10 @@ exports.update = async (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
@@ -270,7 +280,10 @@ exports.delete = async (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
