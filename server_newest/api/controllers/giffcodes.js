@@ -8,12 +8,15 @@ exports.getAll = (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
     const page = parseInt(req.query.page) || 1
-    const items_per_page = parseInt(req.query.limit) || 8
+    const items_per_page = parseInt(req.query.limit) || 100
 
     if (page < 1) page = 1
 
@@ -78,29 +81,34 @@ exports.getOne = (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
     Code.findById(codeId)
     .select('_id code type items isUsed expiresTime')
-    .then(item => {
-
-        if(!item){
+    .then(code => {
+        if (!code) {
             return res.status(404).json({
-                msg: 'Item not found!'
+                msg: 'ValidatorError',
+                errors: {
+                    user: `Code not found!`
+                }
             })
         }
 
         res.status(200).json({
             msg: "success",
-            item: {
-                _id: item._id,
-                code: item.code,
-                type: item.type,
-                items: item.items,
-                isUsed: item.isUsed,
-                expiresTime: item.expiresTime,
+            code: {
+                _id: code._id,
+                code: code.code,
+                type: code.type,
+                items: code.items,
+                isUsed: code.isUsed,
+                expiresTime: code.expiresTime,
                 request: {
                     type: 'GET',
                     url: req.hostname + '/giffcodes'
@@ -116,14 +124,9 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create = async (req, res, next) => {
-    const {code, type, items, expiresTime} = req.body
-
-    if(!code || !items){
-        return res.status(400).json({
-            msg: 'Bad request body!'
-        })
-    }
+exports.create = (req, res, next) => {
+    const {code, type, items} = req.body
+    let {expiresTime} = req.body
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -131,17 +134,19 @@ exports.create = async (req, res, next) => {
         })
     }
 
+    +expiresTime > 0 ? expiresTime = Date.now() + +expiresTime*24*60*60*1000 : expiresTime = Date.now() + 259200000
+
     const codeObj = new Code({
         code,
         type,
-        items: items.split(' '),
+        items,
         expiresTime
     })
 
-    await codeObj.save()
+    codeObj.save()
     .then(async newCode => {
 
-        await saveHistory(req.userData._id, 'codes', 'manage', `Create a gift code: ${newCode._id}-${code}-${codeObj.type.toLowerCase()}-${items.split(' ').join('-')}-${codeObj.expiresTime} | ${new Date()}`)
+        await saveHistory(req.userData._id, 'codes', 'manage', `Create a gift code: ${newCode._id}-${code}-${type.toLowerCase()}-${items.join('-')}-${newCode.expiresTime} | ${new Date()}`)
 
         res.status(201).json({
             msg: "success",
@@ -151,7 +156,7 @@ exports.create = async (req, res, next) => {
                 type: newCode.type,
                 items: newCode.items,
                 isUsed: newCode.isUsed,
-                expiresTime: Date.now() +  +newCode.expiresTime,
+                expiresTime: newCode.expiresTime,
                 request: {
                     type: 'GET',
                     url: req.hostname + '/giffcodes/' + newCode._id
@@ -160,9 +165,12 @@ exports.create = async (req, res, next) => {
         })
     })
     .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
+        let respond = {}
+        error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+
+        res.status(422).json({
+            msg: 'ValidatorError',
+            errors: respond
         })
     })
 }
@@ -174,16 +182,22 @@ exports.useOne = async (req, res, next) => {
     let validCode = await Code.findOne({code})
 
     if(!validCode){
-        return res.status(200).json({
-            msg: 'Code does not exist!'
+        return res.status(404).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `Code does not exist!`
+            }
         })
     }
 
     const {type, items, isUsed, expiresTime} = validCode
 
     if (expiresTime < Date.now()) {
-        return res.status(200).json({
-            msg: 'The code has been expired!'
+        return res.status(404).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `The code has been expired!`
+            }
         })
     }
 
@@ -191,25 +205,31 @@ exports.useOne = async (req, res, next) => {
     historyCodes = historyCodes.map(his => his.split(' ')[2])
 
     if(type === 'Normal' && historyCodes.includes(code)) {
-        return res.status(200).json({
-            msg: 'You has been used this code!'
+        return res.status(403).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `You has been using this code!`
+            }
         })
     }
 
     if(isUsed) {
         return res.status(200).json({
-            msg: 'The code has been used!'
+            msg: 'ValidatorError',
+            errors: {
+                user: `The code has been expired!`
+            }
         })
     }
     else {
-        await saveUserItem(userId, items)
+        await saveUserItem(userId, items, 0)
     }
 
     if (type === 'Vip') {
         validCode.isUsed = true
     }
 
-    const result = await validCode.save()
+    const result = await Code.updateOne({_id: validCode._id}, {$set: validCode})
 
     if(result) {
         await saveHistory(userId, 'codes', 'personal', `Used code: ${code} | ${new Date()}`)
@@ -227,12 +247,15 @@ exports.useOne = async (req, res, next) => {
     }
 }
 
-exports.update = async (req, res, next) => {
+exports.update = (req, res, next) => {
     const {codeId: _id} = req.params
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
@@ -242,10 +265,11 @@ exports.update = async (req, res, next) => {
         code[ops.propName] = ops.value
     }
 
-    await saveHistory(req.userData._id, 'codes', 'manage', `Update a gift code: ${_id}-${Object.keys(code).join('-')} | ${new Date()}`)
+    Code.updateOne({_id}, {$set: code}, {runValidators: true})
+    .then(async result => {
 
-    await Code.updateOne({_id}, {$set: code})
-    .then(result => {
+        await saveHistory(req.userData._id, 'codes', 'manage', `Update a gift code: ${_id}-${Object.keys(code).join('-')} | ${new Date()}`)
+
         res.status(200).json({
             msg: "success",
             request: {
@@ -255,9 +279,12 @@ exports.update = async (req, res, next) => {
         })
     })
     .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
+        let respond = {}
+        error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+
+        res.status(422).json({
+            msg: 'ValidatorError',
+            errors: respond
         })
     })
 }
@@ -267,24 +294,29 @@ exports.delete = async (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
-    const objCode = await Code.find({code: _code})
+    const objCode = await Code.findOne({code: _code})
 
-    if(!objCode[0]) {
-
+    if(!objCode) {
         return res.status(404).json({
-            msg: 'Code not found!'
+            msg: 'ValidatorError',
+            errors: {
+                user: `Code not found!`
+            }
         })
     }
 
-    const {_id, code, type, items, isUsed, expiresTime} = objCode[0]
+    const {_id, code, type, items, isUsed, expiresTime} = objCode
 
     await saveHistory(req.userData._id, 'codes', 'manage', `Delete a gift code: ${_id}-${code}-${type.toLowerCase()}-${items.join('-')}-${isUsed}-${expiresTime} | ${new Date()}`)
 
-    await Code.deleteOne({_id})
+    Code.deleteOne({_id})
     .then(result => {
         res.status(200).json({
             msg: 'success',

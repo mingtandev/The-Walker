@@ -4,9 +4,7 @@ const slug = require('mongoose-slug-generator')
 const userItemSchema = mongoose.Schema({
     userId: {
         type: mongoose.Types.ObjectId,
-        required: true,
-        ref: 'User',
-        unique: true
+        ref: 'User'
     },
     coin: {
         type: Number,

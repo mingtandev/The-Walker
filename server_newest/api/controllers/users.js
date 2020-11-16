@@ -16,12 +16,15 @@ const jwtKey = process.env.JWT_KEY
 exports.getAll = (req, res, next) => {
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
     const page = parseInt(req.query.page) || 1
-    const items_per_page = parseInt(req.query.limit) || 8
+    const items_per_page = parseInt(req.query.limit) || 100
 
     if (page < 1) page = 1
 
@@ -82,14 +85,22 @@ exports.getAll = (req, res, next) => {
 }
 
 exports.getOne = (req, res, next) => {
-    const _id = req.userData._id
+    const _id = req.params.userId
+
+    let selectStr = ''
+
+    if(_id === req.userData._id) selectStr = 'name email roles cash isVerified'
+    else selectStr = 'name email roles'
 
     User.findById(_id)
-    .select('name email roles cash isVerified')
+    .select(selectStr)
     .then(user => {
         if(!user){
-            return res.status(404).json({
-                msg: 'User not found!'
+            return res.status(403).json({
+                msg: 'ValidatorError',
+                errors: {
+                    user: `User not found!`
+                }
             })
         }else{
             res.status(200).json({
@@ -106,77 +117,77 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create = async (req, res, next) => {
+exports.create = (req, res, next) => {
     const {name, email, password} = req.body
 
-    if(!name || !email || !password) {
-        return res.status(404).json({
-            msg: "Fields: name, email and password are required!"
-        })
-    }
+    bcrypt.hash(password, 10, (error, encryptedPassword) => {
+        if(error){
+            return res.status(500).json({
+                msg: 'Server error!',
+                error
+            })
 
-    User.find({email})
-    .then(user => {
-        if(user.length >= 1){
-            return res.status(409).json({
-                msg: "Email has been used!"
+        }else{
+            const passwordResetToken = crypto.randomBytes(16).toString('hex')
+            const user = new User({
+                name,
+                email,
+                password: encryptedPassword,
+                passwordResetToken
+            })
+
+            user.save()
+            .then(async newUser => {
+                const token = jwt.sign( {_id: newUser._id}, jwtKey, {
+                    expiresIn: tokenLife
+                })
+
+                sendMail(req, newUser.email, token, 'confirmation')
+                await saveStatistic(1, 0, 0, 0, 0, 0)
+
+                res.status(201).json({
+                    msg: "success",
+                    user: newUser
+                })
+            })
+            .catch(error => {
+                let respond = {}
+                error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+
+                res.status(422).json({
+                    msg: 'ValidatorError',
+                    errors: respond
+                })
+
+                // res
+                // {
+                //     "msg": "ValidatorError",
+                //     "errors": {
+                //         "name": "Name already exists!",
+                //         "email": "Email already exists!"
+                //     }
+                // }
             })
         }
-
-        bcrypt.hash(password, 10, (error, encryptedPassword) => {
-            if(error){
-                return res.status(500).json({
-                    msg: 'Server error!',
-                    error
-                })
-
-            }else{
-                const passwordResetToken = crypto.randomBytes(16).toString('hex')
-                const user = new User({
-                    name,
-                    email,
-                    password: encryptedPassword,
-                    passwordResetToken
-                })
-
-                user.save()
-                .then(async newUser => {
-                    const token = jwt.sign( {_id: newUser._id}, jwtKey, {
-                        expiresIn: tokenLife
-                    })
-
-                    sendMail(req, newUser.email, token, 'confirmation')
-                    await saveStatistic(1, 0, 0, 0, 0)
-
-                    res.status(201).json({
-                        msg: "success",
-                        user: newUser
-                    })
-                })
-                .catch(error => {
-                    res.status(500).json({
-                        msg: 'Server error!',
-                        error
-                    })
-                })
-            }
-        })
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: "Server error!",
-            error
-        })
     })
 }
 
-
-exports.update = async (req, res, next) => {
+exports.update = (req, res, next) => {
     const {userId: _id} = req.params
+    const {roles} = req.userData
+
+    if(roles != 'admin' && _id != req.userData._id){
+        return res.status(403).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
+        })
+    }
 
     let hasPassword = false
 
-    const newUser = {}
+    let newUser = {}
 
     for (const ops of req.body) {
         newUser[ops.propName] = ops.value
@@ -186,33 +197,48 @@ exports.update = async (req, res, next) => {
         }
     }
 
+    if (roles === 'user') {
+        for (const key of Object.keys(newUser)) {
+            if (!['name', 'password'].includes(key)) {
+                return res.status(400).json({
+                    msg: 'ValidatorError',
+                    errors: {
+                        user: `You are only allowed to change the name and password!`
+                    }
+                })
+            }
+        }
+    }
 
-    await User.findById(_id)
-    .then(async user => {
+    User.findById(_id)
+    .then(user => {
         if(!user){
-            return res.status(500).json({
-                msg: 'User not found!'
+            return res.status(403).json({
+                msg: 'ValidatorError',
+                errors: {
+                    user: `User not found!`
+                }
             })
         }
 
         if(hasPassword){
-            await bcrypt.hash(newUser.password, 10, async (error, encryptedPassword) => {
+            bcrypt.hash(newUser.password, 10, (error, encryptedPassword) => {
                 if(error){
                     return res.status(500).json({
                         msg: 'Server error!',
                         error
                     })
-
                 }
 
                 newUser.password = encryptedPassword
 
-                await User.updateOne({_id}, {$set: newUser})
+                User.updateOne({_id}, {$set: newUser}, { runValidators: true })
                 .then(async result => {
 
                     await saveHistory(_id, 'accInfos', 'personal', `Update an account: ${_id}-${Object.keys(newUser).join('-')} | ${new Date()}`)
+
                     res.status(200).json({
-                        msg: "success",
+                        msg: 'success',
                         request: {
                             type: 'GET',
                             url: req.hostname + '/users/' + _id
@@ -220,16 +246,25 @@ exports.update = async (req, res, next) => {
                     })
                 })
                 .catch(error => {
-                    console.log(error)
-                    res.status(500).json({
-                        msg: 'Server error!',
-                        error
+                    let respond = {}
+                    error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+
+                    res.status(422).json({
+                        msg: 'ValidatorError',
+                        errors: respond
                     })
+
+                    // {
+                    //     "msg": "ValidatorError",
+                    //     "errors": {
+                    //         "name": "Name already exists!"
+                    //     }
+                    // }
                 })
             })
-
-        }else{
-            await User.updateOne({_id}, {$set: newUser})
+        }
+        else{
+            User.updateOne({_id}, {$set: newUser}, {runValidators: true})
             .then(async result => {
 
                 await saveHistory(_id, 'accInfos', 'personal', `Update an account: ${_id}-${Object.keys(newUser).join('-')} | ${new Date()}`)
@@ -243,11 +278,20 @@ exports.update = async (req, res, next) => {
                 })
             })
             .catch(error => {
-                console.log(error)
-                res.status(500).json({
-                    msg: 'Server error!',
-                    error
+                let respond = {}
+                error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+
+                res.status(422).json({
+                    msg: 'ValidatorError',
+                    errors: respond
                 })
+
+                // {
+                //     "msg": "ValidatorError",
+                //     "errors": {
+                //         "name": "Name already exists!"
+                //     }
+                // }
             })
         }
     })
@@ -259,37 +303,31 @@ exports.update = async (req, res, next) => {
     })
 }
 
-exports.delete =  async (req, res, next) => {
+exports.delete =  (req, res, next) => {
     const {roles} = req.userData
     const {userId: _id} = req.params
 
     if(roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
-    if(!_id){
-        return res.status(404).json({
-            msg: 'UserID is required!'
-        })
-    }
-
-    await User.findById(_id)
-    .then(async user => {
+    User.findById(_id)
+    .then(user => {
         if(!user){
-            return res.status(404).json({
-                msg: 'User not found!'
+            return res.status(403).json({
+                msg: 'ValidatorError',
+                errors: {
+                    user: `User not found!`
+                }
             })
         }
 
-        if(user.roles === 'admin'){
-            return res.status(404).json({
-                msg: `You don't have the permission!`
-            })
-        }
-
-        await User.deleteOne({_id})
+        User.deleteOne({_id})
         .then(async result => {
 
             await saveHistory(req.userData._id, 'accInfos', 'manage', `Delete an account: ${_id}-${user.name}-${user.email} | ${new Date()}`)
@@ -316,24 +354,21 @@ exports.delete =  async (req, res, next) => {
 
 // --------------------------------------------------------------------
 
-exports.confirmation = async (req, res, next) => {
+exports.confirmation = (req, res, next) => {
     const {verifyToken: token} = req.params
-
-    if(!token){
-        return res.status(404).json({
-            msg: 'Invalid token!'
-        })
-    }
 
     try {
         const decoded = jwt.verify(token, jwtKey)
         const {_id} = decoded
 
-        await User.findOne({_id})
-        .then(async user => {
+        User.findOne({_id})
+        .then(user => {
             if(!user) {
                 return res.status(404).json({
-                    msg: 'User not found!'
+                    msg: 'ValidatorError',
+                    errors: {
+                        user: 'User not found!'
+                    }
                 })
             }
 
@@ -345,18 +380,18 @@ exports.confirmation = async (req, res, next) => {
 
             user.isVerified = true
 
-            await user.save(async error => {
-                if(error) {
-                    return res.status(500).json({
-                        msg: 'Server error!',
-                        error
-                    })
-                }
-
+            User.updateOne({_id}, {$set: user})
+            .then (async result => {
                 await saveHistory(_id, 'accInfos', 'manage', `Confirm this account | ${new Date()}`)
 
                 res.status(200).json({
                     msg: 'success'
+                })
+            })
+            .catch(error => {
+                res.status(500).json({
+                    msg: 'Server error!',
+                    error
                 })
             })
         })
@@ -366,28 +401,28 @@ exports.confirmation = async (req, res, next) => {
                 error
             })
         })
-
-    } catch (error) {
+    }
+    catch (error) {
         res.status(404).json({
-            msg: 'Token has expires. Please click resend confirmation email!'
+            msg: 'ValidatorError',
+            errors: {
+                user: 'Token is invalid or has been expired. Please click resend confirmation email!'
+            }
         })
     }
 }
 
-exports.resend = async (req, res, next) => {
+exports.resend = (req, res, next) => {
     const {email} = req.body
 
-    if(!email) {
-        res.status(404).json({
-            msg: 'Email is required!'
-        })
-    }
-
-    await User.findOne({email})
+    User.findOne({email})
     .then(async user => {
         if(!user) {
             return res.status(404).json({
-                msg: 'Email not found!'
+                msg: 'ValidatorError',
+                errors: {
+                    user: 'User not found!'
+                }
             })
         }
 
@@ -420,29 +455,27 @@ exports.resend = async (req, res, next) => {
 exports.login = (req, res, next) => {
     const {email, password} = req.body
 
-    if(!email || !password){
-        return res.status(404).json({
-            msg: 'Email and password are required!'
-        })
-    }
-
-    User.find({email})
+    User.findOne({email})
     .then(user => {
-        if(user.length < 1){
+        if(!user){
             return res.status(404).json({
-                msg: 'Auth failed!'
+                msg: 'ValidatorError',
+                errors: {
+                    user: 'User not found!'
+                }
             })
 
         }else{
-            bcrypt.compare(password, user[0].password, (error, matched) => {
+            bcrypt.compare(password, user.password, (error, matched) => {
                 if(error){
-                    return res.status(404).json({
-                        msg: 'Auth failed!'
+                    return res.status(500).json({
+                        msg: 'Server error!',
+                        error
                     })
 
                 }else{
                     if(matched){
-                        const { email, _id, isVerified, name, cash, slugName, roles } = user[0]
+                        const { email, _id, isVerified, name, cash, slugName, roles } = user
                         const payloadToken = { _id, roles, name, cash, slugName, email }
                         const token = jwt.sign( payloadToken, jwtKey, {
                             expiresIn: tokenLife
@@ -453,7 +486,10 @@ exports.login = (req, res, next) => {
 
                         if(!isVerified) {
                             return res.status(401).json({
-                                msg: "Your account has not been verified!"
+                                msg: 'ValidatorError',
+                                errors: {
+                                    user: 'Your account has not been verified!'
+                                }
                             })
                         }
 
@@ -464,8 +500,11 @@ exports.login = (req, res, next) => {
                         })
 
                     }else{
-                        res.status(404).json({
-                            msg: 'Auth failed!'
+                        return res.status(401).json({
+                            msg: 'ValidatorError',
+                            errors: {
+                                user: 'Email or password does not match!'
+                            }
                         })
                     }
                 }
@@ -483,12 +522,6 @@ exports.login = (req, res, next) => {
 exports.refresh = (req, res, next) => {
     const { refreshToken } = req.body
 
-    if(!refreshToken){
-        return res.status(404).json({
-            msg: 'RefreshToken is required!'
-        })
-    }
-
     try {
         const decoded = jwt.verify(refreshToken, jwtKey)
         const { _id, roles, name, cash, slugName, email} = decoded
@@ -504,38 +537,38 @@ exports.refresh = (req, res, next) => {
         })
 
     } catch (error) {
-        res.status(401).json({
-            msg: 'Refresh token expires. Please login!'
+        return res.status(401).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: 'Token has been expired. Please login!'
+            }
         })
     }
 }
 
-exports.recovery = async (req, res, next) => {
+exports.recovery = (req, res, next) => {
     const {email} = req.body
 
-    if(!email) {
-        return res.status(404).json({
-            msg: 'Email is required!'
-        })
-    }
-
-    await User.findOne({email})
-    .then(async user => {
+    User.findOne({email})
+    .then(user => {
         if(!user) {
-            return res.status(404).json({
-                msg: 'Email not found!'
+            return res.status(401).json({
+                msg: 'ValidatorError',
+                errors: {
+                    user: 'Email not found!'
+                }
             })
         }
 
-        await bcrypt.hash(email, 10)
-        .then(async hashed => {
+        bcrypt.hash(email, 10)
+        .then(hashed => {
             user.passwordResetToken = hashed
-            user.passwordResetExpires = Date.now() + 7200000 // 2h
+            user.passwordResetExpires = Date.now() + 5*60*1000 // 5h
 
-            await user.save()
+            User.updateOne({_id: user._id}, {$set: user})
             .then(async newUser => {
 
-                sendMail(req, newUser.email, newUser.passwordResetToken, 'recovery')
+                sendMail(req, email, hashed, 'recovery')
                 await saveHistory(user._id, 'accInfos', 'manage', `Send password reset token: ${user._id}-${user.email} | ${new Date()}`)
 
                 res.status(200).json({
@@ -558,38 +591,37 @@ exports.recovery = async (req, res, next) => {
     })
 }
 
-exports.forgot = async (req, res, next)  => {
+exports.forgot = (req, res, next)  => {
     const {newPassword, passwordResetToken} = req.body
 
-    if(!newPassword || ! passwordResetToken){
-        return res.status(404).json({
-            msg: 'newPassword and passwordResetToken are required!'
-        })
-    }
-
-    await User.findOne({
+    User.findOne({
         passwordResetToken,
         passwordResetExpires: {
             $gt: Date.now()
         }
     })
-    .then(async user => {
+    .then(user => {
+        console.log(user)
         if(!user){
-            return res.status(404).json({
-                msg: 'User not found or password reset token expires!'
+            return res.status(401).json({
+                msg: 'ValidatorError',
+                errors: {
+                    user: 'User not found or reset password token has been expired!'
+                }
             })
         }
 
-        await bcrypt.hash(newPassword, 10)
-        .then(async hashed => {
+        bcrypt.hash(newPassword, 10)
+        .then(hashed => {
             user.password = hashed
-            user.passwordResetToken = ''
+            user.passwordResetToken = 'randomStringHere'
             user.passwordResetExpires = Date.now()
 
-            await user.save()
-            .then(async user => {
+            User.updateOne({_id: user._id}, {$set: user})
+            .then(async newUser => {
+                console.log(newUser._id)
+                await saveHistory(user._id, 'accInfos', 'personal', `Recovery password: ${user._id}-${user.name}-${user.email} | ${new Date()}`)
 
-                await saveHistory(user._id, 'accInfos', 'manage', `Recovery password: ${user._id}-${user.name}-${user.email} | ${new Date()}`)
                 res.status(200).json({
                     msg: 'success'
                 })
@@ -622,7 +654,10 @@ exports.history = async (req, res, next)  => {
     if (!type && !effect) {
         if (req.userData.roles != 'admin'){
             return res.status(403).json({
-                msg: `You don't have the permission!`
+                msg: 'ValidatorError',
+                errors: {
+                    user: `You don't have the permission!`
+                }
             })
         }
 
@@ -634,9 +669,28 @@ exports.history = async (req, res, next)  => {
             history: result
         })
     }
+    else if (!types) {
+        return res.status(400).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `Request body have to include 'type'!`
+            }
+        })
+    }
+    else if (!effect) {
+        return res.status(400).json({
+            msg: 'ValidatorError',
+            errors: {
+                user: `Request body have to include 'effect'!`
+            }
+        })
+    }
     else if (!types.includes(type) || !effects.includes(effect)) {
         return res.status(400).json({
-            msg: 'Bad request body!'
+            msg: 'ValidatorError',
+            errors: {
+                user: `Value of 'type' and 'effect' must be valid!`
+            }
         })
     }
 

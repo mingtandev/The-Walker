@@ -6,22 +6,12 @@ Method: GET
 Auth: Yes,
 Roles: Admin only
 Req.body: {}
-URL: /histories?page=1&limit=2
+URL: /histories
 If 'success' => {
     msg: 'success'.
     length: Number,
-    histories: [],
-    request: {
-        currentPage: 1,
-        totalPages: 3,
-        next: {
-            page: 2,
-            limit: 2
-        }
-    }
+    histories: []
 }
-
-NOTE: ?page=1&limit=2 (option)
 
 ----------------------------------------------------------------------------
 
@@ -31,30 +21,6 @@ Auth: Yes,
 Roles: User or Admin
 Req.params: userId
 URL: /histories/:userId
-If 'success' => {
-    msg: 'success',
-    history: {
-        _id,
-        userId,
-        actions: {
-            accInfos: [],   // Create acc, Update info, Forgot pass, ....
-            items: [],      // Buy items, Delete items (Game client)
-            rolls: [],      // History rolls
-            code: []        // Code used
-        }
-    }
-}
-
-----------------------------------------------------------------------------
-
-// Create a new item
-Method: POST
-Auth: No
-Roles: No
-Req.body {
-    userId: ObjectId
-}
-URL: /histories
 If 'success' => {
     msg: 'success',
     history: {

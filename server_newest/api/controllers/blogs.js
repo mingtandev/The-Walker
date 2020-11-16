@@ -6,12 +6,12 @@ const Blog = require('../models/blog')
 exports.getAll = (req, res, next) => {
 
     const page = parseInt(req.query.page) || 1
-    const items_per_page = parseInt(req.query.limit) || 8
+    const items_per_page = parseInt(req.query.limit) || 100
 
     if (page < 1) page = 1
 
     Blog.find({})
-    .select('_id date writer title content thumbnail')
+    .select('_id date writer name title content thumbnail')
     .skip((page - 1) * items_per_page)
     .limit(items_per_page)
     .then(async blogs => {
@@ -43,6 +43,7 @@ exports.getAll = (req, res, next) => {
                     _id: blog._id,
                     date: blog.date,
                     writer: blog.writer,
+                    name: blog.name,
                     title: blog.title,
                     content: blog.content,
                     thumbnail: blog.thumbnail,
@@ -71,12 +72,14 @@ exports.getOne = (req, res, next) => {
     const {blogId} = req.params
 
     Blog.findById(blogId)
-    .select('_id date writer title content thumbnail')
+    .select('_id date writer name title content thumbnail')
     .then(blog => {
-
         if(!blog){
             return res.status(404).json({
-                msg: 'Blog not found!'
+                msg: 'ValidatorError',
+                errors: {
+                    user: `Blog not found!`
+                }
             })
         }
 
@@ -86,6 +89,7 @@ exports.getOne = (req, res, next) => {
                 _id: blog._id,
                 date: blog.date,
                 writer: blog.writer,
+                name: blog.name,
                 title: blog.title,
                 content: blog.content,
                 thumbnail: blog.thumbnail,
@@ -105,32 +109,32 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create = async (req, res, next) => {
-    const {writer, title, content} = req.body
-
-    if(!writer || !title || !content){
-        return res.status(400).json({
-            msg: 'Writer, title, content are required!'
-        })
-    }
+exports.create = (req, res, next) => {
+    const {title, content} = req.body
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
+    const thumbnail = req.file ? req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '') : ''
+
     const blog = new Blog({
-        writer,
+        writer: req.userData._id,
+        name: req.userData.name,
         title,
         content,
-        thumbnail: req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '')
+        thumbnail
     })
 
-    await blog.save()
+    blog.save()
     .then(async blog => {
 
-        await saveHistory(writer, 'blogs', 'manage', `Create a blog: ${blog._id}-${writer}-${title} | ${new Date()}`)
+        await saveHistory(req.userData._id, 'blogs', 'manage', `Create a blog: ${blog._id}-${title} | ${new Date()}`)
         await saveStatistic(0, 0, 0, 0, 1, 0)
 
         res.status(201).json({
@@ -138,7 +142,8 @@ exports.create = async (req, res, next) => {
             blog: {
                 _id: blog._id,
                 date: blog.date,
-                writer: blog.writer,
+                writer: req.userData._id,
+                name: req.userData.name,
                 title: blog.title,
                 content: blog.content,
                 thumbnail: blog.thumbnail,
@@ -150,20 +155,25 @@ exports.create = async (req, res, next) => {
         })
     })
     .catch(error => {
-        console.log(error)
-        res.status(500).json({
-            msg: 'Server error!',
-            error
+        let respond = {}
+        error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+
+        res.status(422).json({
+            msg: 'ValidatorError',
+            errors: respond
         })
     })
 }
 
-exports.update = async (req, res, next) => {
+exports.update = (req, res, next) => {
     const {blogId: _id} = req.params
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
@@ -173,10 +183,11 @@ exports.update = async (req, res, next) => {
         blog[ops.propName] = ops.value
     }
 
-    await saveHistory(req.userData._id, 'blogs', 'manage', `Update a blog: ${_id}-${Object.keys(blog).join('-')} | ${new Date()}`)
+    Blog.updateOne({_id}, {$set: blog}, {runValidators: true})
+    .then(async result => {
+ 
+        await saveHistory(req.userData._id, 'blogs', 'manage', `Update a blog: ${_id}-${Object.keys(blog).join('-')} | ${new Date()}`)
 
-    await Blog.updateOne({_id}, {$set: blog})
-    .then(result => {
         res.status(200).json({
             msg: "success",
             request: {
@@ -186,10 +197,12 @@ exports.update = async (req, res, next) => {
         })
     })
     .catch(error => {
-        console.log(error)
-        res.status(500).json({
-            msg: 'Server error!',
-            error
+        let respond = {}
+        error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+
+        res.status(422).json({
+            msg: 'ValidatorError',
+            errors: respond
         })
     })
 }
@@ -199,22 +212,20 @@ exports.delete = async (req, res, next) => {
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
-            msg: `You don't have the permission!`
+            msg: 'ValidatorError',
+            errors: {
+                user: `You don't have the permission!`
+            }
         })
     }
 
     const blog = await Blog.findById(_id)
 
-    if(!blog) {
-        return res.status(404).json({
-            msg: 'Blog not found!'
-        })
-    }
+    Blog.deleteOne({_id})
+    .then(async result => {
 
-    await saveHistory(req.userData._id, 'blogs', 'manage', `Delete a blog: ${blog._id}-${blog.title} | ${new Date()}`)
+        await saveHistory(req.userData._id, 'blogs', 'manage', `Delete a blog: ${blog._id}-${blog.title} | ${new Date()}`)
 
-    await Blog.deleteOne({_id})
-    .then(result => {
         res.status(200).json({
             msg: 'success',
             request: {
@@ -230,7 +241,6 @@ exports.delete = async (req, res, next) => {
         })
     })
     .catch(error => {
-        console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
