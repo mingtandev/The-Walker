@@ -92,7 +92,7 @@ exports.getOne = (req, res, next) => {
     .select('_id code type items isUsed expiresTime')
     .then(code => {
         if (!code) {
-            return res.status(404).json({
+            return res.status(202).json({
                 msg: 'ValidatorError',
                 errors: {
                     user: `Code not found!`
@@ -168,7 +168,7 @@ exports.create = (req, res, next) => {
         let respond = {}
         error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
 
-        res.status(422).json({
+        res.status(202).json({
             msg: 'ValidatorError',
             errors: respond
         })
@@ -178,11 +178,12 @@ exports.create = (req, res, next) => {
 exports.useOne = async (req, res, next) => {
     const {code} = req.params
     const {_id: userId} = req.userData
+    let userItem = {}
 
     let validCode = await Code.findOne({code})
 
     if(!validCode){
-        return res.status(404).json({
+        return res.status(202).json({
             msg: 'ValidatorError',
             errors: {
                 user: `Code does not exist!`
@@ -193,7 +194,7 @@ exports.useOne = async (req, res, next) => {
     const {type, items, isUsed, expiresTime} = validCode
 
     if (expiresTime < Date.now()) {
-        return res.status(404).json({
+        return res.status(202).json({
             msg: 'ValidatorError',
             errors: {
                 user: `The code has been expired!`
@@ -205,7 +206,7 @@ exports.useOne = async (req, res, next) => {
     historyCodes = historyCodes.map(his => his.split(' ')[2])
 
     if(type === 'Normal' && historyCodes.includes(code)) {
-        return res.status(403).json({
+        return res.status(202).json({
             msg: 'ValidatorError',
             errors: {
                 user: `You has been using this code!`
@@ -214,15 +215,15 @@ exports.useOne = async (req, res, next) => {
     }
 
     if(isUsed) {
-        return res.status(200).json({
+        return res.status(202).json({
             msg: 'ValidatorError',
             errors: {
-                user: `The code has been expired!`
+                user: `The code has been used!`
             }
         })
     }
     else {
-        await saveUserItem(userId, items, 0)
+       userItem =  await saveUserItem(userId, items, 0)
     }
 
     if (type === 'Vip') {
@@ -236,7 +237,8 @@ exports.useOne = async (req, res, next) => {
         await saveStatistic(0, 0, 0, 1, 0, 0)
 
         res.status(200).json({
-            msg: 'success'
+            msg: 'success',
+            userItem
         })
     }
     else {
@@ -282,7 +284,7 @@ exports.update = (req, res, next) => {
         let respond = {}
         error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
 
-        res.status(422).json({
+        res.status(202).json({
             msg: 'ValidatorError',
             errors: respond
         })
@@ -304,7 +306,7 @@ exports.delete = async (req, res, next) => {
     const objCode = await Code.findOne({code: _code})
 
     if(!objCode) {
-        return res.status(404).json({
+        return res.status(202).json({
             msg: 'ValidatorError',
             errors: {
                 user: `Code not found!`

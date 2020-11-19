@@ -5,12 +5,16 @@ const enu = {
     values: ['gun', 'hat', 'outfit'],
     message: `Type must be 'gun', 'hat' or 'outfit'!`
 }
- 
+
 const itemScheme = mongoose.Schema({
     name: {
         type: String,
         unique: true,
         required: [true, 'Name is required!']
+    },
+    detail: {
+        type: String,
+        required: [true, 'Detail is required!']
     },
     slugName: {
         type: String,

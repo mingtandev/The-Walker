@@ -11,7 +11,7 @@ exports.getAll = (req, res, next) => {
     if (page < 1) page = 1
 
     Blog.find({})
-    .select('_id date writer name title content thumbnail')
+    .select('_id date writer name title slugTitle content thumbnail')
     .skip((page - 1) * items_per_page)
     .limit(items_per_page)
     .then(async blogs => {
@@ -45,6 +45,7 @@ exports.getAll = (req, res, next) => {
                     writer: blog.writer,
                     name: blog.name,
                     title: blog.title,
+                    slugTitle: blog.slugTitle,
                     content: blog.content,
                     thumbnail: blog.thumbnail,
                     request: {
@@ -72,10 +73,10 @@ exports.getOne = (req, res, next) => {
     const {blogId} = req.params
 
     Blog.findById(blogId)
-    .select('_id date writer name title content thumbnail')
+    .select('_id date writer name title slugTitle content thumbnail')
     .then(blog => {
         if(!blog){
-            return res.status(404).json({
+            return res.status(202).json({
                 msg: 'ValidatorError',
                 errors: {
                     user: `Blog not found!`
@@ -91,6 +92,7 @@ exports.getOne = (req, res, next) => {
                 writer: blog.writer,
                 name: blog.name,
                 title: blog.title,
+                slugTitle: blog.slugTitle,
                 content: blog.content,
                 thumbnail: blog.thumbnail,
                 request: {
@@ -145,6 +147,7 @@ exports.create = (req, res, next) => {
                 writer: req.userData._id,
                 name: req.userData.name,
                 title: blog.title,
+                slugTitle: blog.slugTitle,
                 content: blog.content,
                 thumbnail: blog.thumbnail,
                 request: {
@@ -158,7 +161,7 @@ exports.create = (req, res, next) => {
         let respond = {}
         error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
 
-        res.status(422).json({
+        res.status(202).json({
             msg: 'ValidatorError',
             errors: respond
         })
@@ -185,7 +188,7 @@ exports.update = (req, res, next) => {
 
     Blog.updateOne({_id}, {$set: blog}, {runValidators: true})
     .then(async result => {
- 
+
         await saveHistory(req.userData._id, 'blogs', 'manage', `Update a blog: ${_id}-${Object.keys(blog).join('-')} | ${new Date()}`)
 
         res.status(200).json({
@@ -200,7 +203,7 @@ exports.update = (req, res, next) => {
         let respond = {}
         error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
 
-        res.status(422).json({
+        res.status(202).json({
             msg: 'ValidatorError',
             errors: respond
         })

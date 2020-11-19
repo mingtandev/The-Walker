@@ -76,7 +76,7 @@ exports.getOne = (req, res, next) => {
     .select('_id day thumbnail coin item')
     .then(roll => {
         if(!roll){
-            return res.status(404).json({
+            return res.status(202).json({
                 msg: 'ValidatorError',
                 errors: {
                     user: `Roll not found!`
@@ -113,7 +113,7 @@ exports.use = async (req, res, next) => {
     const userId = req.userData._id
 
     if(rollupDay != new Date().getDate()) {
-        return res.status(400).json({
+        return res.status(202).json({
             msg: 'ValidatorError',
             errors: {
                 user: `Today is not ${rollupDay}!`
@@ -125,7 +125,7 @@ exports.use = async (req, res, next) => {
     const historyRollupDays = history.map(his => his.split(' ')[2])
 
     if (historyRollupDays.includes(rollupDay)) {
-        return res.status(200).json({
+        return res.status(202).json({
             msg: 'ValidatorError',
             errors: {
                 user: `You has been registered today!`
@@ -147,7 +147,7 @@ exports.use = async (req, res, next) => {
     })
 }
 
-exports.create = (req, res, next) => {
+exports.create = async (req, res, next) => {
     const {day, coin, item} = req.body
 
     if (req.userData.roles != 'admin'){
@@ -166,7 +166,7 @@ exports.create = (req, res, next) => {
     }
 
     if (mongoose.Types.ObjectId.isValid(item)) {
-        Item.findById(item)
+        await Item.findById(item)
         .then(item => {
             item ? item.thumbnail ? roll.thumbnail = item.thumbnail : '' : ''
         })
@@ -207,7 +207,7 @@ exports.create = (req, res, next) => {
         let respond = {}
         error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
 
-        res.status(422).json({
+        res.status(202).json({
             msg: 'ValidatorError',
             errors: respond
         })
@@ -265,7 +265,7 @@ exports.update = async (req, res, next) => {
         let respond = {}
         error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
 
-        res.status(422).json({
+        res.status(202).json({
             msg: 'ValidatorError',
             errors: respond
         })

@@ -76,7 +76,7 @@ exports.getOne = (req, res, next) => {
     .select('_id userId actions')
     .then(history => {
         if(!history[0]){
-            return res.status(404).json({
+            return res.status(202).json({
                 msg: 'ValidatorError',
                 errors: {
                     user: `History not found!`

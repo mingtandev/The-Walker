@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const slug = require('mongoose-slug-generator')
 
 const historySchema = mongoose.Schema({
     userId: {

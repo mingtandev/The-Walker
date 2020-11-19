@@ -1,4 +1,3 @@
-const { startSession } = require('mongoose')
 const Statistic = require('./../models/statistic')
 
 exports.get = async (req, res, next) => {

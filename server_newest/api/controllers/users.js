@@ -96,7 +96,7 @@ exports.getOne = (req, res, next) => {
     .select(selectStr)
     .then(user => {
         if(!user){
-            return res.status(403).json({
+            return res.status(202).json({
                 msg: 'ValidatorError',
                 errors: {
                     user: `User not found!`
@@ -154,7 +154,7 @@ exports.create = (req, res, next) => {
                 let respond = {}
                 error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
 
-                res.status(422).json({
+                res.status(202).json({
                     msg: 'ValidatorError',
                     errors: respond
                 })
@@ -200,7 +200,7 @@ exports.update = (req, res, next) => {
     if (roles === 'user') {
         for (const key of Object.keys(newUser)) {
             if (!['name', 'password'].includes(key)) {
-                return res.status(400).json({
+                return res.status(202).json({
                     msg: 'ValidatorError',
                     errors: {
                         user: `You are only allowed to change the name and password!`
@@ -213,7 +213,7 @@ exports.update = (req, res, next) => {
     User.findById(_id)
     .then(user => {
         if(!user){
-            return res.status(403).json({
+            return res.status(202).json({
                 msg: 'ValidatorError',
                 errors: {
                     user: `User not found!`
@@ -249,7 +249,7 @@ exports.update = (req, res, next) => {
                     let respond = {}
                     error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
 
-                    res.status(422).json({
+                    res.status(202).json({
                         msg: 'ValidatorError',
                         errors: respond
                     })
@@ -281,7 +281,7 @@ exports.update = (req, res, next) => {
                 let respond = {}
                 error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
 
-                res.status(422).json({
+                res.status(202).json({
                     msg: 'ValidatorError',
                     errors: respond
                 })
@@ -319,7 +319,7 @@ exports.delete =  (req, res, next) => {
     User.findById(_id)
     .then(user => {
         if(!user){
-            return res.status(403).json({
+            return res.status(202).json({
                 msg: 'ValidatorError',
                 errors: {
                     user: `User not found!`
@@ -364,7 +364,7 @@ exports.confirmation = (req, res, next) => {
         User.findOne({_id})
         .then(user => {
             if(!user) {
-                return res.status(404).json({
+                return res.status(202).json({
                     msg: 'ValidatorError',
                     errors: {
                         user: 'User not found!'
@@ -403,7 +403,7 @@ exports.confirmation = (req, res, next) => {
         })
     }
     catch (error) {
-        res.status(404).json({
+        res.status(202).json({
             msg: 'ValidatorError',
             errors: {
                 user: 'Token is invalid or has been expired. Please click resend confirmation email!'
@@ -418,7 +418,7 @@ exports.resend = (req, res, next) => {
     User.findOne({email})
     .then(async user => {
         if(!user) {
-            return res.status(404).json({
+            return res.status(202).json({
                 msg: 'ValidatorError',
                 errors: {
                     user: 'User not found!'
@@ -458,7 +458,7 @@ exports.login = (req, res, next) => {
     User.findOne({email})
     .then(user => {
         if(!user){
-            return res.status(404).json({
+            return res.status(202).json({
                 msg: 'ValidatorError',
                 errors: {
                     user: 'User not found!'
@@ -485,7 +485,7 @@ exports.login = (req, res, next) => {
                         })
 
                         if(!isVerified) {
-                            return res.status(401).json({
+                            return res.status(202).json({
                                 msg: 'ValidatorError',
                                 errors: {
                                     user: 'Your account has not been verified!'
@@ -500,7 +500,7 @@ exports.login = (req, res, next) => {
                         })
 
                     }else{
-                        return res.status(401).json({
+                        return res.status(202).json({
                             msg: 'ValidatorError',
                             errors: {
                                 user: 'Email or password does not match!'
@@ -537,7 +537,7 @@ exports.refresh = (req, res, next) => {
         })
 
     } catch (error) {
-        return res.status(401).json({
+        return res.status(404).json({
             msg: 'ValidatorError',
             errors: {
                 user: 'Token has been expired. Please login!'
@@ -552,7 +552,7 @@ exports.recovery = (req, res, next) => {
     User.findOne({email})
     .then(user => {
         if(!user) {
-            return res.status(401).json({
+            return res.status(202).json({
                 msg: 'ValidatorError',
                 errors: {
                     user: 'Email not found!'
@@ -603,7 +603,7 @@ exports.forgot = (req, res, next)  => {
     .then(user => {
         console.log(user)
         if(!user){
-            return res.status(401).json({
+            return res.status(202).json({
                 msg: 'ValidatorError',
                 errors: {
                     user: 'User not found or reset password token has been expired!'
@@ -670,7 +670,7 @@ exports.history = async (req, res, next)  => {
         })
     }
     else if (!types) {
-        return res.status(400).json({
+        return res.status(202).json({
             msg: 'ValidatorError',
             errors: {
                 user: `Request body have to include 'type'!`
@@ -678,7 +678,7 @@ exports.history = async (req, res, next)  => {
         })
     }
     else if (!effect) {
-        return res.status(400).json({
+        return res.status(202).json({
             msg: 'ValidatorError',
             errors: {
                 user: `Request body have to include 'effect'!`
@@ -686,7 +686,7 @@ exports.history = async (req, res, next)  => {
         })
     }
     else if (!types.includes(type) || !effects.includes(effect)) {
-        return res.status(400).json({
+        return res.status(202).json({
             msg: 'ValidatorError',
             errors: {
                 user: `Value of 'type' and 'effect' must be valid!`
