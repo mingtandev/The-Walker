@@ -1,8 +1,8 @@
 import React from "react";
 import "./index.scss";
 
-function Item(props) {
-  const { _id, name, type, thumbnail, price, onPurchase } = props;
+function ItemDetail(props) {
+  const { _id, name, thumbnail, price, onPurchase } = props;
 
   const handleBuyItem = () => {
     if (onPurchase) onPurchase(_id);
@@ -22,4 +22,4 @@ function Item(props) {
   );
 }
 
-export default Item;
+export default ItemDetail;

@@ -7,13 +7,16 @@ import Loading from "../../components/loading";
 import Item from "../../components/item";
 import userApi from "../../api/userApi";
 import { loadUser } from "../../actions/authAction";
+import ItemPurchaseConfirm from "../../components/dialog/itemPurchase";
 import "./index.scss";
 
 function Shop() {
   const [items, setItems] = useState([]);
+  const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
+  const [purchaseConfirm, setPurchaseConfirm] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -36,9 +39,13 @@ function Shop() {
     getItems();
   }, [currentPage]);
 
+  const handleConfirm = (data) => {
+    setItem(data);
+    setPurchaseConfirm(true);
+  };
+
   const handleBuyItem = async (id) => {
     try {
-      console.log(id);
       itemApi.buyOne(id).then((res) => {
         console.log("buy: ", res);
         if (res && res.msg === "success") {
@@ -59,7 +66,6 @@ function Shop() {
   };
 
   const handlePaginationChange = (e, value) => {
-    console.log(e, value);
     setCurrentPage(value);
   };
 
@@ -70,7 +76,7 @@ function Shop() {
           {items.length ? (
             items.map((item, id) => (
               <Item
-                onPurchase={() => handleBuyItem(item._id)}
+                onPurchase={() => handleConfirm(item._id)}
                 key={id}
                 {...item}
               />
@@ -82,15 +88,26 @@ function Shop() {
       ) : (
         <Loading />
       )}
-      <div className="items__pagination">
-        <Pagination
-          count={2}
-          page={currentPage}
-          onChange={handlePaginationChange}
-          variant="outlined"
-          shape="rounded"
-        />
-      </div>
+
+      {items.length && (
+        <>
+          <ItemPurchaseConfirm
+            data={item}
+            show={purchaseConfirm}
+            onPurchase={handleBuyItem}
+            close={() => setPurchaseConfirm(false)}
+          />
+          <div className="items__pagination">
+            <Pagination
+              count={totalPage}
+              page={currentPage}
+              onChange={handlePaginationChange}
+              variant="outlined"
+              shape="rounded"
+            />
+          </div>
+        </>
+      )}
     </>
   );
 }

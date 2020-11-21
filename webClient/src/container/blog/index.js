@@ -23,6 +23,7 @@ function Blogs() {
         console.log(res);
         if (res.msg === "success") {
           setBlogs(res.blogs);
+          setTotalPage(res.length);
         }
         setLoading(false);
       } catch (error) {

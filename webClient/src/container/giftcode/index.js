@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import giftcodeApi from "../../api/giftcodeApi";
 import { toastr } from "react-redux-toastr";
-import "../../components/auth/form.scss";
 
 function GiftcodeForm() {
   const handleSubmitCode = (e) => {
