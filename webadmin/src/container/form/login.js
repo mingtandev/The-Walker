@@ -10,23 +10,13 @@ import "./index.scss";
 import userApi from "../../api/userApi";
 
 function Login() {
-  const [loginErr, setLoginErr] = useState("");
   const recaptchaRef = React.createRef();
+  const [error, setError] = useState("");
   const history = useHistory();
   let dispatch = useDispatch();
 
-  const user = useSelector((state) => state.auth);
-
-  const togglePassword = (e) => {
-    e.preventDefault();
-    let x = document.getElementById("password");
-    let passwordEye = document.getElementById("togglePassword");
-    x.type === "password" ? (x.type = "text") : (x.type = "password");
-    passwordEye.classList.toggle("fa-eye-slash");
-  };
-
   const onInputChange = (e) => {
-    setLoginErr("");
+    setError("");
   };
 
   const login = async (e) => {
@@ -38,31 +28,36 @@ function Login() {
     try {
       let res = await userApi.signIn({ email, password });
       console.log(res);
-      if (res.msg === "Auth failed!") {
-        setLoginErr("Email or Password is not correct");
+      if (res && res.msg === "ValidatorError") {
+        if (res.errors.user === "User not found!")
+          setError("Account Does Not Exist");
+        else if (res.errors.user === "Email or password does not match!")
+          setError("Wrong Password");
+        // "Your account has not been verified!"
+        else setError("Your account has not been verified!");
+        return;
       }
-      if (res.msg === "success") {
+      if (res && res.msg === "success") {
         let user = jwt_decode(res.token);
+
         if (user.roles !== "admin") {
-          console.log("NOT ADMIN");
+          setError("You Do Not Have the Permisson");
           return;
         }
+
         localStorage.setItem("token", res.token);
         localStorage.setItem("refreshToken", res.refreshToken);
         dispatch(signIn(user));
-
         history.push("/dashboard");
       }
     } catch (error) {
       console.log(error);
-      setLoginErr("Email or Password is not correct");
+      setError("Try Again Later!");
     }
   };
 
   return (
     <div className="form__container">
-      {/* {user.user && <p>user</p>}
-      {user.status && <p>{user.status}</p>} */}
       <div className="form">
         <div className="form__left">
           <img
@@ -74,7 +69,7 @@ function Login() {
         </div>
 
         <div className="form__login">
-          {loginErr && <p className="form__error">{loginErr}</p>}
+          {error && <p className="form__error">{error}</p>}
           <form onSubmit={login}>
             <div className="form__input">
               <input
@@ -94,13 +89,6 @@ function Login() {
                 placeholder="Your password"
               />
               <span class="form__input--focus"></span>
-              <button
-                class="form__input--eye"
-                type="button"
-                onClick={togglePassword}
-              >
-                <i class="far fa-eye" id="togglePassword"></i>
-              </button>
             </div>
             <input type="submit" value="LOG IN" />
           </form>

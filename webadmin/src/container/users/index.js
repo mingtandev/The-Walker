@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-
-import userApi from "../../api/userApi";
-import * as usersAction from "../../actions/usersAction";
-
 import MaterialTable from "material-table";
-import UserEditDialog from "../../components/dialog/user";
-
+import userApi from "../../api/userApi";
+import UserEditDialog from "../../components/dialog/userUpdate";
+import DeleteConfirmBox from "../../components/dialog/deleteConfirm";
+import * as usersAction from "../../actions/usersAction";
+import * as actions from "../../utils/actions";
 import * as dataColumns from "../../utils/dataColumns";
 
 function UsersList() {
-  const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [rowData, setRowData] = useState(null);
-
+  const [error, setError] = useState("");
   const users = useSelector((state) => state.users);
-
   const dispatch = useDispatch();
 
   async function fetchAllUsers() {
@@ -33,39 +32,46 @@ function UsersList() {
     fetchAllUsers();
   }, []);
 
-  const handleClickOpen = (rowData) => {
+  const handleClickOpen = (rowData, e) => {
     setRowData(rowData);
-    setOpen(true);
+    if (e === actions.EDIT) setEditOpen(true);
+    else setDeleteConfirm(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleClose = (e) => {
+    if (e === actions.EDIT) setEditOpen(false);
+    else setDeleteConfirm(false);
   };
 
   const handleDelete = async (data) => {
     try {
       let res = await userApi.delete(data._id);
-      if (res && res.msg === "success")
+      if (res && res.msg === "success") {
         dispatch(usersAction.deleteUser(data._id));
-      else alert("Cannot delete user");
+        setDeleteConfirm(false);
+      } else alert("Cannot delete user");
     } catch (error) {
       console.log(error);
     }
   };
 
   const handleUpdateUser = async (object, userId) => {
-    console.log("neee", object, userId);
     let body = [];
     for (const property in object) {
       if (object[property])
         body.push({ propName: property, value: object[property] });
     }
     try {
-      console.log("cll");
       let res = await userApi.update(userId, body);
       console.log(res);
       if (res && res.msg === "success") {
         fetchAllUsers();
+        setEditOpen(false);
+        return;
+      }
+      if (res && res.msg === "ValidatorError") {
+        if (res.errors.name === "Name already exists!")
+          setError(res.errors.name);
       }
     } catch (error) {
       console.log(error);
@@ -84,17 +90,17 @@ function UsersList() {
           }}
           actions={[
             {
-              tooltip: "Remove All Selected Users",
+              tooltip: "Remove User",
               icon: "delete",
               onClick: (evt, data) => {
-                handleDelete(data);
+                handleClickOpen(data, actions.DELETE);
               },
             },
-            (rowData) => ({
+            () => ({
               icon: "edit",
-              tooltip: "Edit",
+              tooltip: "Update User",
               onClick: (event, rowData) => {
-                handleClickOpen(rowData);
+                handleClickOpen(rowData, actions.EDIT);
               },
             }),
           ]}
@@ -103,8 +109,17 @@ function UsersList() {
       <UserEditDialog
         onsubmit={handleUpdateUser}
         data={rowData}
-        show={open}
-        onclose={handleClose}
+        show={editOpen}
+        error={error}
+        onClearError={() => setError("")}
+        onclose={() => handleClose(actions.EDIT)}
+      />
+      <DeleteConfirmBox
+        onsubmit={handleDelete}
+        title="Delete this user?"
+        data={rowData}
+        show={deleteConfirm}
+        onclose={() => handleClose(actions.DELETE)}
       />
     </>
   );

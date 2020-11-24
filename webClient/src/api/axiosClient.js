@@ -25,6 +25,7 @@ axiosClient.interceptors.response.use(
   },
   (error) => {
     const originalRequest = error.config;
+    console.log(originalRequest);
     if (error.response.status === 401) {
       if (originalRequest.url === "/users/login/refresh") {
         localStorage.removeItem("token");
