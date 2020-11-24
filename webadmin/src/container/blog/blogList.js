@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import BlogEditDialog from "../../components/dialog/blogEdit";
-import blogApi from "../../api/blogApi";
-import * as blogsAction from "../../actions/blogsAction";
-import * as dataColumns from "../../utils/dataColumns";
 import { Button } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import MaterialTable from "material-table";
+import BlogEditDialog from "../../components/dialog/blogEdit";
+import DeleteConfirmBox from "../../components/dialog/deleteConfirm";
+import blogApi from "../../api/blogApi";
+import * as blogsAction from "../../actions/blogsAction";
+import * as dataColumns from "../../utils/dataColumns";
+import * as actions from "../../utils/actions";
 import "./index.scss";
 
 function BlogList() {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [updateOpen, setUpdateOpen] = useState(false);
   const [rowData, setRowData] = useState(null);
-
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [error, setError] = useState("");
   const blogs = useSelector((state) => state.blogs);
-
   const dispatch = useDispatch();
 
   async function getAllBlogs() {
@@ -23,9 +25,8 @@ function BlogList() {
       let res = await blogApi.getAll();
       console.log(res);
       let blogArray = res.blogs;
-      blogArray.map((item, i) => (item.id = i));
+      // blogArray.map((item, i) => (item.id = i));
       dispatch(blogsAction.loadBlogs(blogArray));
-      console.log(blogArray);
     } catch (error) {
       console.log(error);
     }
@@ -35,22 +36,25 @@ function BlogList() {
     getAllBlogs();
   }, []);
 
-  const handleDialogOpen = (rowData) => {
+  const handleDialogOpen = (rowData, e) => {
     setRowData(rowData);
-    setDialogOpen(true);
+    if (e === actions.EDIT) setUpdateOpen(true);
+    else setDeleteConfirm(true);
   };
 
-  const handleDialogClose = () => {
-    setDialogOpen(false);
+  const handleDialogClose = (e) => {
+    if (e === actions.EDIT) setUpdateOpen(false);
+    else setDeleteConfirm(false);
   };
 
   const handleDelete = async (data) => {
     try {
       let res = await blogApi.delete(data._id);
       console.log(res);
-      if (res && res.msg === "success")
+      if (res && res.msg === "success") {
+        setDeleteConfirm(false);
         dispatch(blogsAction.deleteBlog(data._id));
-      else alert("Cannot delete blog");
+      } else alert("Cannot delete blog");
     } catch (error) {
       console.log(error);
     }
@@ -66,8 +70,14 @@ function BlogList() {
       let res = await blogApi.update(blogId, body);
       console.log(res);
       if (res && res.msg === "success") {
-        setDialogOpen(false);
+        setUpdateOpen(false);
         getAllBlogs();
+        return;
+      }
+      if (res && res.msg === "ValidatorError") {
+        if (res.errors.title === "Title already exists!") {
+          setError("Title already exists!");
+        }
       }
     } catch (error) {
       console.log(error);
@@ -98,14 +108,14 @@ function BlogList() {
                 tooltip: "Remove All Selected Users",
                 icon: "delete",
                 onClick: (evt, data) => {
-                  handleDelete(data);
+                  handleDialogOpen(data, actions.DELETE);
                 },
               },
               {
                 tooltip: "Edit",
                 icon: "edit",
                 onClick: (evt, data) => {
-                  handleDialogOpen(data);
+                  handleDialogOpen(data, actions.EDIT);
                 },
               },
             ]}
@@ -115,8 +125,17 @@ function BlogList() {
       <BlogEditDialog
         onsubmit={handleUpdateBlog}
         data={rowData}
-        show={dialogOpen}
-        onclose={handleDialogClose}
+        show={updateOpen}
+        error={error}
+        onClearError={() => setError("")}
+        onclose={() => handleDialogClose(actions.EDIT)}
+      />
+      <DeleteConfirmBox
+        onsubmit={handleDelete}
+        title="Delete this blog?"
+        data={rowData}
+        show={deleteConfirm}
+        onclose={() => handleDialogClose(actions.DELETE)}
       />
     </div>
   );

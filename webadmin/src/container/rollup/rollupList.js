@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import RollUpEditDialog from "../../components/dialog/rollupEdit";
-import { Button } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
+import { Button } from "@material-ui/core";
+import MaterialTable from "material-table";
+import RollUpEditDialog from "../../components/dialog/rollupEdit";
+import DeleteConfirmBox from "../../components/dialog/deleteConfirm";
 import rollupAPI from "../../api/rollupApi";
 import * as rollupAction from "../../actions/rollupAction";
-import MaterialTable from "material-table";
 import * as dataColumns from "../../utils/dataColumns";
+import * as actions from "../../utils/actions";
 import "./index.scss";
-import rollupApi from "../../api/rollupApi";
 
 function RollUpList() {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [updateOpen, setUpdateOpen] = useState(false);
   const [rowData, setRowData] = useState(null);
-
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [error, setError] = useState("");
   const rollups = useSelector((state) => state.rollup);
-
   const dispatch = useDispatch();
 
   async function getAllRoll() {
@@ -33,14 +34,15 @@ function RollUpList() {
     getAllRoll();
   }, []);
 
-  const handleDialogOpen = (rowData) => {
-    console.log("rrrrrrrrrr", rowData);
+  const handleDialogOpen = (rowData, e) => {
     setRowData(rowData);
-    setDialogOpen(true);
+    if (e === actions.EDIT) setUpdateOpen(true);
+    else setDeleteConfirm(true);
   };
 
-  const handleDialogClose = () => {
-    setDialogOpen(false);
+  const handleDialogClose = (e) => {
+    if (e === actions.EDIT) setUpdateOpen(false);
+    else setDeleteConfirm(false);
   };
 
   const handleUpdateBlog = async (object, day) => {
@@ -51,10 +53,10 @@ function RollUpList() {
     }
 
     try {
-      let res = await rollupApi.update(day, body);
+      let res = await rollupAPI.update(day, body);
       console.log(res);
       if (res && res.msg === "success") {
-        setDialogOpen(false);
+        setUpdateOpen(false);
         getAllRoll();
       }
     } catch (error) {
@@ -66,9 +68,10 @@ function RollUpList() {
     try {
       let res = await rollupAPI.delete(data.day);
       console.log(res);
-      if (res && res.msg === "success")
+      if (res && res.msg === "success") {
         dispatch(rollupAction.deleteRollups(data.day));
-      else alert("Cannot delete item");
+        setDeleteConfirm(false);
+      } else alert("Cannot delete item");
     } catch (error) {
       console.log(error);
     }
@@ -97,14 +100,14 @@ function RollUpList() {
               tooltip: "Remove All Selected Users",
               icon: "delete",
               onClick: (evt, data) => {
-                handleDelete(data);
+                handleDialogOpen(data, actions.DELETE);
               },
             },
             {
               tooltip: "Edit",
               icon: "edit",
               onClick: (evt, data) => {
-                handleDialogOpen(data);
+                handleDialogOpen(data, actions.EDIT);
               },
             },
           ]}
@@ -113,8 +116,18 @@ function RollUpList() {
       <RollUpEditDialog
         onsubmit={handleUpdateBlog}
         data={rowData}
-        show={dialogOpen}
-        onclose={handleDialogClose}
+        show={updateOpen}
+        show={updateOpen}
+        error={error}
+        onClearError={() => setError("")}
+        onclose={() => handleDialogClose(actions.EDIT)}
+      />
+      <DeleteConfirmBox
+        onsubmit={handleDelete}
+        title="Delete this roll?"
+        data={rowData}
+        show={deleteConfirm}
+        onclose={() => handleDialogClose(actions.DELETE)}
       />
     </>
   );
