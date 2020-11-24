@@ -1,19 +1,42 @@
 .user {
-  max-width: 50%;
-  margin: 3rem auto;
-  background-color: whitesmoke;
-  border-radius: 20px;
   &__container {
     width: 90%;
     margin: auto;
-    margin-top: 15rem;
+    padding-top: 15rem;
+  }
+  &__update {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
     background-color: white;
+    &-form {
+      width: 40%;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+  &__infos {
+    display: flex;
+    justify-content: space-between;
   }
   &__info {
-    display: grid;
-    grid-template-columns: 40% 60%;
-    justify-items: center;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    width: calc(25% - 20px);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: slategrey;
+    color: white;
+    &-title {
+      font-size: 2rem;
+    }
+    &-content {
+      margin: auto;
+      color: black;
+      font-size: 2.3rem;
+      letter-spacing: 2px;
+    }
   }
 }

@@ -1,7 +1,12 @@
 import React from "react";
+import Statistic from "./../statistic";
 
 function DashBoard() {
-  return <div>DashBoard</div>;
+  return (
+    <div>
+      <Statistic />
+    </div>
+  );
 }
 
 export default DashBoard;

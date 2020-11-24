@@ -1,0 +1,141 @@
+.form {
+  margin: auto;
+  padding: 2rem 2rem;
+  padding-bottom: 0;
+  width: 30%;
+  background-color: rgba($color: gray, $alpha: 0.7);
+  text-align: right;
+  border: 1px solid white;
+  a {
+    width: fit-content;
+    margin-left: auto;
+    padding: 2px 4px;
+    font-family: sans-serif;
+    font-weight: bold;
+    transition: 0.3s all ease;
+    &:hover {
+      color: orange;
+    }
+  }
+  &__container {
+    padding-top: 20rem;
+    &--smallertop {
+      padding-top: 15rem;
+    }
+  }
+  h1 {
+    font-size: 3rem;
+    text-align: center;
+  }
+  &__input {
+    position: relative;
+    margin-top: 2rem;
+    width: 100%;
+    border: 0;
+    text-align: left;
+    overflow: hidden;
+    input {
+      width: 100%;
+      max-width: 100%;
+      padding: 1rem;
+      border: 0;
+      outline: none;
+      color: white;
+      background-color: transparent;
+      border-bottom: 1.5px solid black;
+    }
+    input::placeholder {
+      color: white;
+    }
+    label {
+      margin-left: 1rem;
+    }
+    &--focus {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 3px;
+      background-color: #3399ff;
+      transition: 0.5s;
+    }
+    &--eye {
+      position: absolute;
+      top: 50%;
+      right: 3%;
+      transform: translateY(-50%);
+      background-color: transparent;
+      border: 0;
+      outline: none;
+      cursor: pointer;
+    }
+    &--error {
+      font-style: italic;
+      color: red;
+      &::before {
+        content: "* ";
+      }
+    }
+    input:focus ~ .form__input--focus {
+      width: 100%;
+      transition: 0.4s;
+    }
+  }
+  &__error {
+    margin-top: 2rem;
+    text-align: left;
+    font-weight: bold;
+    font-style: italic;
+    color: red;
+    &::before {
+      content: "* ";
+    }
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    input[type="submit"] {
+      color: white;
+      padding: 1.3rem 5rem;
+      margin: 2rem auto;
+      width: fit-content;
+      border-radius: 5rem;
+      border: 0;
+      outline: none;
+      font-weight: bold;
+      letter-spacing: 3px;
+      background-color: #7b78f8;
+      transition: 0.4s ease-in-out;
+    }
+    input[type="submit"]:hover {
+      font-weight: bold;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px 0 rgba(123, 120, 248, 0.5);
+    }
+  }
+}
+
+.recaptcha {
+  margin: auto;
+  margin-top: 2rem;
+}
+
+.forgot__container {
+  margin: auto;
+  padding-top: 20rem;
+  width: 50%;
+  .MuiPaper-root {
+    background-color: rgba($color: gray, $alpha: 0.8);
+  }
+  .MuiStepLabel {
+    &-labelContainer {
+      width: fit-content;
+    }
+    &-label {
+      margin: 0;
+      color: black !important;
+      font-weight: bold !important;
+      font-size: 1.5rem;
+    }
+  }
+}

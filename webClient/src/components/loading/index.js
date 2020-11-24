@@ -2,7 +2,7 @@ import React from "react";
 import "./index.scss";
 import { Spinner } from "react-bootstrap";
 
-function BlogLoading() {
+function Loading() {
   return (
     <div className="loading">
       <Spinner animation="border" role="status">
@@ -13,4 +13,4 @@ function BlogLoading() {
   );
 }
 
-export default BlogLoading;
+export default Loading;

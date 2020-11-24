@@ -70,7 +70,6 @@ export const ROLLUP_COLUMNS = [
 ];
 
 export const BLOG_COLUMNS = [
-  { field: "id", title: "No." },
   { field: "_id", title: "ID" },
   { field: "title", title: "Title" },
   { field: "content", title: "Content" },

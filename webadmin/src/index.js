@@ -1,8 +1,7 @@
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter as Router, HashRouter, Route } from "react-router-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import "./index.css";
-// import "bootstrap/dist/css/bootstrap.min.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import configureStore from "./store";

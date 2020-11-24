@@ -1,0 +1,19 @@
+.forgot {
+  &__component {
+    position: relative;
+    input {
+      color: black;
+    }
+  }
+  &__input {
+    color: black;
+    margin-bottom: 2rem;
+  }
+  &__buttons {
+    &-back {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+    }
+  }
+}

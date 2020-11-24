@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-
 import { IconButton } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
-import userApi from "../../api/userApi";
-
 import jwt_decode from "jwt-decode";
-
+import userApi from "../../api/userApi";
 import * as authActions from "../../actions/authAction";
-
 import "./index.scss";
 
 function Header(props) {
@@ -68,7 +64,13 @@ function Header(props) {
       </div>
 
       <div className="header__right">
-        <div className="header__avatar">
+        <span className="header__user-name">
+          {user.user ? user.user.name : "Admin"}
+        </span>
+        <span className="submenu__link" onClick={handleLogOut}>
+          Log Out
+        </span>
+        {/* <div className="header__avatar">
           <img src="" alt="avatar" onClick={handleSubmenuShow} />
           <div
             className={
@@ -79,10 +81,7 @@ function Header(props) {
               Log Out
             </span>
           </div>
-        </div>
-        <span className="header__user-name">
-          {user.user ? user.user.name : "Admin"}
-        </span>
+        </div> */}
       </div>
     </div>
   );
