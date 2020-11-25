@@ -8,48 +8,40 @@ exports.get = async (req, res, next) => {
 
     let result = null
 
-    if(day) {
-        let start = new Date(day)
-        start.setHours(0,0,0,0)
+    try {
+        if(day) {
+            let start = new Date(day)
+            start.setHours(0,0,0,0)
 
-        let end = new Date(day)
-        end.setHours(23,59,59,999)
+            let end = new Date(day)
+            end.setHours(23,59,59,999)
 
-        result = await Statistic.find({
-            createdAt: {
-                "$gte": start,
-                "$lt": end
-            }
-        })
-    }
-    else if(!start_day || !end_day) {
-        result = await Statistic.find({})
+            result = await Statistic.find({
+                createdAt: {
+                    "$gte": start,
+                    "$lt": end
+                }
+            })
+        }
+        else if(!start_day || !end_day) {
+            result = await Statistic.find({})
 
-    }else if (start_day && end_day){
-        let start = new Date(start_day)
-        start.setHours(0,0,0,0)
+        }else if (start_day && end_day){
+            let start = new Date(start_day)
+            start.setHours(0,0,0,0)
 
-        let end = new Date(end_day)
-        end.setHours(23,59,59,999)
+            let end = new Date(end_day)
+            end.setHours(23,59,59,999)
 
-        result = await Statistic.find({
-            createdAt: {
-                "$gte": start,
-                "$lt": end
-            }
-        })
-    }
+            result = await Statistic.find({
+                createdAt: {
+                    "$gte": start,
+                    "$lt": end
+                }
+            })
+        }
 
-    if (!result) {
-        return res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    }
-
-    console.log(result)
-
-    const statistics = result.reduce((accumulator, currentValue) =>
+        const statistics = result.reduce((accumulator, currentValue) =>
         {
             accumulator['newUsers'] += currentValue['newUsers']
             accumulator['activeUsers'] += currentValue['activeUsers']
@@ -69,10 +61,18 @@ exports.get = async (req, res, next) => {
                 cash: 0,
         })
 
-    const response = {
-        msg: 'success',
-        statistics
-    }
+        const response = {
+            msg: 'success',
+            statistics
+        }
 
-    res.status(200).json(response)
+        res.status(200).json(response)
+    }
+    catch (error) {
+        console.log(error)
+        res.status(500).json({
+            msg: 'Server error!',
+            error
+        })
+    }
 }

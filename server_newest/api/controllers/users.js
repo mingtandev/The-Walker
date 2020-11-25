@@ -8,6 +8,7 @@ const History = require('./../models/history')
 const {sendMail} =  require('./../config/nodemailer')
 const {loadHistory, saveHistory} = require('./../utils/history')
 const {saveStatistic} = require('./../utils/statistic')
+const {saveUserItem} = require('./../utils/userItem')
 
 const tokenLife = process.env.TOKEN_LIFE
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE
@@ -34,7 +35,7 @@ exports.getAll = (req, res, next) => {
     .limit(items_per_page)
     .then(async users => {
         const request = {}
-        const len = await User.find({}).count()
+        const len = await User.find({}).countDocuments()
 
         request.currentPage = page
         request.totalPages = Math.ceil(len / items_per_page)
@@ -77,6 +78,7 @@ exports.getAll = (req, res, next) => {
         res.status(200).json(response)
     })
     .catch(error => {
+        console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
@@ -102,14 +104,15 @@ exports.getOne = (req, res, next) => {
                     user: `User not found!`
                 }
             })
-        }else{
-            res.status(200).json({
-                msg: 'success',
-                user
-            })
         }
+
+        res.status(200).json({
+            msg: 'success',
+            user
+        })
     })
     .catch(error => {
+        console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
@@ -122,6 +125,7 @@ exports.create = (req, res, next) => {
 
     bcrypt.hash(password, 10, (error, encryptedPassword) => {
         if(error){
+            console.log(error)
             return res.status(500).json({
                 msg: 'Server error!',
                 error
@@ -142,8 +146,11 @@ exports.create = (req, res, next) => {
                     expiresIn: tokenLife
                 })
 
-                sendMail(req, newUser.email, token, 'confirmation')
-                await saveStatistic(1, 0, 0, 0, 0, 0)
+                await Promise.all([
+                    sendMail(req, newUser.email, token, 'confirmation'),
+                    saveStatistic(1, 0, 0, 0, 0, 0),
+                    saveUserItem(newUser._id, [], 0)
+                ])
 
                 res.status(201).json({
                     msg: "success",
@@ -151,22 +158,13 @@ exports.create = (req, res, next) => {
                 })
             })
             .catch(error => {
+                console.log(error)
                 let respond = {}
                 error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
-
                 res.status(202).json({
                     msg: 'ValidatorError',
                     errors: respond
                 })
-
-                // res
-                // {
-                //     "msg": "ValidatorError",
-                //     "errors": {
-                //         "name": "Name already exists!",
-                //         "email": "Email already exists!"
-                //     }
-                // }
             })
         }
     })
@@ -210,97 +208,62 @@ exports.update = (req, res, next) => {
         }
     }
 
-    User.findById(_id)
-    .then(user => {
-        if(!user){
-            return res.status(202).json({
-                msg: 'ValidatorError',
-                errors: {
-                    user: `User not found!`
-                }
-            })
-        }
-
-        if(hasPassword){
-            bcrypt.hash(newUser.password, 10, (error, encryptedPassword) => {
-                if(error){
-                    return res.status(500).json({
-                        msg: 'Server error!',
-                        error
-                    })
-                }
-
-                newUser.password = encryptedPassword
-
-                User.updateOne({_id}, {$set: newUser}, { runValidators: true })
-                .then(async result => {
-
-                    await saveHistory(_id, 'accInfos', 'personal', `Update an account: ${_id}-${Object.keys(newUser).join('-')} | ${new Date()}`)
-
-                    res.status(200).json({
-                        msg: 'success',
-                        request: {
-                            type: 'GET',
-                            url: req.hostname + '/users/' + _id
-                        }
-                    })
-                })
-                .catch(error => {
-                    let respond = {}
-                    error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
-
-                    res.status(202).json({
-                        msg: 'ValidatorError',
-                        errors: respond
-                    })
-
-                    // {
-                    //     "msg": "ValidatorError",
-                    //     "errors": {
-                    //         "name": "Name already exists!"
-                    //     }
-                    // }
-                })
-            })
-        }
-        else{
-            User.updateOne({_id}, {$set: newUser}, {runValidators: true})
-            .then(async result => {
-
-                await saveHistory(_id, 'accInfos', 'personal', `Update an account: ${_id}-${Object.keys(newUser).join('-')} | ${new Date()}`)
-
-                res.status(200).json({
-                    msg: "success",
-                    request: {
-                        type: 'GET',
-                        url: req.hostname + '/users/' + _id
+    try {
+        User.findById(_id)
+        .then(async user => {
+            if(!user){
+                return res.status(202).json({
+                    msg: 'ValidatorError',
+                    errors: {
+                        user: `User not found!`
                     }
                 })
-            })
-            .catch(error => {
-                let respond = {}
-                error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+            }
 
-                res.status(202).json({
-                    msg: 'ValidatorError',
-                    errors: respond
+            if(hasPassword){
+                bcrypt.hash(newUser.password, 10, (error, encryptedPassword) => {
+                    if(error){
+                        console.log(error)
+                        return res.status(500).json({
+                            msg: 'Server error!',
+                            error
+                        })
+                    }
+
+                    newUser.password = encryptedPassword
                 })
+            }
 
-                // {
-                //     "msg": "ValidatorError",
-                //     "errors": {
-                //         "name": "Name already exists!"
-                //     }
-                // }
+            const  [, newUser] = await Promise.all([
+                saveHistory(_id, 'accInfos', 'personal', `Update an account: ${_id}-${Object.keys(newUser).join('-')} | ${new Date()}`),
+                User.updateOne({_id}, {$set: newUser}, { runValidators: true })
+            ])
+
+            res.status(200).json({
+                msg: 'success',
+                user: newUser,
+                request: {
+                    type: 'GET',
+                    url: req.hostname + '/users/' + _id
+                }
             })
-        }
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
         })
-    })
+        .catch(error => {
+            res.status(500).json({
+                msg: 'Server error!',
+                error
+            })
+        })
+    }
+    catch (error) {
+        console.log(error)
+        let respond = {}
+        error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+        res.status(202).json({
+            msg: 'ValidatorError',
+            errors: respond
+        })
+    }
 }
 
 exports.delete =  (req, res, next) => {
@@ -316,25 +279,34 @@ exports.delete =  (req, res, next) => {
         })
     }
 
-    User.findById(_id)
-    .then(user => {
-        if(!user){
-            return res.status(202).json({
-                msg: 'ValidatorError',
-                errors: {
-                    user: `User not found!`
-                }
-            })
-        }
+    try {
+        User.findById(_id)
+        .then(async user => {
+            if(!user){
+                return res.status(202).json({
+                    msg: 'ValidatorError',
+                    errors: {
+                        user: `User not found!`
+                    }
+                })
+            }
 
-        User.deleteOne({_id})
-        .then(async result => {
-
-            await saveHistory(req.userData._id, 'accInfos', 'manage', `Delete an account: ${_id}-${user.name}-${user.email} | ${new Date()}`)
-            await saveHistory(_id, 'accInfos', 'manage', `Account has been deleted by: ${_id}-${user.name}-${user.email} | ${new Date()}`)
+            await Promise.all([
+                User.deleteOne({_id}),
+                saveHistory(req.userData._id, 'accInfos', 'manage', `Delete an account: ${_id}-${user.name}-${user.email} | ${new Date()}`)
+            ])
 
             res.status(200).json({
-                msg: 'success'
+                msg: 'success',
+                request: {
+                    type: 'POST',
+                    url: req.hostname + '/users',
+                    body: {
+                        name: 'String',
+                        email: 'String',
+                        password: 'String'
+                    }
+                }
             })
         })
         .catch(error => {
@@ -343,13 +315,14 @@ exports.delete =  (req, res, next) => {
                 error
             })
         })
-    })
-    .catch(error => {
+    }
+    catch (error) {
+        console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
         })
-    })
+    }
 }
 
 // --------------------------------------------------------------------
@@ -362,7 +335,7 @@ exports.confirmation = (req, res, next) => {
         const {_id} = decoded
 
         User.findOne({_id})
-        .then(user => {
+        .then(async user => {
             if(!user) {
                 return res.status(202).json({
                     msg: 'ValidatorError',
@@ -380,19 +353,14 @@ exports.confirmation = (req, res, next) => {
 
             user.isVerified = true
 
-            User.updateOne({_id}, {$set: user})
-            .then (async result => {
-                await saveHistory(_id, 'accInfos', 'manage', `Confirm this account | ${new Date()}`)
+            await Promise.all([
+                User.updateOne({_id}, {$set: user}),
+                saveHistory(_id, 'accInfos', 'manage', `Confirm this account | ${new Date()}`)
 
-                res.status(200).json({
-                    msg: 'success'
-                })
-            })
-            .catch(error => {
-                res.status(500).json({
-                    msg: 'Server error!',
-                    error
-                })
+            ])
+
+            res.status(200).json({
+                msg: 'success'
             })
         })
         .catch(error => {
@@ -403,6 +371,7 @@ exports.confirmation = (req, res, next) => {
         })
     }
     catch (error) {
+        console.log(error)
         res.status(202).json({
             msg: 'ValidatorError',
             errors: {
@@ -428,7 +397,7 @@ exports.resend = (req, res, next) => {
 
         if(user.isVerified) {
             return res.status(200).json({
-                msg: 'success'
+                msg: 'Your account has been verified!'
             })
         }
 
@@ -445,6 +414,7 @@ exports.resend = (req, res, next) => {
         })
     })
     .catch(error => {
+        console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
@@ -464,54 +434,56 @@ exports.login = (req, res, next) => {
                     user: 'User not found!'
                 }
             })
-
-        }else{
-            bcrypt.compare(password, user.password, (error, matched) => {
-                if(error){
-                    return res.status(500).json({
-                        msg: 'Server error!',
-                        error
-                    })
-
-                }else{
-                    if(matched){
-                        const { email, _id, isVerified, name, cash, slugName, roles } = user
-                        const payloadToken = { _id, roles, name, cash, slugName, email }
-                        const token = jwt.sign( payloadToken, jwtKey, {
-                            expiresIn: tokenLife
-                        })
-                        const refreshToken = jwt.sign(payloadToken, jwtKey, {
-                            expiresIn: refreshTokenLife
-                        })
-
-                        if(!isVerified) {
-                            return res.status(202).json({
-                                msg: 'ValidatorError',
-                                errors: {
-                                    user: 'Your account has not been verified!'
-                                }
-                            })
-                        }
-
-                        res.status(200).json({
-                            msg: 'success',
-                            token,
-                            refreshToken
-                        })
-
-                    }else{
-                        return res.status(202).json({
-                            msg: 'ValidatorError',
-                            errors: {
-                                user: 'Email or password does not match!'
-                            }
-                        })
-                    }
-                }
-            })
         }
+
+        bcrypt.compare(password, user.password, (error, matched) => {
+            if(error){
+                console.log(error)
+                return res.status(500).json({
+                    msg: 'Server error!',
+                    error
+                })
+
+            }
+
+            if(matched){
+                const { email, _id, isVerified, name, cash, slugName, roles } = user
+                const payloadToken = { _id, roles, name, cash, slugName, email }
+
+                const token = jwt.sign( payloadToken, jwtKey, {
+                    expiresIn: tokenLife
+                })
+                const refreshToken = jwt.sign(payloadToken, jwtKey, {
+                    expiresIn: refreshTokenLife
+                })
+
+                if(!isVerified) {
+                    return res.status(202).json({
+                        msg: 'ValidatorError',
+                        errors: {
+                            user: 'Your account has not been verified!'
+                        }
+                    })
+                }
+
+                res.status(200).json({
+                    msg: 'success',
+                    token,
+                    refreshToken
+                })
+
+            }else{
+                return res.status(202).json({
+                    msg: 'ValidatorError',
+                    errors: {
+                        user: 'Email or password does not match!'
+                    }
+                })
+            }
+        })
     })
     .catch(error => {
+        console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
@@ -537,6 +509,7 @@ exports.refresh = (req, res, next) => {
         })
 
     } catch (error) {
+        console.log(error)
         return res.status(404).json({
             msg: 'ValidatorError',
             errors: {
@@ -561,29 +534,24 @@ exports.recovery = (req, res, next) => {
         }
 
         bcrypt.hash(email, 10)
-        .then(hashed => {
+        .then(async hashed => {
             user.passwordResetToken = hashed
             user.passwordResetExpires = Date.now() + 5*60*1000 // 5h
 
-            User.updateOne({_id: user._id}, {$set: user})
-            .then(async newUser => {
+            const [, , newUser] = await Promise.all([
+                sendMail(req, email, hashed, 'recovery'),
+                saveHistory(user._id, 'accInfos', 'manage', `Send password reset token: ${user._id}-${user.email} | ${new Date()}`),
+                User.updateOne({_id: user._id}, {$set: user})
+            ])
 
-                sendMail(req, email, hashed, 'recovery')
-                await saveHistory(user._id, 'accInfos', 'manage', `Send password reset token: ${user._id}-${user.email} | ${new Date()}`)
-
-                res.status(200).json({
-                    msg: 'success'
-                })
-            })
-            .catch(error => {
-                res.status(500).json({
-                    msg: 'Server error!',
-                    error
-                })
+            res.status(200).json({
+                msg: 'success',
+                user: newUser
             })
         })
     })
     .catch(error => {
+        console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
@@ -601,7 +569,6 @@ exports.forgot = (req, res, next)  => {
         }
     })
     .then(user => {
-        console.log(user)
         if(!user){
             return res.status(202).json({
                 msg: 'ValidatorError',
@@ -612,29 +579,24 @@ exports.forgot = (req, res, next)  => {
         }
 
         bcrypt.hash(newPassword, 10)
-        .then(hashed => {
+        .then(async hashed => {
             user.password = hashed
             user.passwordResetToken = 'randomStringHere'
             user.passwordResetExpires = Date.now()
 
-            User.updateOne({_id: user._id}, {$set: user})
-            .then(async newUser => {
-                console.log(newUser._id)
-                await saveHistory(user._id, 'accInfos', 'personal', `Recovery password: ${user._id}-${user.name}-${user.email} | ${new Date()}`)
+            const [, newUser] = await Promise.all([
+                saveHistory(user._id, 'accInfos', 'personal', `Recovery password: ${user._id}-${user.name}-${user.email} | ${new Date()}`),
+                User.updateOne({_id: user._id}, {$set: user})
+            ])
 
-                res.status(200).json({
-                    msg: 'success'
-                })
-            })
-            .catch(error => {
-                res.status(500).json({
-                    msg: 'Server error!',
-                    error
-                })
+            res.status(200).json({
+                msg: 'success',
+                user: newUser
             })
         })
     })
     .catch(error => {
+        console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
@@ -651,60 +613,62 @@ exports.history = async (req, res, next)  => {
 
     let result = []
 
-    if (!type && !effect) {
-        if (req.userData.roles != 'admin'){
-            return res.status(403).json({
+    try {
+        if (!type && !effect) {
+            if (req.userData.roles != 'admin'){
+                return res.status(403).json({
+                    msg: 'ValidatorError',
+                    errors: {
+                        user: `You don't have the permission!`
+                    }
+                })
+            }
+
+            result = await History.find({})
+
+            return res.status(200).json({
+                msg: 'success',
+                length: result.length,
+                history: result
+            })
+        }
+        else if (!types) {
+            return res.status(202).json({
                 msg: 'ValidatorError',
                 errors: {
-                    user: `You don't have the permission!`
+                    user: `Request body have to include 'type'!`
+                }
+            })
+        }
+        else if (!effect) {
+            return res.status(202).json({
+                msg: 'ValidatorError',
+                errors: {
+                    user: `Request body have to include 'effect'!`
+                }
+            })
+        }
+        else if (!types.includes(type) || !effects.includes(effect)) {
+            return res.status(202).json({
+                msg: 'ValidatorError',
+                errors: {
+                    user: `Value of 'type' and 'effect' must be valid!`
                 }
             })
         }
 
-        result = await History.find({})
+        result = await loadHistory(_id, type, effect)
 
-        return res.status(200).json({
-            msg: 'success',
-            length: result.length,
-            history: result
-        })
-    }
-    else if (!types) {
-        return res.status(202).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `Request body have to include 'type'!`
-            }
-        })
-    }
-    else if (!effect) {
-        return res.status(202).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `Request body have to include 'effect'!`
-            }
-        })
-    }
-    else if (!types.includes(type) || !effects.includes(effect)) {
-        return res.status(202).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `Value of 'type' and 'effect' must be valid!`
-            }
-        })
-    }
-
-    result = await loadHistory(_id, type, effect)
-
-    if (result) {
         res.status(200).json({
             msg: 'success',
             history: result
         })
     }
-    else {
-        re.status(500).json({
+    catch (error) {
+        console.log(error)
+        res.status(500).json({
             msg: 'Server error!',
+            error
         })
     }
 }

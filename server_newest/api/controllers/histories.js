@@ -22,7 +22,7 @@ exports.getAll = (req, res, next) => {
     .limit(items_per_page)
     .then(async histories => {
         const request = {}
-        const len = await History.find({}).count()
+        const len = await History.find({}).countDocuments()
 
         request.currentPage = page
         request.totalPages = Math.ceil(len / items_per_page)
@@ -72,10 +72,10 @@ exports.getAll = (req, res, next) => {
 exports.getOne = (req, res, next) => {
     const {userId} = req.params
 
-    History.find({userId})
+    History.findOne({userId})
     .select('_id userId actions')
     .then(history => {
-        if(!history[0]){
+        if(!history){
             return res.status(202).json({
                 msg: 'ValidatorError',
                 errors: {
@@ -83,8 +83,6 @@ exports.getOne = (req, res, next) => {
                 }
             })
         }
-
-        history = history[0]
 
         res.status(200).json({
             msg: "success",
@@ -100,212 +98,10 @@ exports.getOne = (req, res, next) => {
         })
     })
     .catch(error => {
+        console.log(error)
         res.status(500).json({
             msg: "Server error!",
             error
         })
     })
 }
-
-// exports.create = (req, res, next) => {
-//     const {userId} = req.body
-
-//     if(!userId){
-//         return res.status(400).json({
-//             msg: 'Bad request body!'
-//         })
-//     }
-
-//     const history = new History({
-//         userId,
-//         actions: {
-//             accInfos: {
-//                 personal: [],
-//                 manage: []
-//             },
-//             items:  {
-//                 personal: [],
-//                 manage: []
-//             },
-//             rolls:  {
-//                 personal: [],
-//                 manage: []
-//             },
-//             codes:  {
-//                 personal: [],
-//                 manage: []
-//             },
-//             blogs:  {
-//                 personal: [],
-//                 manage: []
-//             }
-//         }
-//     })
-
-//     history.save()
-//     .then(his => {
-//         res.status(201).json({
-//             msg: "success",
-//             history: {
-//                 _id: his._id,
-//                 userId: his.userId,
-//                 actions: his.actions,
-//                 request: {
-//                     type: 'GET',
-//                     url: req.hostname + '/histories/' + his.userId
-//                 }
-//             }
-//         })
-//     })
-//     .catch(error => {
-//         res.status(500).json({
-//             msg: 'Server error!',
-//             error
-//         })
-//     })
-// }
-
-// // Updating
-// exports.use = (req, res, next) => {
-//     const {codeId} = req.params
-//     const {_id} = req.body
-
-//     let userItems = {
-//         userId: '',
-//         items: []
-//     }
-
-//     User.findById({_id})
-//     .then(user => {
-//         if(!user){
-//             return res.status(400).json({
-//                 msg: 'User not found!'
-//             })
-//         }
-
-//         userItems.userId = user._id
-//     })
-//     .catch(error => {
-//         res.status(500).json({
-//             msg: 'Server error!',
-//             error
-//         })
-//     })
-
-//     Code.findById({_id: codeId})
-//     .then(code => {
-//         if(!code){
-//             return res.status(400).json({
-//                 msg: 'Code not found!'
-//             })
-//         }
-
-//         if(code.isUsed){
-//             return res.status(400).json({
-//                 msg: 'The code has been used!'
-//             })
-//         }
-
-//         // map
-//         for (const _id of code.items){
-//             Item.findById(_id)
-//             .then(item => {
-//                 // can be change
-//                 if(item){
-//                     userItems.items.push(item.name)
-
-//                     // call model user-items .push item
-//                 }
-
-//             })
-//             .catch(error => {
-//                 return res.status(500).json({
-//                     msg: 'Server error!',
-//                     error
-//                 })
-//             })
-//         }
-
-//         code.isUsed = true
-
-//         code.save()
-
-//         res.status(200).json({
-//             msg: 'success'
-//         })
-//     })
-//     .catch(error => {
-//         res.status(500).json({
-//             msg: 'Server error!',
-//             error
-//         })
-//     })
-// }
-
-// exports.update = (req, res, next) => {
-//     const {codeId: _id} = req.params
-
-//     if (req.userData.roles != 'admin'){
-//         return res.status(403).json({
-//             msg: `You don't have the permission!`
-//         })
-//     }
-
-//     const code = {}
-
-//     for (const ops of req.body) {
-//         code[ops.propName] = ops.value
-//     }
-
-//     Code.updateOne({_id}, {$set: code})
-//     .then(result => {
-//         res.status(200).json({
-//             msg: "success",
-//             request: {
-//                 type: 'GET',
-//                 url: req.hostname + '/giffcodes/' + _id
-//             }
-//         })
-//     })
-//     .catch(error => {
-//         console.log(error)
-//         res.status(500).json({
-//             msg: 'Server error!',
-//             error
-//         })
-//     })
-// }
-
-// exports.delete = (req, res, next) => {
-//     const {codeId: _id} = req.params
-
-//     if (req.userData.roles != 'admin'){
-//         return res.status(403).json({
-//             msg: `You don't have the permission!`
-//         })
-//     }
-
-//     Code.deleteOne({_id})
-//     .then(result => {
-//         res.status(200).json({
-//             msg: 'success',
-//             request: {
-//                 type: 'POST',
-//                 url: req.hostname + '/giffcodes',
-//                 body: {
-//                     code: 'String',
-//                     type: 'String',
-//                     items: 'Array of Item id',
-//                     expiresTime: 'Number (millisecond)'
-//                 }
-//             }
-//         })
-//     })
-//     .catch(error => {
-//         console.log(error)
-//         res.status(500).json({
-//             msg: 'Server error!',
-//             error
-//         })
-//     })
-// }

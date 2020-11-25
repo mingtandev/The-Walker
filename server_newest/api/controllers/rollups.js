@@ -19,7 +19,7 @@ exports.getAll = (req, res, next) => {
     .limit(items_per_page)
     .then(async rolls => {
         const request = {}
-        const len = await Rollup.find({}).count()
+        const len = await Rollup.find({}).countDocuments()
 
         request.currentPage = page
         request.totalPages = Math.ceil(len / items_per_page)
@@ -121,30 +121,39 @@ exports.use = async (req, res, next) => {
         })
     }
 
-    const history = await loadHistory(userId, 'rolls', 'personal')
-    const historyRollupDays = history.map(his => his.split(' ')[2])
+    try {
+        const history = await loadHistory(userId, 'rolls', 'personal')
+        const historyRollupDays = history.map(his => his.split(' ')[2])
 
-    if (historyRollupDays.includes(rollupDay)) {
-        return res.status(202).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `You has been registered today!`
-            }
+        if (historyRollupDays.includes(rollupDay)) {
+            return res.status(202).json({
+                msg: 'ValidatorError',
+                errors: {
+                    user: `You has been registered today!`
+                }
+            })
+        }
+
+        const roll = await Rollup.findOne({ day: rollupDay })
+
+        const [ , , result] = await Promise.all([
+            saveHistory(userId, 'rolls', 'personal', `Roll up: ${rollupDay} | ${new Date()}`),
+            saveStatistic(0, 1, 0, 0, 0, 0),
+            saveUserItem(userId, [roll.item], roll.coin)
+        ])
+
+        res.status(200).json({
+            msg: 'success',
+            userItem: result
         })
     }
-
-    const roll = await Rollup.findOne({ day: rollupDay })
-
-    const [ , , result] = await Promise.all([
-        saveHistory(userId, 'rolls', 'personal', `Roll up: ${rollupDay} | ${new Date()}`),
-        saveStatistic(0, 1, 0, 0, 0, 0),
-        saveUserItem(userId, [roll.item], roll.coin)
-    ])
-
-    res.status(200).json({
-        msg: 'success',
-        userItem: result
-    })
+    catch (error) {
+        console.log(error)
+        res.status(500).json({
+            msg: 'Server error!',
+            error
+        })
+    }
 }
 
 exports.create = async (req, res, next) => {
@@ -160,63 +169,51 @@ exports.create = async (req, res, next) => {
     }
 
     let roll = {
+        _id: mongoose.Types.ObjectId(),
         day,
         coin,
         item
     }
 
-    if (mongoose.Types.ObjectId.isValid(item)) {
-        await Item.findById(item)
-        .then(item => {
-            item ? item.thumbnail ? roll.thumbnail = item.thumbnail : '' : ''
-        })
-        .catch(error => {
-            res.status(500).json({
-                msg: 'Server error!',
-                error
-            })
-        })
-    }
+    try {
+        const itemRes = await Item.findById(item)
+        itemRes ? itemRes.thumbnail ? roll.thumbnail = itemRes.thumbnail : '' : ''
 
-    console.log(roll)
+        const rollObj = new Rollup(roll)
 
-    const rollObj = new Rollup(roll)
-
-    rollObj.save()
-    .then(async newRoll => {
-        const {_id, day, coin, item, thumbnail} = newRoll
-
-        await saveHistory(req.userData._id, 'rolls', 'manage', `Create a roll: ${_id}-${day}-${coin}-${item}} | ${new Date()}`)
+        await Promise.all([
+            saveHistory(req.userData._id, 'rolls', 'manage', `Create a roll: ${roll._id}-${day}-${coin}-${item}} | ${new Date()}`),
+            rollObj.save()
+        ])
 
         res.status(201).json({
             msg: "success",
             roll: {
-                _id,
+                _id: roll._id,
                 day,
                 coin,
                 item,
-                thumbnail,
+                thumbnail: roll.thumbnail,
                 request: {
                     type: 'GET',
                     url: req.hostname + '/rolls/' + newRoll.day
                 }
             }
         })
-    })
-    .catch(error => {
+    }
+    catch (error) {
+        console.log(error)
         let respond = {}
         error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
-
         res.status(202).json({
             msg: 'ValidatorError',
             errors: respond
         })
-    })
+    }
 }
 
 exports.update = async (req, res, next) => {
     const {rollupDay} = req.params
-    const objRoll = await Rollup.find({day: rollupDay})
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -227,56 +224,46 @@ exports.update = async (req, res, next) => {
         })
     }
 
-    const roll = {}
+    try {
+        const objRoll = await Rollup.findOne({day: rollupDay})
+        const roll = {}
 
-    for (const ops of req.body) {
-        roll[ops.propName] = ops.value
-    }
-
-    if (roll.item) {
-        if (mongoose.Types.ObjectId.isValid(roll.item)) {
-            await Item.findById(roll.item)
-            .then(item => {
-                item ? item.thumbnail ? roll.thumbnail = item.thumbnail : '' : ''
-            })
-            .catch(error => {
-                res.status(500).json({
-                    msg: 'Server error!',
-                    error
-                })
-            })
+        for (const ops of req.body) {
+            roll[ops.propName] = ops.value
         }
-    }
 
-    Rollup.updateOne({day: rollupDay}, {$set: roll}, {runValidators: true})
-    .then(async result => {
+        if (roll.item) {
+            const itemRes = await Item.findById(item)
+            itemRes ? itemRes.thumbnail ? roll.thumbnail = itemRes.thumbnail : '' : ''
+        }
 
-        await saveHistory(req.userData._id, 'rolls', 'manage', `Update a roll: ${objRoll[0]._id}-${rollupDay}-${Object.keys(roll).join('-')} | ${new Date()}`)
+        const [, newRoll] = await Promise.all([
+            saveHistory(req.userData._id, 'rolls', 'manage', `Update a roll: ${objRoll._id}-${rollupDay}-${Object.keys(roll).join('-')} | ${new Date()}`),
+            Rollup.updateOne({day: rollupDay}, {$set: roll}, {runValidators: true})
+        ])
 
         res.status(200).json({
             msg: "success",
+            roll: newRoll,
             request: {
                 type: 'GET',
                 url: req.hostname + '/rolls/' + rollupDay
             }
         })
-    })
-    .catch(error => {
+    }
+    catch (error) {
+        console.log(error)
         let respond = {}
         error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
-
         res.status(202).json({
             msg: 'ValidatorError',
             errors: respond
         })
-    })
+    }
 }
 
 exports.delete = async (req, res, next) => {
     const {rollupDay} = req.params
-
-    const rollObj = await Rollup.findOne({day: rollupDay})
-    const {_id, coin, item} = rollObj
 
     if (req.userData.roles != 'admin'){
         return res.status(403).json({
@@ -287,10 +274,15 @@ exports.delete = async (req, res, next) => {
         })
     }
 
-    await saveHistory(req.userData._id, 'rolls', 'manage', `Delete a roll: ${_id}-${rollupDay}-${coin}-${item} | ${new Date()}`)
+    try {
+        const rollObj = await Rollup.findOne({day: rollupDay})
+        const {_id, coin, item} = rollObj
 
-    Rollup.deleteOne({day: rollupDay})
-    .then(result => {
+        await Promise.all([
+            saveHistory(req.userData._id, 'rolls', 'manage', `Delete a roll: ${_id}-${rollupDay}-${coin}-${item} | ${new Date()}`),
+            Rollup.deleteOne({day: rollupDay})
+        ])
+
         res.status(200).json({
             msg: 'success',
             request: {
@@ -303,12 +295,12 @@ exports.delete = async (req, res, next) => {
                 }
             }
         })
-    })
-    .catch(error => {
+    }
+    catch (error) {
         console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
         })
-    })
+    }
 }

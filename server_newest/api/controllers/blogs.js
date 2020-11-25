@@ -1,3 +1,5 @@
+const mongoose = require('mongoose')
+
 const {saveHistory} = require('./../utils/history')
 const {saveStatistic} = require('./../utils/statistic')
 
@@ -16,7 +18,7 @@ exports.getAll = (req, res, next) => {
     .limit(items_per_page)
     .then(async blogs => {
         const request = {}
-        const len = await Blog.find({}).count()
+        const len = await Blog.find({}).countDocuments()
 
         request.currentPage = page
         request.totalPages = Math.ceil(len / items_per_page)
@@ -57,7 +59,7 @@ exports.getAll = (req, res, next) => {
             request
         }
 
-        res.set("x-total-count", blogs.length);
+        // res.set("x-total-count", blogs.length);
         res.status(200).json(response)
     })
     .catch(error => {
@@ -111,7 +113,7 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.create = (req, res, next) => {
+exports.create = async (req, res, next) => {
     const {title, content} = req.body
 
     if (req.userData.roles != 'admin'){
@@ -122,22 +124,23 @@ exports.create = (req, res, next) => {
             }
         })
     }
+    try {
+        const thumbnail = req.file ? req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '') : ''
 
-    const thumbnail = req.file ? req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '') : ''
+        const blog = new Blog({
+            _id: mongoose.Types.ObjectId(),
+            writer: req.userData._id,
+            name: req.userData.name,
+            title,
+            content,
+            thumbnail
+        })
 
-    const blog = new Blog({
-        writer: req.userData._id,
-        name: req.userData.name,
-        title,
-        content,
-        thumbnail
-    })
-
-    blog.save()
-    .then(async blog => {
-
-        await saveHistory(req.userData._id, 'blogs', 'manage', `Create a blog: ${blog._id}-${title} | ${new Date()}`)
-        await saveStatistic(0, 0, 0, 0, 1, 0)
+        await Promise.all([
+            saveHistory(req.userData._id, 'blogs', 'manage', `Create a blog: ${blog._id}-${title} | ${new Date()}`),
+            saveStatistic(0, 0, 0, 0, 1, 0),
+            blog.save()
+        ])
 
         res.status(201).json({
             msg: "success",
@@ -156,8 +159,9 @@ exports.create = (req, res, next) => {
                 }
             }
         })
-    })
-    .catch(error => {
+    }
+    catch (error) {
+        console.log(error)
         let respond = {}
         error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
 
@@ -165,10 +169,10 @@ exports.create = (req, res, next) => {
             msg: 'ValidatorError',
             errors: respond
         })
-    })
+    }
 }
 
-exports.update = (req, res, next) => {
+exports.update = async (req, res, next) => {
     const {blogId: _id} = req.params
 
     if (req.userData.roles != 'admin'){
@@ -186,20 +190,23 @@ exports.update = (req, res, next) => {
         blog[ops.propName] = ops.value
     }
 
-    Blog.updateOne({_id}, {$set: blog}, {runValidators: true})
-    .then(async result => {
-
-        await saveHistory(req.userData._id, 'blogs', 'manage', `Update a blog: ${_id}-${Object.keys(blog).join('-')} | ${new Date()}`)
+    try {
+        await Promise.all([
+            saveHistory(req.userData._id, 'blogs', 'manage', `Update a blog: ${_id}-${Object.keys(blog).join('-')} | ${new Date()}`),
+            Blog.updateOne({_id}, {$set: blog}, {runValidators: true})
+        ])
 
         res.status(200).json({
             msg: "success",
+            blog: result,
             request: {
                 type: 'GET',
                 url: req.hostname + '/blogs/' + _id
             }
         })
-    })
-    .catch(error => {
+    }
+    catch (error) {
+        console.log(error)
         let respond = {}
         error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
 
@@ -207,7 +214,7 @@ exports.update = (req, res, next) => {
             msg: 'ValidatorError',
             errors: respond
         })
-    })
+    }
 }
 
 exports.delete = async (req, res, next) => {
@@ -222,12 +229,13 @@ exports.delete = async (req, res, next) => {
         })
     }
 
-    const blog = await Blog.findById(_id)
+    try {
+        const blog = await Blog.findById(_id)
 
-    Blog.deleteOne({_id})
-    .then(async result => {
-
-        await saveHistory(req.userData._id, 'blogs', 'manage', `Delete a blog: ${blog._id}-${blog.title} | ${new Date()}`)
+        await Promise.all([
+            saveHistory(req.userData._id, 'blogs', 'manage', `Delete a blog: ${blog._id}-${blog.title} | ${new Date()}`),
+            Blog.deleteOne({_id})
+        ])
 
         res.status(200).json({
             msg: 'success',
@@ -242,11 +250,12 @@ exports.delete = async (req, res, next) => {
                 }
             }
         })
-    })
-    .catch(error => {
+    }
+    catch (error) {
+        console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
         })
-    })
+    }
 }

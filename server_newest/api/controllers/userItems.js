@@ -22,7 +22,7 @@ exports.getAll = (req, res, next) => {
             })
         }
 
-        res.set("x-total-count", userItems.length);
+        // res.set("x-total-count", userItems.length);
         res.status(200).json(response)
     })
     .catch(error => {
@@ -37,11 +37,9 @@ exports.getAll = (req, res, next) => {
 exports.getOne = (req, res, next) => {
     const {userId} = req.params
 
-    UserItem.find({userId})
+    UserItem.findOne({userId})
     .select('_id userId coin items')
-    .then(userItems => {
-
-        const userItem = userItems[0]
+    .then(userItem => {
 
         if(!userItem){
             return res.status(202).json({
@@ -75,23 +73,29 @@ exports.getOne = (req, res, next) => {
     })
 }
 
-exports.update = (req, res, next) => { // Only for game client to update coins
+exports.update = async (req, res, next) => { // Only for game client to update coins
     const {userId} = req.params
     const {coin} = req.body
 
     if (!coin) coin = 0
 
-    UserItem.updateOne({userId}, {
-        $inc: {
-            coin: +coin
-        },
-        // $addToSet: {
-        //     "items.guns": items.guns,
-        //     "items.hats": items.hats,
-        //     "items.outfits": items.outfits,
-        // }
-    })
-    .then(result => {
+    // await UserItem.updateOne({userId}, {
+    //     $inc: {
+    //         coin: +coin
+    //     },
+    //     // $addToSet: {
+    //     //     "items.guns": items.guns,
+    //     //     "items.hats": items.hats,
+    //     //     "items.outfits": items.outfits,
+    //     // }
+    // })
+
+    try {
+        const userItem = await UserItem.findOne({userId})
+        userItem.coin += parseInt(coin)
+
+        const result = await userItem.save()
+
         res.status(200).json({
             msg: "success",
             userItem: result,
@@ -100,14 +104,14 @@ exports.update = (req, res, next) => { // Only for game client to update coins
                 url: req.hostname + '/user-items/' + userId
             }
         })
-    })
-    .catch(error => {
+    }
+    catch (error) {
         console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
         })
-    })
+    }
 }
 
 exports.delete = (req, res, next) => {

@@ -10,9 +10,35 @@ const userItemSchema = mongoose.Schema({
         default: 5000,
     },
     items: {
-        guns: [],
-        hats: [],
-        outfits: []
+        guns: {
+            type: Array,
+            default: [{
+                id: '',
+                name: 'AWM',
+                detail: 'Item detail',
+                boughtAt: new Date()
+            }]
+        }
+        ,
+        hats: {
+            type: Array,
+                default: [{id: '',
+                name: 'Cowboy',
+                detail: 'Item detail',
+                boughtAt: new Date()
+            }]
+        }
+        ,
+        outfits: {
+            type: Array,
+            default: [{
+                id: '',
+                name: 'Bikini',
+                detail: 'Item detail',
+                boughtAt: new Date()
+            }]
+        }
+
     }
 })
 

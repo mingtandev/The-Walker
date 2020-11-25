@@ -1,7 +1,6 @@
 const express = require('express')
 
 const StatisticController = require('../controllers/statistics')
-const checkAuth = require('../middleware/checkAuth')
 
 const router = express.Router()
 

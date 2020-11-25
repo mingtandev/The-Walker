@@ -59,7 +59,7 @@ exports.getAll = (req, res, next) => {
             request
         }
 
-        res.set('Content-Range', `items 0-4/${items.length}`)
+        // res.set('Content-Range', `items 0-4/${items.length}`)
         res.status(200).json(response)
     })
     .catch(error => {
@@ -118,41 +118,42 @@ exports.buyOne = async (req, res, next) => {
     const {itemId} = req.params
     const {_id} = req.userData
 
-    const [user, item] = await Promise.all([
-        User.findById(_id),
-        Item.findById(itemId)
-    ])
+    try {
+        const [user, item] = await Promise.all([
+            User.findById(_id),
+            Item.findById(itemId)
+        ])
 
-    const {cash} = user
-    const {name, type, price, sale, saleExpiresTime} = item
+        const {cash} = user
+        const {name, type, price, sale, saleExpiresTime} = item
 
-    let salePrice = price
+        let salePrice = price
 
-    if(saleExpiresTime >= Date.now()){
-        salePrice = (price - sale/100*price).toFixed(2)
+        if(saleExpiresTime >= Date.now()){
+            salePrice = (price - sale/100*price).toFixed(2)
 
-        console.log(`Sale: ${sale}%`)
-        console.log(`Sale price: ${salePrice}`)
-    }
+            console.log(`Sale: ${sale}%`)
+            console.log(`Sale price: ${salePrice}`)
+        }
 
-    if(cash < salePrice) {
-        return res.status(202).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `Cash not enough!`
-            }
-        })
-    }
+        if(cash < salePrice) {
+            return res.status(202).json({
+                msg: 'ValidatorError',
+                errors: {
+                    user: `Cash not enough!`
+                }
+            })
+        }
 
-    await Promise.all([
-        saveHistory(_id, 'items', 'personal', `Buy a item: ${name}-${type}-${price}-${salePrice}-${sale}-${saleExpiresTime}} | ${new Date()}`),
-        saveStatistic(0, 0, 1, 0, 0, salePrice),
-        saveUserItem(_id, [itemId], 0)
-    ])
+        user.cash = cash - salePrice
 
-    user.cash = cash - salePrice
-    User.updateOne({_id: user._id}, {$set: user})
-    .then(result => {
+        await Promise.all([
+            saveHistory(_id, 'items', 'personal', `Buy a item: ${name}-${type}-${price}-${salePrice}-${sale}-${saleExpiresTime}} | ${new Date()}`),
+            saveStatistic(0, 0, 1, 0, 0, salePrice),
+            saveUserItem(_id, [itemId], 0),
+            User.updateOne({_id: user._id}, {$set: user})
+        ])
+
         res.status(200).json({
             msg: 'success',
             user: {
@@ -164,16 +165,17 @@ exports.buyOne = async (req, res, next) => {
                 cash: user.cash
             }
         })
-    })
-    .catch(error => {
+    }
+    catch (error) {
+        console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
         })
-    })
+    }
 }
 
-exports.create = (req, res, next) => {
+exports.create = async (req, res, next) => {
     const {name, type, price, detail, sale, saleExpiresTime} = req.body
 
     if (req.userData.roles != 'admin'){
@@ -185,63 +187,55 @@ exports.create = (req, res, next) => {
         })
     }
 
-    const thumbnail = req.file ? req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '') : ''
+    try {
+        const thumbnail = req.file ? req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '') : ''
 
-    const item = new Item({
-        name,
-        type,
-        price,
-        detail,
-        thumbnail
-    })
+        const item = new Item({
+            name,
+            type,
+            price,
+            detail,
+            thumbnail
+        })
 
-    if(+sale > 0){
-        item['sale'] = +sale,
-        +saleExpiresTime > 0 ? item['saleExpiresTime'] = Date.now() + +saleExpiresTime*24*60*60*1000 : item['saleExpiresTime'] = Date.now() + 259200000
-    }
+        if(+sale > 0){
+            item['sale'] = +sale,
+            +saleExpiresTime > 0 ? item['saleExpiresTime'] = Date.now() + +saleExpiresTime*24*60*60*1000 : item['saleExpiresTime'] = Date.now() + 259200000
+        }
 
-    item.save()
-    .then(async newItem => {
+        await Promise.all([
+            item.save(),
+            saveHistory(req.userData._id, 'items', 'manage', `Create a new item: ${item._id}-${name}-${type}-${price}-${item.sale}-${item.saleExpiresTime} | ${new Date()}`)
 
-        await saveHistory(req.userData._id, 'items', 'manage', `Create a new item: ${newItem._id}-${name}-${type}-${price}-${newItem.sale}-${newItem.saleExpiresTime} | ${new Date()}`)
+        ])
 
         res.status(201).json({
             msg: "success",
             item: {
-                _id: newItem._id,
-                name: newItem.name,
-                slugName: newItem.slugName,
-                detail: newItem.detail,
-                thumbnail: newItem.thumbnail,
-                type: newItem.type,
-                price: newItem.price,
+                _id: item._id,
+                name: item.name,
+                slugName: item.slugName,
+                detail: item.detail,
+                thumbnail: item.thumbnail,
+                type: item.type,
+                price: item.price,
                 sale: item.sale,
                 saleExpiresTime: item.saleExpiresTime,
                 request: {
                     type: 'GET',
-                    url: req.hostname + '/items/' + newItem._id
+                    url: req.hostname + '/items/' + item._id
                 }
             }
         })
-    })
-    .catch(error => {
+    }
+    catch (error) {
         let respond = {}
         error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
-
         res.status(202).json({
             msg: 'ValidatorError',
             errors: respond
         })
-
-        // {
-        //     "msg": "ValidatorError",
-        //     "errors": {
-        //         "name": "Name is required!",
-        //         "type": "Type is required!",
-        //         "price": "Price is required!"
-        //     }
-        // }
-    })
+    }
 }
 
 exports.update = async (req, res, next) => {
@@ -266,14 +260,16 @@ exports.update = async (req, res, next) => {
         }
     }
 
-    if(+item.sale > 0){
-        +item.saleExpiresTime > 0 ? item['saleExpiresTime'] = Date.now() + +item.saleExpiresTime*24*60*60*1000 : item['saleExpiresTime'] = Date.now() + 259200000
-    }
+    try {
+        if(+item.sale > 0){
+            +item.saleExpiresTime > 0 ? item['saleExpiresTime'] = Date.now() + +item.saleExpiresTime*24*60*60*1000 : item['saleExpiresTime'] = Date.now() + 259200000
+        }
 
-    await saveHistory(req.userData._id, 'items', 'manage', `Update a item: ${_id}-${Object.keys(item).join('-')} | ${new Date()}`)
+        await Promise.all([
+            saveHistory(req.userData._id, 'items', 'manage', `Update a item: ${_id}-${Object.keys(item).join('-')} | ${new Date()}`),
+            Item.updateOne({_id}, {$set: item}, {runValidators: true})
+        ])
 
-    Item.updateOne({_id}, {$set: item}, {runValidators: true})
-    .then(result => {
         res.status(200).json({
             msg: "success",
             request: {
@@ -281,16 +277,16 @@ exports.update = async (req, res, next) => {
                 url: req.hostname + '/items/' + _id
             }
         })
-    })
-    .catch(error => {
+    }
+    catch (error) {
+        console.log(error)
         let respond = {}
         error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
-
         res.status(202).json({
             msg: 'ValidatorError',
             errors: respond
         })
-    })
+    }
 }
 
 exports.delete = async (req, res, next) => {
@@ -305,13 +301,15 @@ exports.delete = async (req, res, next) => {
         })
     }
 
-    const item = await Item.findById(_id)
-    const {name, type, price, sale, saleExpiresTime} = item
+    try {
+        const item = await Item.findById(_id)
+        const {name, type, price, sale, saleExpiresTime} = item
 
-    await saveHistory(req.userData._id, 'items', 'manage', `Delete a item: ${_id}-${name}-${type}-${price}-${sale}-${saleExpiresTime} | ${new Date()}`)
+        await Promise.all([
+            saveHistory(req.userData._id, 'items', 'manage', `Delete a item: ${_id}-${name}-${type}-${price}-${sale}-${saleExpiresTime} | ${new Date()}`),
+            Item.deleteOne({_id})
+        ])
 
-    Item.deleteOne({_id})
-    .then(result => {
         res.status(200).json({
             msg: 'success',
             request: {
@@ -326,12 +324,12 @@ exports.delete = async (req, res, next) => {
                 }
             }
         })
-    })
-    .catch(error => {
+    }
+    catch (error) {
         console.log(error)
         res.status(500).json({
             msg: 'Server error!',
             error
         })
-    })
+    }
 }
