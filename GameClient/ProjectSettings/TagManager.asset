@@ -18,6 +18,7 @@ TagManager:
   - GunBarrel
   - TargetFollow
   - CameraFreeLook
+  - BuffAmmo
   layers:
   - Default
   - TransparentFX
