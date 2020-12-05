@@ -17,13 +17,14 @@ namespace Michsky.UI.FieldCompleteMainMenu
         public Text passwordText;
 
 
-        readonly string postURL = "http://r2w-team-api.ap-1.evennode.com/users/login";
+        readonly string postURL = "http://r2w-team-api-v2.ap-1.evennode.com/users/login";
+        readonly string itemURL = "http://r2w-team-api-v2.ap-1.evennode.com/user-items/";
 
         string emailTest = "ccc@kascsjdhaasdsdf.asc";
         string passwordTest = "12345";
         void Start()
         {
-            
+
 
         }
 
@@ -60,8 +61,6 @@ namespace Michsky.UI.FieldCompleteMainMenu
             UnityWebRequest www = UnityWebRequest.Post(postURL, form);
             yield return www.SendWebRequest();
 
-            Debug.Log(email);
-            Debug.Log(password);
 
             if (www.isNetworkError)
             {
@@ -78,17 +77,14 @@ namespace Michsky.UI.FieldCompleteMainMenu
                     yield break;
                 }
 
-                LoginSceneManager.token = JsonConvert.DeserializeObject<Token>(www.downloadHandler.text);
+                GameManager.token = JsonConvert.DeserializeObject<Token>(www.downloadHandler.text);
 
-                Debug.Log(LoginSceneManager.token.msg);
-
-                LoginSceneManager.playerData = JsonConvert.DeserializeObject<PlayerData>(Decode(LoginSceneManager.token.token));
-
-                LoginSceneManager.playerData.ShowInfo();
-
-                if (LoginSceneManager.token.msg == "success")
+                if (GameManager.token.msg == "success")
                 {
                     switchPanelMain.Animate();
+                    GameManager.playerData = JsonConvert.DeserializeObject<PlayerData>(Decode(GameManager.token.token));
+                    StartCoroutine(GetItemData(GameManager.playerData._id));
+
                 }
                 else
                 {
@@ -104,15 +100,18 @@ namespace Michsky.UI.FieldCompleteMainMenu
         {
 
             StartCoroutine(PostRequest(usernameText.text, passwordText.text));
+        }
 
-            // if (usernameText.text == username && passwordText.text == password)
+        IEnumerator GetItemData(string id)
+        {
+            UnityWebRequest www = UnityWebRequest.Get(itemURL + id);
+            yield return www.SendWebRequest();
+            Debug.Log(www.downloadHandler.text);
+            GameManager.UserItems = JsonConvert.DeserializeObject<ListItem>(www.downloadHandler.text);
+            Debug.Log(GameManager.UserItems);
+            // foreach(Weapon we in GameManager.UserItems.userItem.items.weapons)
             // {
-            //     switchPanelMain.Animate();
-            // }
-            // else
-            // {
-            //     wrongAnimator.Play("Notification In");
-            //     soundScript.Notification();
+            //     Debug.Log(we.name);
             // }
         }
     }
