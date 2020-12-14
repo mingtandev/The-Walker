@@ -1,14 +1,17 @@
 .header {
-  position: relative;
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+  right: 0;
+  left: 0;
   padding: 1rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  right: 0;
-  left: auto;
   background: #fff;
   border-bottom: 1px solid #d8dbe0;
   box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 4px 1px;
+  z-index: 100;
   &__left {
     display: flex;
     align-items: center;

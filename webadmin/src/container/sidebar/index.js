@@ -6,12 +6,6 @@ import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
 import StoreIcon from "@material-ui/icons/Store";
 import "./index.scss";
 
-import Accordion from "@material-ui/core/Accordion";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
-import Typography from "@material-ui/core/Typography";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-
 function Sidebar(props) {
   const { show } = props;
 

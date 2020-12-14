@@ -60,7 +60,8 @@ function BlogEdit(props) {
               fullWidth
             />
             <TextField
-              autoFocus
+              multiline
+              rows={5}
               margin="dense"
               name="content"
               label="Content"

@@ -1,7 +1,11 @@
-.giftcode {
+.items {
   &__option {
     display: flex;
     justify-content: flex-end;
     padding: 2rem;
+  }
+  &__notification {
+    color: #28a745;
+    font-style: italic;
   }
 }
