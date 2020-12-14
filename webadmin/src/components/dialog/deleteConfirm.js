@@ -1,5 +1,6 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
+import DeleteIcon from "@material-ui/icons/Delete";
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -27,7 +28,12 @@ function DeleteConfirmBox(props) {
       >
         <DialogTitle id="form-dialog-title">{title}</DialogTitle>
         <DialogContent>
-          <Button onClick={handleDelete} color="primary">
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleDelete}
+            startIcon={<DeleteIcon />}
+          >
             Delete
           </Button>
           <Button onClick={handleCloseDialog} color="primary">

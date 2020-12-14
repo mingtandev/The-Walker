@@ -34,6 +34,7 @@ function BlogList() {
 
   useEffect(() => {
     getAllBlogs();
+    return () => getAllBlogs();
   }, []);
 
   const handleDialogOpen = (rowData, e) => {
@@ -102,6 +103,12 @@ function BlogList() {
             title="BLOGS"
             options={{
               actionsColumnIndex: -1,
+              rowStyle: (rowData) => ({
+                backgroundColor:
+                  rowData.tableData.id % 2 === 0
+                    ? "rgba(249, 249, 249, 0.6)"
+                    : "#FFF",
+              }),
             }}
             actions={[
               {

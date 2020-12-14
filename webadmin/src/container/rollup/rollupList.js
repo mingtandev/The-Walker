@@ -32,6 +32,7 @@ function RollUpList() {
   }
   useEffect(() => {
     getAllRoll();
+    return () => getAllRoll();
   }, []);
 
   const handleDialogOpen = (rowData, e) => {
@@ -94,6 +95,12 @@ function RollUpList() {
           title="ROLL-UPS"
           options={{
             actionsColumnIndex: -1,
+            rowStyle: (rowData) => ({
+              backgroundColor:
+                rowData.tableData.id % 2 === 0
+                  ? "rgba(249, 249, 249, 0.6)"
+                  : "#FFF",
+            }),
           }}
           actions={[
             {
