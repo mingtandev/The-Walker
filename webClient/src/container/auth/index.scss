@@ -138,4 +138,62 @@
       font-size: 1.5rem;
     }
   }
+  .MuiSvgIcon-root {
+    font-size: 2.5rem;
+  }
+}
+
+.user {
+  &__container {
+    width: 90%;
+    margin: auto;
+    padding-top: 20rem;
+  }
+  &__update {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    background-color: #f8f8ff;
+    &-form {
+      width: 40%;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+  &__infos {
+    display: flex;
+    justify-content: space-between;
+  }
+  &__info {
+    width: calc(25% - 20px);
+    padding: 2rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: #87cefa;
+    color: white;
+    &-title {
+      font-size: 2rem;
+    }
+    &-content {
+      margin: auto;
+      color: black;
+      font-size: 2.3rem;
+      letter-spacing: 2px;
+    }
+    &-icon {
+      width: 50px !important;
+      height: 50px !important;
+    }
+    &--left {
+      width: 30%;
+    }
+    &--right {
+      width: 70%;
+      display: flex;
+      flex-direction: column;
+    }
+  }
 }

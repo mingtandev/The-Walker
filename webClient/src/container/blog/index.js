@@ -23,7 +23,7 @@ function Blogs() {
         console.log(res);
         if (res.msg === "success") {
           setBlogs(res.blogs);
-          setTotalPage(res.length);
+          setTotalPage(res.request.totalPages);
         }
         setLoading(false);
       } catch (error) {
@@ -39,7 +39,6 @@ function Blogs() {
   };
 
   const handlePaginationChange = (e, value) => {
-    console.log(e, value);
     setCurrentPage(value);
   };
 
@@ -58,15 +57,18 @@ function Blogs() {
       ) : (
         <Loading />
       )}
-      <div className="items__pagination">
-        <Pagination
-          count={totalPage}
-          page={currentPage}
-          onChange={handlePaginationChange}
-          variant="outlined"
-          shape="rounded"
-        />
-      </div>
+
+      {blogs.length && (
+        <div className="blogs__pagination">
+          <Pagination
+            count={totalPage}
+            page={currentPage}
+            onChange={handlePaginationChange}
+            variant="outlined"
+            shape="rounded"
+          />
+        </div>
+      )}
     </>
   );
 }

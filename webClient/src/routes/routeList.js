@@ -10,13 +10,13 @@ import Blog from "../pages/blog";
 import ForgotPassword from "../pages/auth/forgot";
 import NotFound from "../components/notFound";
 
+const UserItem = lazy(() => import("../container/userItems"));
 const UserInfo = lazy(() => import("../container/auth/userInfo"));
-const BlogByID = lazy(() => import("../components/blog/blogDetail"));
-const ItemByID = lazy(() => import("../components/item/itemByID"));
 const AcccountVerify = lazy(() => import("../pages/auth/accountVerify"));
 
 const routes = [
   { path: "/", exact: true, component: Home },
+  { path: "/my-items", exact: true, component: UserItem },
   {
     path: "/sign-in",
     role: "noAuth",
@@ -32,10 +32,6 @@ const routes = [
     exact: true,
     component: Shop,
   },
-  // {
-  //   path: "/shop/:id",
-  //   component: ItemByID,
-  // },
   {
     path: "/roll-up",
     role: "user",
@@ -51,10 +47,6 @@ const routes = [
     exact: true,
     component: Blog,
   },
-  // {
-  //   path: `/blog/:id`,
-  //   component: BlogByID,
-  // },
   {
     path: "/account/forgot",
     role: "noAuth",

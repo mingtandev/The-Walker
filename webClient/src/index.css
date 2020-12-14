@@ -18,8 +18,9 @@ body {
   letter-spacing: 1px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #98acf8;
   background-image: url("../src/images/wall.png");
-  background-size: cover;
+  /* background-size: cover; */
 }
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",

@@ -108,7 +108,7 @@ function Navbar() {
         <ul className="nav__links--auth">
           {!user.user && (
             <>
-              <li className="nav__link">
+              <li className="nav__link nav__link--capitalize">
                 <NavLink
                   to="/sign-in"
                   replace
@@ -117,7 +117,7 @@ function Navbar() {
                   <i className="fas fa-sign-in-alt"></i> Sign In
                 </NavLink>
               </li>
-              <li className="nav__link">
+              <li className="nav__link nav__link--capitalize">
                 <NavLink
                   to="/sign-up"
                   replace

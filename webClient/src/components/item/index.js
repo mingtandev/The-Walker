@@ -10,7 +10,7 @@ function ItemDetail(props) {
 
   return (
     <div className="item">
-      <img className="item__img" src={thumbnail} alt="item" />
+      <img className="item__img" src={"http://" + thumbnail} alt="item" />
       <p className="item__name">{name}</p>
       <p className="item__price">
         Price: <span style={{ color: "red" }}>{price}</span>

@@ -26,11 +26,11 @@ export default function ItemPurchaseConfirm(props) {
       >
         <DialogTitle id="scroll-dialog-title">Confirm Purchase</DialogTitle>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
           <Button onClick={handlePurchase} color="primary">
             PURCHASE
+          </Button>
+          <Button onClick={handleClose} color="primary">
+            Cancel
           </Button>
         </DialogActions>
       </Dialog>

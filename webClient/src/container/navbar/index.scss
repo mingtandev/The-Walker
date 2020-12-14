@@ -73,6 +73,9 @@
       font-weight: bold;
       color: orange;
     }
+    &--capitalize {
+      text-transform: capitalize;
+    }
     &--user {
       cursor: pointer;
       position: relative;

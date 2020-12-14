@@ -4,7 +4,7 @@ import userApi from "../../api/userApi";
 import "./index.scss";
 
 function Blog(props) {
-  const { _id, date, writer, title, content, thumbnail, onclick } = props;
+  const { _id, date, name, title, content, thumbnail, onclick } = props;
 
   const showDetail = () => {
     if (onclick) onclick(_id);
@@ -18,9 +18,8 @@ function Blog(props) {
         alt="image"
       />
       <p className="blog__title">{title}</p>
-      <p className="blog__caption">
-        {date} | Writer: {writer}
-      </p>
+      <p className="blog__caption">{date}</p>
+      <p className="blog__caption">Writer: {name}</p>
       <p className="blog__content">{content}</p>
     </div>
   );

@@ -110,14 +110,12 @@ function Register() {
               "Check your email for validation"
             );
             history.push("/sign-in");
-          } else if (res.msg === "Email has been used!")
-            toastr.error("Register Failed", "Email has been used");
-          else if (res.msg === "Fields: name, email and password are required!")
-            toastr.error(
-              "Register Failed",
-              "Fields: name, email and password are required!"
-            );
-          else toastr.warning("Register Failed", "Try Again Later");
+          } else {
+            if (res.errors) {
+              for (let error in res.errors)
+                toastr.error("Register Failed", res.errors[error]);
+            }
+          }
           return;
         }
         toastr.warning("Register Failed", "Try Again Later");

@@ -16,14 +16,6 @@ function Login() {
   let dispatch = useDispatch();
   let history = useHistory();
 
-  const togglePassword = (e) => {
-    e.preventDefault();
-    let x = document.getElementById("password");
-    let passwordEye = document.getElementById("togglePassword");
-    x.type === "password" ? (x.type = "text") : (x.type = "password");
-    passwordEye.classList.toggle("fa-eye-slash");
-  };
-
   const onInputChange = (e) => {
     setLoginErr("");
   };
@@ -100,13 +92,6 @@ function Login() {
               placeholder="Your password"
             />
             <span class="form__input--focus"></span>
-            <button
-              class="form__input--eye"
-              type="button"
-              onClick={togglePassword}
-            >
-              <i class="far fa-eye" id="togglePassword"></i>
-            </button>
           </div>
           <div className="recaptcha">
             <ReCAPTCHA

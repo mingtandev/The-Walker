@@ -1,0 +1,18 @@
+.useritem {
+  &__container {
+    margin: 0 auto;
+    padding-top: 15rem;
+    width: 50%;
+  }
+  &__title {
+    margin-bottom: 3rem;
+    padding: 1rem;
+    color: white;
+    border-bottom: 1px solid white;
+  }
+  &__main {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+}
