@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useDispatch } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
@@ -7,6 +7,7 @@ import userApi from "../../api/userApi";
 import jwt_decode from "jwt-decode";
 import { toastr } from "react-redux-toastr";
 import { EmailValidation } from "../../utils/formValidation";
+import AOS from "aos";
 
 import "./index.scss";
 
@@ -15,6 +16,10 @@ function Login() {
   const recaptchaRef = React.createRef();
   let dispatch = useDispatch();
   let history = useHistory();
+
+  useEffect(() => {
+    AOS.init({ duration: 500 });
+  }, []);
 
   const onInputChange = (e) => {
     setLoginErr("");
@@ -69,7 +74,7 @@ function Login() {
 
   return (
     <div className="form__container">
-      <div className="form form__login">
+      <div data-aos="flip-right" className="form form__login">
         <form onSubmit={login}>
           <Link to="/account/forgot">Forgot Password</Link>
           <Link to="/sign-up">Not have an account?</Link>

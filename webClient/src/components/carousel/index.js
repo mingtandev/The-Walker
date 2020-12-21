@@ -1,5 +1,6 @@
 import React from "react";
 import Carousel from "react-bootstrap/Carousel";
+import "./index.scss";
 
 function HomeSlideBanner() {
   return (
@@ -12,9 +13,17 @@ function HomeSlideBanner() {
             alt="First slide"
           />
           <Carousel.Caption>
-            <h3 className="carousel__title">First slide label</h3>
+            <h2 className="carousel__toptitle carousel__toptitle--orange">
+              Island
+            </h2>
+            <h3 className="carousel__title">
+              The{" "}
+              <span className="carousel__title carousel__title--orange">
+                Walker
+              </span>
+            </h3>
             <p className="carousel__caption">
-              Nulla vitae elit libero, a pharetra augue mollis interdum.
+              Survive on fighting with the Bloodthirsty Zombies
             </p>
           </Carousel.Caption>
         </Carousel.Item>

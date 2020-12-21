@@ -1,0 +1,24 @@
+.about {
+  padding: 10rem 3rem;
+  color: white;
+  &__title {
+    font-weight: bold;
+    font-size: 5rem;
+    letter-spacing: 5px;
+  }
+  &__main {
+    margin-top: 5rem;
+    display: flex;
+    justify-content: space-between;
+  }
+  &__item {
+    width: calc(25%);
+    border-right: 2px solid #dfdede;
+    > img {
+      width: 100%;
+    }
+    &:last-child {
+      border-right: 0;
+    }
+  }
+}

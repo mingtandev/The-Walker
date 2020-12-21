@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-redux-toastr/lib/css/react-redux-toastr.min.css";
+import "aos/dist/aos.css"; // You can also use <link> for styles
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
