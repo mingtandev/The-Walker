@@ -30,7 +30,6 @@ exports.getAll = (req, res, next) => {
   if (page < 1) page = 1;
 
   User.find({})
-    .select("name slugName email cash roles isVerified")
     .skip((page - 1) * items_per_page)
     .limit(items_per_page)
     .then(async (users) => {
@@ -66,6 +65,9 @@ exports.getAll = (req, res, next) => {
             cash: user.cash,
             roles: user.roles,
             isVerified: user.isVerified,
+            history: user.history,
+            items: user.items,
+            slugName: user.slugName,
             request: {
               type: "GET",
               url: req.hostname + "/users/" + user._id,
@@ -91,8 +93,9 @@ exports.getOne = (req, res, next) => {
 
   let selectStr = "";
 
-  if (_id === req.userData._id) selectStr = "name email roles cash isVerified";
-  else selectStr = "name email roles";
+  if (_id === req.userData._id)
+    selectStr = "name email roles cash isVerified history items slugName";
+  else selectStr = "name email roles slugName";
 
   User.findById(_id)
     .select(selectStr)

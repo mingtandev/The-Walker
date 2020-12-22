@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const Rollup = require("../models/rollup");
 const Item = require("../models/item");
+const User = require("../models/user");
 
 const { saveHistory, loadHistory } = require("./../utils/history");
 const { saveStatistic } = require("./../utils/statistic");
@@ -189,15 +190,25 @@ exports.create = async (req, res, next) => {
 
     const rollObj = new Rollup(roll);
 
-    await Promise.all([
-      saveHistory(
-        req.userData._id,
-        "rolls",
-        "manage",
-        `Create a roll: ${roll._id}-${day}-${coin}-${item}} | ${new Date()}`
-      ),
-      rollObj.save(),
-    ]);
+    const history = {
+      type: "create",
+      collection: "roll up",
+      task: `Create a new roll up day: ${rollObj.day}`,
+      date: new Date(),
+      others: {
+        id: rollObj._id,
+      },
+    };
+
+    await rollObj.save();
+    await User.updateOne(
+      { _id: req.userData._id },
+      {
+        $push: {
+          "history.manage": history,
+        },
+      }
+    );
 
     res.status(201).json({
       msg: "success",
@@ -241,40 +252,43 @@ exports.update = async (req, res, next) => {
 
   try {
     const objRoll = await Rollup.findOne({ day: rollupDay });
-    const roll = {};
-
     for (const ops of req.body) {
-      roll[ops.propName] = ops.value;
+      objRoll[ops.propName] = ops.value;
+
+      if (ops.propName === "item") {
+        const itemRes = await Item.findById(item);
+        itemRes
+          ? itemRes.thumbnail
+            ? (objRoll.thumbnail = itemRes.thumbnail)
+            : ""
+          : "";
+      }
     }
 
-    if (roll.item) {
-      const itemRes = await Item.findById(item);
-      itemRes
-        ? itemRes.thumbnail
-          ? (roll.thumbnail = itemRes.thumbnail)
-          : ""
-        : "";
-    }
+    const history = {
+      type: "update",
+      collection: "roll up",
+      task: `Update a roll up day: ${objRoll.day}`,
+      date: new Date(),
+      others: {
+        id: objRoll._id,
+        fields: req.body.map((ele) => `${ele.propName}: ${ele.value}`),
+      },
+    };
 
-    const [, newRoll] = await Promise.all([
-      saveHistory(
-        req.userData._id,
-        "rolls",
-        "manage",
-        `Update a roll: ${objRoll._id}-${rollupDay}-${Object.keys(roll).join(
-          "-"
-        )} | ${new Date()}`
-      ),
-      Rollup.updateOne(
-        { day: rollupDay },
-        { $set: roll },
-        { runValidators: true }
-      ),
-    ]);
+    await objRoll.save();
+    await User.updateOne(
+      { _id: req.userData._id },
+      {
+        $push: {
+          "history.manage": history,
+        },
+      }
+    );
 
     res.status(200).json({
       msg: "success",
-      roll: newRoll,
+      roll: objRoll,
       request: {
         type: "GET",
         url: req.hostname + "/rolls/" + rollupDay,
@@ -308,17 +322,26 @@ exports.delete = async (req, res, next) => {
 
   try {
     const rollObj = await Rollup.findOne({ day: rollupDay });
-    const { _id, coin, item } = rollObj;
 
-    await Promise.all([
-      saveHistory(
-        req.userData._id,
-        "rolls",
-        "manage",
-        `Delete a roll: ${_id}-${rollupDay}-${coin}-${item} | ${new Date()}`
-      ),
-      Rollup.deleteOne({ day: rollupDay }),
-    ]);
+    const history = {
+      type: "delete",
+      collection: "roll up",
+      task: `Delete a roll up day: ${rollObj.day}`,
+      date: new Date(),
+      others: {
+        id: rollObj._id,
+      },
+    };
+
+    await Rollup.deleteOne({ day: rollupDay });
+    await User.updateOne(
+      { _id: req.userData._id },
+      {
+        $push: {
+          "history.manage": history,
+        },
+      }
+    );
 
     res.status(200).json({
       msg: "success",
