@@ -1,9 +1,7 @@
 const Item = require("../models/item");
 const User = require("../models/user");
 
-const { saveHistory } = require("./../utils/history");
 const { saveStatistic } = require("./../utils/statistic");
-const { saveUserItem } = require("./../utils/userItem");
 
 exports.getAll = (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
@@ -40,17 +38,7 @@ exports.getAll = (req, res, next) => {
         length: items.length,
         products: items.map((item) => {
           return {
-            _id: item._id,
-            name: item.name,
-            slugName: item.slugName,
-            detail: item.detail,
-            thumbnail: item.thumbnail,
-            type: item.type,
-            price: item.price,
-            sale: item.sale,
-            description: item.description,
-            details: item.details,
-            saleExpiresTime: item.saleExpiresTime,
+            ...item["_doc"],
             request: {
               type: "GET",
               url: req.hostname + "/items/" + item._id,
@@ -60,7 +48,6 @@ exports.getAll = (req, res, next) => {
         request,
       };
 
-      // res.set('Content-Range', `items 0-4/${items.length}`)
       res.status(200).json(response);
     })
     .catch((error) => {
@@ -89,17 +76,7 @@ exports.getOne = (req, res, next) => {
       res.status(200).json({
         msg: "success",
         item: {
-          _id: item._id,
-          name: item.name,
-          slugName: item.slugName,
-          detail: item.detail,
-          thumbnail: item.thumbnail,
-          type: item.type,
-          price: item.price,
-          sale: item.sale,
-          saleExpiresTime: item.saleExpiresTime,
-          description: item.description,
-          details: item.details,
+          ...item["_doc"],
           request: {
             type: "GET",
             url: req.hostname + "/items",
@@ -126,6 +103,7 @@ exports.buyOne = async (req, res, next) => {
       Item.findById(itemId),
     ]);
 
+    // Destructuring
     const { cash } = user;
     const {
       name,
@@ -139,11 +117,9 @@ exports.buyOne = async (req, res, next) => {
 
     let salePrice = price;
 
+    // Check sale
     if (saleExpiresTime >= Date.now()) {
       salePrice = (price - (sale / 100) * price).toFixed(2);
-
-      console.log(`Sale: ${sale}%`);
-      console.log(`Sale price: ${salePrice}`);
     }
 
     if (cash < salePrice) {
@@ -155,8 +131,10 @@ exports.buyOne = async (req, res, next) => {
       });
     }
 
+    // Update cash
     user.cash = +cash - +salePrice;
 
+    // Add to user items
     const record = {
       id: item._id,
       name,
@@ -221,6 +199,17 @@ exports.create = async (req, res, next) => {
       ? req.hostname + "/" + req.file.path.replace(/\\/g, "/").replace("..", "")
       : "";
 
+    // if(req.file) {
+    //   const ret = await cloudinary.uploadSingleAvatar(req.file.path);
+    //   if (ret) {
+    //     await cloudinary.destroySingle(user.cloudinary_id);
+    //     user.avatar = ret.url;
+    //     user.cloudinary_id = ret.id;
+    //   }
+
+    //   console.log(ret);
+    // }
+
     const item = new Item({
       name,
       type,
@@ -230,6 +219,7 @@ exports.create = async (req, res, next) => {
       thumbnail,
     });
 
+    // Check sale
     if (+sale > 0) {
       (item["sale"] = +sale),
         +saleExpiresTime > 0
@@ -248,15 +238,17 @@ exports.create = async (req, res, next) => {
       },
     };
 
-    await item.save();
-    await User.updateOne(
-      { _id: req.userData._id },
-      {
-        $push: {
-          "history.manage": history,
-        },
-      }
-    );
+    await Promise.all([
+      item.save(),
+      User.updateOne(
+        { _id: req.userData._id },
+        {
+          $push: {
+            "history.manage": history,
+          },
+        }
+      ),
+    ]);
 
     res.status(201).json({
       msg: "success",
@@ -295,6 +287,8 @@ exports.update = async (req, res, next) => {
 
   try {
     const item = await Item.findById(_id);
+    const oldName = item.name;
+
     for (const ops of req.body) {
       item[ops.propName] = ops.value;
 
@@ -303,6 +297,7 @@ exports.update = async (req, res, next) => {
       }
     }
 
+    // Check sale
     if (+req.body.sale > 0) {
       +item.saleExpiresTime > 0
         ? (item["saleExpiresTime"] =
@@ -313,7 +308,7 @@ exports.update = async (req, res, next) => {
     const history = {
       type: "update",
       collection: "item",
-      task: `Update a item: ${item.name}`,
+      task: `Update a item: ${oldName}`,
       date: new Date(),
       others: {
         id: item._id,
@@ -321,18 +316,21 @@ exports.update = async (req, res, next) => {
       },
     };
 
-    await item.save();
-    await User.updateOne(
-      { _id: req.userData._id },
-      {
-        $push: {
-          "history.manage": history,
-        },
-      }
-    );
+    await Promise.all([
+      item.save(),
+      User.updateOne(
+        { _id: req.userData._id },
+        {
+          $push: {
+            "history.manage": history,
+          },
+        }
+      ),
+    ]);
 
     res.status(200).json({
       msg: "success",
+      item,
       request: {
         type: "GET",
         url: req.hostname + "/items/" + _id,
@@ -377,15 +375,17 @@ exports.delete = async (req, res, next) => {
       },
     };
 
-    await Item.deleteOne({ _id: item._id });
-    await User.updateOne(
-      { _id: req.userData._id },
-      {
-        $push: {
-          "history.manage": history,
-        },
-      }
-    );
+    await Promise.all([
+      Item.deleteOne({ _id: item._id }),
+      User.updateOne(
+        { _id: req.userData._id },
+        {
+          $push: {
+            "history.manage": history,
+          },
+        }
+      ),
+    ]);
 
     res.status(200).json({
       msg: "success",

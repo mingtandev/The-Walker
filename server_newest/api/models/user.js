@@ -36,7 +36,7 @@ const userScheme = mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, "Password is required!"],
+    default: "randomPasswordStringHere",
   },
   passwordResetToken: {
     type: String,
@@ -63,27 +63,47 @@ const userScheme = mongoose.Schema({
       guns: [
         {
           id: "",
-          name: "AWM",
-          details: {},
-          description: "Description",
+          name: "AK47",
+          details: {
+            "Load ammo": 30,
+            "Total ammo": 90,
+            Type: "Rifle",
+            Delay: "0.12",
+            Dame: 7,
+            "Bullet speed": 200,
+            "Bullet drop": 3,
+          },
+          thumbnail:
+            "https://i.ibb.co/2vXFgrt/Screenshot-2020-12-02-082158.png",
+          description: "Súng trường tự động Kalashnikov",
           boughtAt: new Date(),
         },
       ],
       hats: [
         {
           id: "",
-          name: "Cowboy",
-          details: {},
-          description: "Description",
+          name: "Noob Hat",
+          details: {
+            HP: "100",
+            Amor: "10",
+            "Buff speed": 3,
+          },
+          thumbnail: "https://i.ibb.co/5RpGjC6/Noob-Hat.png",
+          description: "Nón tân thủ",
           boughtAt: new Date(),
         },
       ],
       outfits: [
         {
           id: "",
-          name: "Bikini",
-          details: {},
-          description: "Description",
+          name: "Battery",
+          details: {
+            HP: "120",
+            Amor: "20",
+            "Buff speed": 3,
+          },
+          thumbnail: "https://i.ibb.co/YZqTM5v/Battery.png",
+          description: "Giáp tân thủ",
           boughtAt: new Date(),
         },
       ],

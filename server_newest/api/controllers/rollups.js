@@ -4,9 +4,7 @@ const Rollup = require("../models/rollup");
 const Item = require("../models/item");
 const User = require("../models/user");
 
-const { saveHistory, loadHistory } = require("./../utils/history");
 const { saveStatistic } = require("./../utils/statistic");
-const { saveUserItem } = require("./../utils/userItem");
 
 exports.getAll = (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
@@ -15,7 +13,6 @@ exports.getAll = (req, res, next) => {
   if (page < 1) page = 1;
 
   Rollup.find({})
-    .select("_id day thumbnail coin item")
     .skip((page - 1) * items_per_page)
     .limit(items_per_page)
     .then(async (rolls) => {
@@ -44,11 +41,7 @@ exports.getAll = (req, res, next) => {
         length: rolls.length,
         rolls: rolls.map((roll) => {
           return {
-            _id: roll._id,
-            day: roll.day,
-            coin: roll.coin,
-            thumbnail: roll.thumbnail,
-            item: roll.item,
+            ...roll["_doc"],
             request: {
               type: "GET",
               url: req.hostname + "/rolls/" + roll.day,
@@ -58,7 +51,6 @@ exports.getAll = (req, res, next) => {
         request,
       };
 
-      // res.set('Content-Range', ``);
       res.status(200).json(response);
     })
     .catch((error) => {
@@ -74,7 +66,6 @@ exports.getOne = (req, res, next) => {
   const { rollupDay } = req.params;
 
   Rollup.findOne({ day: rollupDay })
-    .select("_id day thumbnail coin item")
     .then((roll) => {
       if (!roll) {
         return res.status(202).json({
@@ -88,11 +79,7 @@ exports.getOne = (req, res, next) => {
       res.status(200).json({
         msg: "success",
         roll: {
-          _id: roll._id,
-          day: roll.day,
-          thumbnail: roll.thumbnail,
-          coin: roll.coin,
-          item: roll.item,
+          ...roll["_doc"],
           request: {
             type: "GET",
             url: req.hostname + "/rolls",
@@ -111,7 +98,6 @@ exports.getOne = (req, res, next) => {
 
 exports.use = async (req, res, next) => {
   const { rollupDay } = req.params;
-  const userId = req.userData._id;
 
   // if (rollupDay != new Date().getDate()) {
   //   return res.status(202).json({
@@ -122,9 +108,8 @@ exports.use = async (req, res, next) => {
   //   });
   // }
 
-  // BUg
   try {
-    // Check roll up again
+    // Load rolled days
     let historyRollupDays = req.userData.history.personal.filter(
       (el) => el.collection === "roll up" && el.type === "roll"
     );
@@ -141,22 +126,14 @@ exports.use = async (req, res, next) => {
       });
     }
 
-    const roll = await Rollup.findOne({ day: rollupDay });
-    const user = await User.findById(req.userData._id);
-
-    await saveStatistic(0, 1, 0, 0, 0, 0);
-
-    const history = {
-      type: "roll",
-      collection: "roll up",
-      task: `Roll up a day: ${roll.day}`,
-      date: new Date(),
-      others: {
-        id: roll._id,
-      },
-    };
+    const [, roll, user] = await Promise.all([
+      saveStatistic(0, 1, 0, 0, 0, 0),
+      Rollup.findOne({ day: rollupDay }),
+      User.findById(req.userData._id),
+    ]);
 
     try {
+      // Add to user items
       const result = await Item.findById(roll.item);
       const record = {
         id: result._id,
@@ -174,6 +151,16 @@ exports.use = async (req, res, next) => {
         error,
       });
     }
+
+    const history = {
+      type: "roll",
+      collection: "roll up",
+      task: `Roll up a day: ${roll.day}`,
+      date: new Date(),
+      others: {
+        id: roll._id,
+      },
+    };
 
     user.history.personal.push(history);
     await User.updateOne({ _id: user._id }, { $set: user });
@@ -230,24 +217,22 @@ exports.create = async (req, res, next) => {
       },
     };
 
-    await rollObj.save();
-    await User.updateOne(
-      { _id: req.userData._id },
-      {
-        $push: {
-          "history.manage": history,
-        },
-      }
-    );
+    await Promise.all([
+      rollObj.save(),
+      User.updateOne(
+        { _id: req.userData._id },
+        {
+          $push: {
+            "history.manage": history,
+          },
+        }
+      ),
+    ]);
 
     res.status(201).json({
       msg: "success",
       roll: {
-        _id: roll._id,
-        day,
-        coin,
-        item,
-        thumbnail: roll.thumbnail,
+        ...roll["_doc"],
         request: {
           type: "GET",
           url: req.hostname + "/rolls/" + rollObj.day,
@@ -282,6 +267,8 @@ exports.update = async (req, res, next) => {
 
   try {
     const objRoll = await Rollup.findOne({ day: rollupDay });
+    if (!objRoll) throw new Error("Not found matching rollup day!");
+
     for (const ops of req.body) {
       objRoll[ops.propName] = ops.value;
 
@@ -298,7 +285,7 @@ exports.update = async (req, res, next) => {
     const history = {
       type: "update",
       collection: "roll up",
-      task: `Update a roll up day: ${objRoll.day}`,
+      task: `Update a roll up day: ${rollupDay}`,
       date: new Date(),
       others: {
         id: objRoll._id,
@@ -306,15 +293,17 @@ exports.update = async (req, res, next) => {
       },
     };
 
-    await objRoll.save();
-    await User.updateOne(
-      { _id: req.userData._id },
-      {
-        $push: {
-          "history.manage": history,
-        },
-      }
-    );
+    await Promise.all([
+      objRoll.save(),
+      User.updateOne(
+        { _id: req.userData._id },
+        {
+          $push: {
+            "history.manage": history,
+          },
+        }
+      ),
+    ]);
 
     res.status(200).json({
       msg: "success",
@@ -363,15 +352,17 @@ exports.delete = async (req, res, next) => {
       },
     };
 
-    await Rollup.deleteOne({ day: rollupDay });
-    await User.updateOne(
-      { _id: req.userData._id },
-      {
-        $push: {
-          "history.manage": history,
-        },
-      }
-    );
+    await Promise.all([
+      Rollup.deleteOne({ day: rollupDay }),
+      User.updateOne(
+        { _id: req.userData._id },
+        {
+          $push: {
+            "history.manage": history,
+          },
+        }
+      ),
+    ]);
 
     res.status(200).json({
       msg: "success",

@@ -3,16 +3,12 @@ const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 
 const User = require("./../models/user");
-const History = require("./../models/history");
 
 const { sendMail } = require("./../config/nodemailer");
-const { loadHistory, saveHistory } = require("./../utils/history");
-const { saveStatistic } = require("./../utils/statistic");
-const { saveUserItem } = require("./../utils/userItem");
 
-const tokenLife = process.env.TOKEN_LIFE;
-const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE;
-const jwtKey = process.env.JWT_KEY;
+const TOKEN_LIFE = process.env.TOKEN_LIFE;
+const REFRESH_TOKEN_LIFE = process.env.REFRESH_TOKEN_LIFE;
+const JWT_KEY = process.env.JWT_KEY;
 
 exports.getAll = (req, res, next) => {
   if (req.userData.roles != "admin") {
@@ -58,16 +54,7 @@ exports.getAll = (req, res, next) => {
         length: users.length,
         users: users.map((user) => {
           return {
-            _id: user._id,
-            name: user.name,
-            slugName: user.slugName,
-            email: user.email,
-            cash: user.cash,
-            roles: user.roles,
-            isVerified: user.isVerified,
-            history: user.history,
-            items: user.items,
-            slugName: user.slugName,
+            ...user["_doc"],
             request: {
               type: "GET",
               url: req.hostname + "/users/" + user._id,
@@ -126,61 +113,67 @@ exports.getOne = (req, res, next) => {
 exports.create = (req, res, next) => {
   const { name, email, password } = req.body;
 
-  bcrypt.hash(password, 10, (error, encryptedPassword) => {
-    if (error) {
-      console.log(error);
-      return res.status(500).json({
-        msg: "Server error!",
-        error,
-      });
-    } else {
-      const passwordResetToken = crypto.randomBytes(16).toString("hex");
-      const user = new User({
-        name,
-        email,
-        password: encryptedPassword,
-        passwordResetToken,
-      });
-
-      const history = {
-        type: "create",
-        collection: "user",
-        task: `Create a new user: ${user.name}`,
-        date: new Date(),
-        others: {
-          id: user._id,
-        },
-      };
-
-      user.history.personal.push(history);
-      user
-        .save()
-        .then(async (newUser) => {
-          const token = jwt.sign({ _id: newUser._id }, jwtKey, {
-            expiresIn: tokenLife,
-          });
-
-          sendMail(req, newUser.email, token, "confirmation");
-
-          res.status(201).json({
-            msg: "success",
-            user: newUser,
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-          let respond = {};
-          error.errors &&
-            Object.keys(error.errors).forEach(
-              (err) => (respond[err] = error.errors[err].message)
-            );
-          res.status(202).json({
-            msg: "ValidatorError",
-            errors: respond,
-          });
+  try {
+    bcrypt.hash(password, 10, (error, encryptedPassword) => {
+      if (error) {
+        console.log(error);
+        return res.status(500).json({
+          msg: "Server error!",
+          error,
         });
-    }
-  });
+      } else {
+        const passwordResetToken = crypto.randomBytes(16).toString("hex");
+        const user = new User({
+          name,
+          email,
+          password: encryptedPassword,
+          passwordResetToken,
+        });
+
+        const history = {
+          type: "create",
+          collection: "user",
+          task: `Create a new user: ${user.name}`,
+          date: new Date(),
+          others: {
+            id: user._id,
+          },
+        };
+        user.history.personal.push(history);
+        user
+          .save()
+          .then(async (newUser) => {
+            const token = jwt.sign({ _id: newUser._id }, JWT_KEY, {
+              expiresIn: TOKEN_LIFE,
+            });
+
+            sendMail(req, newUser.email, token, "confirmation"),
+              res.status(201).json({
+                msg: "success",
+                user: newUser,
+              });
+          })
+          .catch((error) => {
+            console.log(error);
+            let respond = {};
+            error.errors &&
+              Object.keys(error.errors).forEach(
+                (err) => (respond[err] = error.errors[err].message)
+              );
+            res.status(202).json({
+              msg: "ValidatorError",
+              errors: respond,
+            });
+          });
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      msg: "Server error!",
+      error,
+    });
+  }
 };
 
 exports.update = (req, res, next) => {
@@ -197,7 +190,6 @@ exports.update = (req, res, next) => {
   }
 
   let hasPassword = false;
-
   let newUser = {};
 
   for (const ops of req.body) {
@@ -232,6 +224,11 @@ exports.update = (req, res, next) => {
         });
       }
 
+      // Fin game update coin => cash
+      if (newUser.coin) {
+        newUser.cash = +user.cash + +newUser.coin;
+      }
+
       if (hasPassword) {
         bcrypt.hash(newUser.password, 10, (error, encryptedPassword) => {
           if (error) {
@@ -245,6 +242,7 @@ exports.update = (req, res, next) => {
           newUser.password = encryptedPassword;
         });
       }
+
       const history = {
         type: "update",
         collection: "user",
@@ -252,19 +250,24 @@ exports.update = (req, res, next) => {
         date: new Date(),
         others: {
           id: user._id,
-          fields: req.body.map((ele) => `${ele.propName}: ${ele.value}`),
+          fields: req.body.map(
+            (ele) =>
+              `${ele.propName}: ${
+                ele.propName === "password" ? "*******" : ele.value
+              }`
+          ),
         },
       };
 
-      newUser.history = user.history;
-      newUser.history.personal.push(history);
-      await User.updateOne(
-        { _id },
-        { $set: newUser },
-        { runValidators: false }
-      );
+      if (!newUser.coin) {
+        newUser.history = user.history;
+        newUser.history.personal.push(history);
+        delete newUser.coin;
+      }
 
-      if (req.userData.roles === "admin") {
+      await User.updateOne({ _id }, { $set: newUser });
+
+      if (!newUser.coin && req.userData.roles === "admin") {
         await User.updateOne(
           { _id: req.userData._id },
           {
@@ -333,15 +336,17 @@ exports.delete = (req, res, next) => {
           },
         };
 
-        await User.deleteOne({ _id });
-        await User.updateOne(
-          { _id: req.userData._id },
-          {
-            $push: {
-              "history.manage": history,
-            },
-          }
-        );
+        await Promise.all([
+          User.deleteOne({ _id }),
+          User.updateOne(
+            { _id: req.userData._id },
+            {
+              $push: {
+                "history.manage": history,
+              },
+            }
+          ),
+        ]);
 
         res.status(200).json({
           msg: "success",
@@ -377,7 +382,7 @@ exports.confirmation = (req, res, next) => {
   const { verifyToken: token } = req.params;
 
   try {
-    const decoded = jwt.verify(token, jwtKey);
+    const decoded = jwt.verify(token, JWT_KEY);
     const { _id } = decoded;
 
     User.findOne({ _id })
@@ -453,12 +458,14 @@ exports.resend = (req, res, next) => {
         });
       }
 
-      const token = jwt.sign({ _id: user._id }, jwtKey, {
-        expiresIn: tokenLife,
+      // Send mail
+      const token = jwt.sign({ _id: user._id }, JWT_KEY, {
+        expiresIn: TOKEN_LIFE,
       });
 
       sendMail(req, user.email, token, "confirmation");
 
+      // Save his
       const history = {
         type: "resend",
         collection: "user",
@@ -526,6 +533,7 @@ exports.login = (req, res, next) => {
             history,
             items,
           } = user;
+
           const payloadToken = {
             _id,
             roles,
@@ -537,11 +545,12 @@ exports.login = (req, res, next) => {
             items,
           };
 
-          const token = jwt.sign(payloadToken, jwtKey, {
-            expiresIn: tokenLife,
+          const token = jwt.sign(payloadToken, JWT_KEY, {
+            expiresIn: TOKEN_LIFE,
           });
-          const refreshToken = jwt.sign(payloadToken, jwtKey, {
-            expiresIn: refreshTokenLife,
+
+          const refreshToken = jwt.sign(payloadToken, JWT_KEY, {
+            expiresIn: REFRESH_TOKEN_LIFE,
           });
 
           if (!isVerified) {
@@ -581,12 +590,21 @@ exports.refresh = (req, res, next) => {
   const { refreshToken } = req.body;
 
   try {
-    const decoded = jwt.verify(refreshToken, jwtKey);
-    const { _id, roles, name, cash, slugName, email } = decoded;
-    const user = { _id, roles, name, cash, slugName, email };
+    const decoded = jwt.verify(refreshToken, JWT_KEY);
+    const { _id, roles, name, cash, slugName, email, items, history } = decoded;
+    const payloadToken = {
+      _id,
+      roles,
+      name,
+      cash,
+      slugName,
+      email,
+      history,
+      items,
+    };
 
-    const token = jwt.sign(user, jwtKey, {
-      expiresIn: tokenLife,
+    const token = jwt.sign(payloadToken, JWT_KEY, {
+      expiresIn: TOKEN_LIFE,
     });
 
     res.status(200).json({
@@ -627,18 +645,17 @@ exports.recovery = (req, res, next) => {
         const history = {
           type: "recovery",
           collection: "user",
-          task: `Recovery a user: ${user.name}`,
+          task: `Sent the token to your email for reset password: ${user.email}`,
           date: new Date(),
           others: {
             id: user._id,
           },
         };
         user.history.personal.push(history);
-        const newUser = await User.updateOne({ _id: user._id }, { $set: user });
+        await User.updateOne({ _id: user._id }, { $set: user });
 
         res.status(200).json({
           msg: "success",
-          user: newUser,
         });
       });
     })
@@ -678,7 +695,7 @@ exports.forgot = (req, res, next) => {
         const history = {
           type: "forgot",
           collection: "user",
-          task: `Forgot a user: ${user.name}`,
+          task: `Update new password successfully for: ${user.name}`,
           date: new Date(),
           others: {
             id: user._id,
@@ -686,11 +703,10 @@ exports.forgot = (req, res, next) => {
         };
 
         user.history.personal.push(history);
-        const newUser = await User.updateOne({ _id: user._id }, { $set: user });
+        await User.updateOne({ _id: user._id }, { $set: user });
 
         res.status(200).json({
           msg: "success",
-          user: newUser,
         });
       });
     })
@@ -703,67 +719,67 @@ exports.forgot = (req, res, next) => {
     });
 };
 
-exports.history = async (req, res, next) => {
-  // const { _id } = req.userData;
-  // const { type, effect } = req.body;
+// exports.history = async (req, res, next) => {
+// const { _id } = req.userData;
+// const { type, effect } = req.body;
 
-  // const types = ["accInfos", "items", "rolls", "codes", "blogs"];
-  // const effects = ["personal", "manage"];
+// const types = ["accInfos", "items", "rolls", "codes", "blogs"];
+// const effects = ["personal", "manage"];
 
-  // let result = [];
+// let result = [];
 
-  // try {
-  //   if (!type && !effect) {
-  //     if (req.userData.roles != "admin") {
-  //       return res.status(403).json({
-  //         msg: "ValidatorError",
-  //         errors: {
-  //           user: `You don't have the permission!`,
-  //         },
-  //       });
-  //     }
+// try {
+//   if (!type && !effect) {
+//     if (req.userData.roles != "admin") {
+//       return res.status(403).json({
+//         msg: "ValidatorError",
+//         errors: {
+//           user: `You don't have the permission!`,
+//         },
+//       });
+//     }
 
-  //     result = await History.find({});
+//     result = await History.find({});
 
-  //     return res.status(200).json({
-  //       msg: "success",
-  //       length: result.length,
-  //       history: result,
-  //     });
-  //   } else if (!types) {
-  //     return res.status(202).json({
-  //       msg: "ValidatorError",
-  //       errors: {
-  //         user: `Request body have to include 'type'!`,
-  //       },
-  //     });
-  //   } else if (!effect) {
-  //     return res.status(202).json({
-  //       msg: "ValidatorError",
-  //       errors: {
-  //         user: `Request body have to include 'effect'!`,
-  //       },
-  //     });
-  //   } else if (!types.includes(type) || !effects.includes(effect)) {
-  //     return res.status(202).json({
-  //       msg: "ValidatorError",
-  //       errors: {
-  //         user: `Value of 'type' and 'effect' must be valid!`,
-  //       },
-  //     });
-  //   }
+//     return res.status(200).json({
+//       msg: "success",
+//       length: result.length,
+//       history: result,
+//     });
+//   } else if (!types) {
+//     return res.status(202).json({
+//       msg: "ValidatorError",
+//       errors: {
+//         user: `Request body have to include 'type'!`,
+//       },
+//     });
+//   } else if (!effect) {
+//     return res.status(202).json({
+//       msg: "ValidatorError",
+//       errors: {
+//         user: `Request body have to include 'effect'!`,
+//       },
+//     });
+//   } else if (!types.includes(type) || !effects.includes(effect)) {
+//     return res.status(202).json({
+//       msg: "ValidatorError",
+//       errors: {
+//         user: `Value of 'type' and 'effect' must be valid!`,
+//       },
+//     });
+//   }
 
-  //   result = await loadHistory(_id, type, effect);
+//   result = await loadHistory(_id, type, effect);
 
-  //   res.status(200).json({
-  //     msg: "success",
-  //     history: result,
-  //   });
-  // } catch (error) {
-  //   console.log(error);
-  res.status(500).json({
-    msg: "Not support!",
-    error,
-  });
-  // }
-};
+//   res.status(200).json({
+//     msg: "success",
+//     history: result,
+//   });
+// } catch (error) {
+//   console.log(error);
+// res.status(500).json({
+//   msg: "Not support!",
+//   error,
+// });
+// }
+// };

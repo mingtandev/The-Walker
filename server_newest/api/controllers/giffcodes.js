@@ -1,6 +1,4 @@
-const { saveHistory, loadHistory } = require("../utils/history");
 const { saveStatistic } = require("../utils/statistic");
-const { saveUserItem } = require("./../utils/userItem");
 
 const Code = require("../models/giffcode");
 const User = require("./../models/user");
@@ -22,7 +20,6 @@ exports.getAll = (req, res, next) => {
   if (page < 1) page = 1;
 
   Code.find({})
-    .select("_id code type items isUsed expiresTime")
     .skip((page - 1) * items_per_page)
     .limit(items_per_page)
     .then(async (codes) => {
@@ -51,12 +48,7 @@ exports.getAll = (req, res, next) => {
         length: codes.length,
         giffcodes: codes.map((code) => {
           return {
-            _id: code._id,
-            code: code.code,
-            type: code.type,
-            items: code.items,
-            isUsed: code.isUsed,
-            expiresTime: code.expiresTime,
+            ...code["_doc"],
             request: {
               type: "GET",
               url: req.hostname + "/giffcodes/" + code._id,
@@ -66,7 +58,6 @@ exports.getAll = (req, res, next) => {
         request,
       };
 
-      // res.set("x-total-count", codes.length);
       res.status(200).json(response);
     })
     .catch((error) => {
@@ -90,7 +81,6 @@ exports.getOne = (req, res, next) => {
   }
 
   Code.findById(codeId)
-    .select("_id code type items isUsed expiresTime")
     .then((code) => {
       if (!code) {
         return res.status(202).json({
@@ -104,12 +94,7 @@ exports.getOne = (req, res, next) => {
       res.status(200).json({
         msg: "success",
         code: {
-          _id: code._id,
-          code: code.code,
-          type: code.type,
-          items: code.items,
-          isUsed: code.isUsed,
-          expiresTime: code.expiresTime,
+          ...code["_doc"],
           request: {
             type: "GET",
             url: req.hostname + "/giffcodes",
@@ -125,7 +110,7 @@ exports.getOne = (req, res, next) => {
     });
 };
 
-exports.create = (req, res, next) => {
+exports.create = async (req, res, next) => {
   const { code, type, items } = req.body;
   let { expiresTime } = req.body;
 
@@ -147,61 +132,49 @@ exports.create = (req, res, next) => {
       expiresTime,
     });
 
-    codeObj
-      .save()
-      .then(async (newCode) => {
-        const history = {
-          type: "create",
-          collection: "gift code",
-          task: `Create a new code: ${code.code}`,
-          date: new Date(),
-          others: {
-            id: newCode._id,
+    const history = {
+      type: "create",
+      collection: "gift code",
+      task: `Create a new code: ${codeObj.code}`,
+      date: new Date(),
+      others: {
+        id: codeObj._id,
+      },
+    };
+
+    const [newCode] = await Promise.all([
+      codeObj.save(),
+      User.updateOne(
+        { _id: req.userData._id },
+        {
+          $push: {
+            "history.manage": history,
           },
-        };
+        }
+      ),
+    ]);
 
-        await User.updateOne(
-          { _id: req.userData._id },
-          {
-            $push: {
-              "history.manage": history,
-            },
-          }
-        );
-
-        res.status(201).json({
-          msg: "success",
-          code: {
-            _id: newCode._id,
-            code: newCode.code,
-            type: newCode.type,
-            items: newCode.items,
-            isUsed: newCode.isUsed,
-            expiresTime: newCode.expiresTime,
-            request: {
-              type: "GET",
-              url: req.hostname + "/giffcodes/" + newCode._id,
-            },
-          },
-        });
-      })
-      .catch((error) => {
-        let respond = {};
-        error.errors &&
-          Object.keys(error.errors).forEach(
-            (err) => (respond[err] = error.errors[err].message)
-          );
-
-        res.status(202).json({
-          msg: "ValidatorError",
-          errors: respond,
-        });
-      });
+    res.status(201).json({
+      msg: "success",
+      code: {
+        ...newCode["_doc"],
+        request: {
+          type: "GET",
+          url: req.hostname + "/giffcodes/" + newCode._id,
+        },
+      },
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
-      msg: "Server error!",
-      error,
+    let respond = {};
+    error.errors &&
+      Object.keys(error.errors).forEach(
+        (err) => (respond[err] = error.errors[err].message)
+      );
+
+    res.status(202).json({
+      msg: "ValidatorError",
+      errors: respond,
     });
   }
 };
@@ -209,11 +182,12 @@ exports.create = (req, res, next) => {
 exports.useOne = async (req, res, next) => {
   const { code } = req.params;
   const { _id: userId } = req.userData;
-  let userItem = {};
 
   try {
-    let validCode = await Code.findOne({ code });
-    const user = await User.findById(userId);
+    const [validCode, user] = await Promise.all([
+      Code.findOne({ code }),
+      User.findById(userId),
+    ]);
 
     if (!validCode) {
       return res.status(202).json({
@@ -235,7 +209,7 @@ exports.useOne = async (req, res, next) => {
       });
     }
 
-    // Check code used
+    // Load code used
     let historyCodes = req.userData.history.personal.filter(
       (el) => el.collection === "code" && el.type === "use"
     );
@@ -269,6 +243,7 @@ exports.useOne = async (req, res, next) => {
             name: result.name,
             details: result.details,
             description: result.description,
+            thumbnail: result.thumbnail,
             boughtAt: new Date(),
           };
 
@@ -289,8 +264,6 @@ exports.useOne = async (req, res, next) => {
       validCode.isUsed = true;
     }
 
-    await Code.updateOne({ _id: validCode._id }, { $set: validCode });
-
     const history = {
       type: "use",
       collection: "code",
@@ -298,19 +271,23 @@ exports.useOne = async (req, res, next) => {
       date: new Date(),
       others: {
         id: validCode._id,
+        fields: items,
       },
     };
 
-    await User.updateOne(
-      { _id: req.userData._id },
-      {
-        $push: {
-          "history.personal": history,
-        },
-      }
-    );
+    await Promise.all([
+      Code.updateOne({ _id: validCode._id }, { $set: validCode }),
+      saveStatistic(0, 0, 0, 1, 0, 0),
+      User.updateOne(
+        { _id: req.userData._id },
+        {
+          $push: {
+            "history.personal": history,
+          },
+        }
+      ),
+    ]);
 
-    saveStatistic(0, 0, 0, 1, 0, 0);
     res.status(200).json({
       msg: "success",
       userItem: user.items,
@@ -338,6 +315,8 @@ exports.update = async (req, res, next) => {
 
   try {
     const code = await Code.findById(_id);
+    const oldCode = code.code;
+
     for (const ops of req.body) {
       code[ops.propName] = ops.value;
     }
@@ -345,7 +324,7 @@ exports.update = async (req, res, next) => {
     const history = {
       type: "update",
       collection: "gift code",
-      task: `Update a code: ${code.code}`,
+      task: `Update a code: ${oldCode}`,
       date: new Date(),
       others: {
         id: code._id,
@@ -353,15 +332,17 @@ exports.update = async (req, res, next) => {
       },
     };
 
-    await code.save();
-    await User.updateOne(
-      { _id: req.userData._id },
-      {
-        $push: {
-          "history.manage": history,
-        },
-      }
-    );
+    await Promise.all([
+      Code.updateOne({ _id }, { $set: code }),
+      User.updateOne(
+        { _id: req.userData._id },
+        {
+          $push: {
+            "history.manage": history,
+          },
+        }
+      ),
+    ]);
 
     res.status(200).json({
       msg: "success",
@@ -411,15 +392,17 @@ exports.delete = async (req, res, next) => {
       },
     };
 
-    await Code.deleteOne({ _id: objCode._id });
-    await User.updateOne(
-      { _id: req.userData._id },
-      {
-        $push: {
-          "history.manage": history,
-        },
-      }
-    );
+    await Promise.all([
+      Code.deleteOne({ _id: objCode._id }),
+      User.updateOne(
+        { _id: req.userData._id },
+        {
+          $push: {
+            "history.manage": history,
+          },
+        }
+      ),
+    ]);
 
     res.status(200).json({
       msg: "success",

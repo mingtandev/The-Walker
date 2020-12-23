@@ -12,7 +12,6 @@ exports.getAll = (req, res, next) => {
   if (page < 1) page = 1;
 
   Blog.find({})
-    .select("_id date writer name title slugTitle content thumbnail")
     .skip((page - 1) * items_per_page)
     .limit(items_per_page)
     .then(async (blogs) => {
@@ -41,14 +40,7 @@ exports.getAll = (req, res, next) => {
         length: blogs.length,
         blogs: blogs.map((blog) => {
           return {
-            _id: blog._id,
-            date: blog.date,
-            writer: blog.writer,
-            name: blog.name,
-            title: blog.title,
-            slugTitle: blog.slugTitle,
-            content: blog.content,
-            thumbnail: blog.thumbnail,
+            ...blog["_doc"],
             request: {
               type: "GET",
               url: req.hostname + "/blogs/" + blog._id,
@@ -58,7 +50,6 @@ exports.getAll = (req, res, next) => {
         request,
       };
 
-      // res.set("x-total-count", blogs.length);
       res.status(200).json(response);
     })
     .catch((error) => {
@@ -74,7 +65,6 @@ exports.getOne = (req, res, next) => {
   const { blogId } = req.params;
 
   Blog.findById(blogId)
-    .select("_id date writer name title slugTitle content thumbnail")
     .then((blog) => {
       if (!blog) {
         return res.status(202).json({
@@ -88,14 +78,7 @@ exports.getOne = (req, res, next) => {
       res.status(200).json({
         msg: "success",
         blog: {
-          _id: blog._id,
-          date: blog.date,
-          writer: blog.writer,
-          name: blog.name,
-          title: blog.title,
-          slugTitle: blog.slugTitle,
-          content: blog.content,
-          thumbnail: blog.thumbnail,
+          ...blog["_doc"],
           request: {
             type: "GET",
             url: req.hostname + "/blogs",
@@ -147,18 +130,19 @@ exports.create = async (req, res, next) => {
       },
     };
 
-    const [, newBlog] = await Promise.all([
-      saveStatistic(0, 0, 0, 0, 1, 0),
+    const [newBlog] = await Promise.all([
       blog.save(),
+      saveStatistic(0, 0, 0, 0, 1, 0),
+      User.updateOne(
+        { _id: req.userData._id },
+        {
+          $push: {
+            "history.manage": history,
+          },
+        }
+      ),
     ]);
-    await User.updateOne(
-      { _id: req.userData._id },
-      {
-        $push: {
-          "history.manage": history,
-        },
-      }
-    );
+
     res.status(201).json({
       msg: "success",
       blog: {
@@ -198,6 +182,8 @@ exports.update = async (req, res, next) => {
 
   try {
     const blog = await Blog.findById(_id);
+    const oldBlog = blog.title;
+
     for (const ops of req.body) {
       blog[ops.propName] = ops.value;
     }
@@ -205,7 +191,7 @@ exports.update = async (req, res, next) => {
     const history = {
       type: "update",
       collection: "blog",
-      task: `Update a blog: ${blog.title}`,
+      task: `Update a blog: ${oldBlog}`,
       date: new Date(),
       others: {
         id: blog._id,
@@ -213,15 +199,17 @@ exports.update = async (req, res, next) => {
       },
     };
 
-    const newBlog = await blog.save();
-    await User.updateOne(
-      { _id: req.userData._id },
-      {
-        $push: {
-          "history.manage": history,
-        },
-      }
-    );
+    const [newBlog] = await Promise.all([
+      blog.save(),
+      User.updateOne(
+        { _id: req.userData._id },
+        {
+          $push: {
+            "history.manage": history,
+          },
+        }
+      ),
+    ]);
 
     res.status(200).json({
       msg: "success",
@@ -271,15 +259,17 @@ exports.delete = async (req, res, next) => {
       },
     };
 
-    await Blog.deleteOne({ _id });
-    await User.updateOne(
-      { _id: req.userData._id },
-      {
-        $push: {
-          "history.manage": history,
-        },
-      }
-    );
+    await Promise.all([
+      Blog.deleteOne({ _id }),
+      User.updateOne(
+        { _id: req.userData._id },
+        {
+          $push: {
+            "history.manage": history,
+          },
+        }
+      ),
+    ]);
 
     res.status(200).json({
       msg: "success",
