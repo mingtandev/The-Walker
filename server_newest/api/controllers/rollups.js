@@ -113,18 +113,24 @@ exports.use = async (req, res, next) => {
   const { rollupDay } = req.params;
   const userId = req.userData._id;
 
-  if (rollupDay != new Date().getDate()) {
-    return res.status(202).json({
-      msg: "ValidatorError",
-      errors: {
-        user: `Today is not ${rollupDay}!`,
-      },
-    });
-  }
+  // if (rollupDay != new Date().getDate()) {
+  //   return res.status(202).json({
+  //     msg: "ValidatorError",
+  //     errors: {
+  //       user: `Today is not ${rollupDay}!`,
+  //     },
+  //   });
+  // }
 
+  // BUg
   try {
-    const history = await loadHistory(userId, "rolls", "personal");
-    const historyRollupDays = history.map((his) => his.split(" ")[2]);
+    // Check roll up again
+    let historyRollupDays = req.userData.history.personal.filter(
+      (el) => el.collection === "roll up" && el.type === "roll"
+    );
+    historyRollupDays = historyRollupDays.map(
+      (el) => el.task.split(" ").reverse()[0]
+    );
 
     if (historyRollupDays.includes(rollupDay)) {
       return res.status(202).json({
@@ -136,21 +142,45 @@ exports.use = async (req, res, next) => {
     }
 
     const roll = await Rollup.findOne({ day: rollupDay });
+    const user = await User.findById(req.userData._id);
 
-    const [, , result] = await Promise.all([
-      saveHistory(
-        userId,
-        "rolls",
-        "personal",
-        `Roll up: ${rollupDay} | ${new Date()}`
-      ),
-      saveStatistic(0, 1, 0, 0, 0, 0),
-      saveUserItem(userId, [roll.item], roll.coin),
-    ]);
+    await saveStatistic(0, 1, 0, 0, 0, 0);
+
+    const history = {
+      type: "roll",
+      collection: "roll up",
+      task: `Roll up a day: ${roll.day}`,
+      date: new Date(),
+      others: {
+        id: roll._id,
+      },
+    };
+
+    try {
+      const result = await Item.findById(roll.item);
+      const record = {
+        id: result._id,
+        name: result.name,
+        details: result.details,
+        description: result.description,
+        boughtAt: new Date(),
+      };
+
+      await user.items[`${result.type}s`].push(record);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        msg: "Server error!",
+        error,
+      });
+    }
+
+    user.history.personal.push(history);
+    await User.updateOne({ _id: user._id }, { $set: user });
 
     res.status(200).json({
       msg: "success",
-      userItem: result,
+      userItem: user,
     });
   } catch (error) {
     console.log(error);

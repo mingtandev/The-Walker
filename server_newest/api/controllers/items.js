@@ -127,7 +127,15 @@ exports.buyOne = async (req, res, next) => {
     ]);
 
     const { cash } = user;
-    const { name, type, price, sale, saleExpiresTime } = item;
+    const {
+      name,
+      type,
+      price,
+      sale,
+      saleExpiresTime,
+      details,
+      description,
+    } = item;
 
     let salePrice = price;
 
@@ -147,30 +155,37 @@ exports.buyOne = async (req, res, next) => {
       });
     }
 
-    user.cash = cash - salePrice;
+    user.cash = +cash - +salePrice;
+
+    const record = {
+      id: item._id,
+      name,
+      details,
+      description,
+      boughtAt: new Date(),
+    };
+
+    const history = {
+      type: "buy",
+      collection: "item",
+      task: `Buy a new item: ${item.name}`,
+      date: new Date(),
+      others: {
+        id: item._id,
+      },
+    };
+
+    user.history.personal.push(history);
+    user.items[`${type}s`].push(record);
 
     await Promise.all([
-      saveHistory(
-        _id,
-        "items",
-        "personal",
-        `Buy a item: ${name}-${type}-${price}-${salePrice}-${sale}-${saleExpiresTime}} | ${new Date()}`
-      ),
       saveStatistic(0, 0, 1, 0, 0, salePrice),
-      saveUserItem(_id, [itemId], 0),
       User.updateOne({ _id: user._id }, { $set: user }),
     ]);
 
     res.status(200).json({
       msg: "success",
-      user: {
-        _id: user._id,
-        roles: user.roles,
-        name: user.name,
-        slugName: user.slugName,
-        email: user.email,
-        cash: user.cash,
-      },
+      user,
     });
   } catch (error) {
     console.log(error);

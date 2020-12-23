@@ -93,9 +93,9 @@ exports.getOne = (req, res, next) => {
 
   let selectStr = "";
 
-  if (_id === req.userData._id)
-    selectStr = "name email roles cash isVerified history items slugName";
-  else selectStr = "name email roles slugName";
+  if (_id !== req.userData._id && req.userData.roles === "user")
+    selectStr = "name email roles slugName";
+  else selectStr = "name email roles cash isVerified history items slugName";
 
   User.findById(_id)
     .select(selectStr)
@@ -142,6 +142,17 @@ exports.create = (req, res, next) => {
         passwordResetToken,
       });
 
+      const history = {
+        type: "create",
+        collection: "user",
+        task: `Create a new user: ${user.name}`,
+        date: new Date(),
+        others: {
+          id: user._id,
+        },
+      };
+
+      user.history.personal.push(history);
       user
         .save()
         .then(async (newUser) => {
@@ -149,11 +160,7 @@ exports.create = (req, res, next) => {
             expiresIn: tokenLife,
           });
 
-          await Promise.all([
-            sendMail(req, newUser.email, token, "confirmation"),
-            saveStatistic(1, 0, 0, 0, 0, 0),
-            saveUserItem(newUser._id, [], 0),
-          ]);
+          sendMail(req, newUser.email, token, "confirmation");
 
           res.status(201).json({
             msg: "success",
@@ -238,26 +245,39 @@ exports.update = (req, res, next) => {
           newUser.password = encryptedPassword;
         });
       }
+      const history = {
+        type: "update",
+        collection: "user",
+        task: `Update a user: ${newUser.name || user.name}`,
+        date: new Date(),
+        others: {
+          id: user._id,
+          fields: req.body.map((ele) => `${ele.propName}: ${ele.value}`),
+        },
+      };
 
-      await Promise.all([
-        saveHistory(
-          _id,
-          "accInfos",
-          "personal",
-          `Update an account: ${_id}-${Object.keys(user).join(
-            "-"
-          )} | ${new Date()}`
-        ),
-        User.updateOne({ _id }, { $set: user }, { runValidators: false }),
-      ]);
+      newUser.history = user.history;
+      newUser.history.personal.push(history);
+      await User.updateOne(
+        { _id },
+        { $set: newUser },
+        { runValidators: false }
+      );
 
-      for (const ops of Object.keys(newUser)) {
-        user[ops] = newUser[ops];
+      if (req.userData.roles === "admin") {
+        await User.updateOne(
+          { _id: req.userData._id },
+          {
+            $push: {
+              "history.manage": history,
+            },
+          }
+        );
       }
 
       res.status(200).json({
         msg: "success",
-        user: user,
+        user,
         request: {
           type: "GET",
           url: req.hostname + "/users/" + _id,
@@ -303,17 +323,25 @@ exports.delete = (req, res, next) => {
           });
         }
 
-        await Promise.all([
-          User.deleteOne({ _id }),
-          saveHistory(
-            req.userData._id,
-            "accInfos",
-            "manage",
-            `Delete an account: ${_id}-${user.name}-${
-              user.email
-            } | ${new Date()}`
-          ),
-        ]);
+        const history = {
+          type: "delete",
+          collection: "user",
+          task: `Delete a user: ${user.name}`,
+          date: new Date(),
+          others: {
+            id: user._id,
+          },
+        };
+
+        await User.deleteOne({ _id });
+        await User.updateOne(
+          { _id: req.userData._id },
+          {
+            $push: {
+              "history.manage": history,
+            },
+          }
+        );
 
         res.status(200).json({
           msg: "success",
@@ -369,17 +397,19 @@ exports.confirmation = (req, res, next) => {
           });
         }
 
-        user.isVerified = true;
+        const history = {
+          type: "confirm",
+          collection: "user",
+          task: `Confirm a new user: ${user.name}`,
+          date: new Date(),
+          others: {
+            id: user._id,
+          },
+        };
 
-        await Promise.all([
-          User.updateOne({ _id }, { $set: user }),
-          saveHistory(
-            _id,
-            "accInfos",
-            "manage",
-            `Confirm this account | ${new Date()}`
-          ),
-        ]);
+        user.isVerified = true;
+        user.history.personal.push(history);
+        await User.updateOne({ _id }, { $set: user });
 
         res.status(200).json({
           msg: "success",
@@ -429,13 +459,23 @@ exports.resend = (req, res, next) => {
 
       sendMail(req, user.email, token, "confirmation");
 
-      await saveHistory(
-        user._id,
-        "accInfos",
-        "manage",
-        `Resend confirm email: ${user._id}-${user.name}-${
-          user.email
-        } | ${new Date()}`
+      const history = {
+        type: "resend",
+        collection: "user",
+        task: `Resend a email confirm: ${user.name}`,
+        date: new Date(),
+        others: {
+          id: user._id,
+        },
+      };
+
+      await User.updateOne(
+        { _id: user._id },
+        {
+          $push: {
+            "history.personal": history,
+          },
+        }
       );
 
       res.status(201).json({
@@ -475,8 +515,27 @@ exports.login = (req, res, next) => {
         }
 
         if (matched) {
-          const { email, _id, isVerified, name, cash, slugName, roles } = user;
-          const payloadToken = { _id, roles, name, cash, slugName, email };
+          const {
+            email,
+            _id,
+            isVerified,
+            name,
+            cash,
+            slugName,
+            roles,
+            history,
+            items,
+          } = user;
+          const payloadToken = {
+            _id,
+            roles,
+            name,
+            cash,
+            slugName,
+            email,
+            history,
+            items,
+          };
 
           const token = jwt.sign(payloadToken, jwtKey, {
             expiresIn: tokenLife,
@@ -563,18 +622,19 @@ exports.recovery = (req, res, next) => {
         user.passwordResetToken = hashed;
         user.passwordResetExpires = Date.now() + 5 * 60 * 1000; // 5h
 
-        const [, , newUser] = await Promise.all([
-          sendMail(req, email, hashed, "recovery"),
-          saveHistory(
-            user._id,
-            "accInfos",
-            "manage",
-            `Send password reset token: ${user._id}-${
-              user.email
-            } | ${new Date()}`
-          ),
-          User.updateOne({ _id: user._id }, { $set: user }),
-        ]);
+        sendMail(req, email, hashed, "recovery");
+
+        const history = {
+          type: "recovery",
+          collection: "user",
+          task: `Recovery a user: ${user.name}`,
+          date: new Date(),
+          others: {
+            id: user._id,
+          },
+        };
+        user.history.personal.push(history);
+        const newUser = await User.updateOne({ _id: user._id }, { $set: user });
 
         res.status(200).json({
           msg: "success",
@@ -615,17 +675,18 @@ exports.forgot = (req, res, next) => {
         user.passwordResetToken = "randomStringHere";
         user.passwordResetExpires = Date.now();
 
-        const [, newUser] = await Promise.all([
-          saveHistory(
-            user._id,
-            "accInfos",
-            "personal",
-            `Recovery password: ${user._id}-${user.name}-${
-              user.email
-            } | ${new Date()}`
-          ),
-          User.updateOne({ _id: user._id }, { $set: user }),
-        ]);
+        const history = {
+          type: "forgot",
+          collection: "user",
+          task: `Forgot a user: ${user.name}`,
+          date: new Date(),
+          others: {
+            id: user._id,
+          },
+        };
+
+        user.history.personal.push(history);
+        const newUser = await User.updateOne({ _id: user._id }, { $set: user });
 
         res.status(200).json({
           msg: "success",
@@ -643,66 +704,66 @@ exports.forgot = (req, res, next) => {
 };
 
 exports.history = async (req, res, next) => {
-  const { _id } = req.userData;
-  const { type, effect } = req.body;
+  // const { _id } = req.userData;
+  // const { type, effect } = req.body;
 
-  const types = ["accInfos", "items", "rolls", "codes", "blogs"];
-  const effects = ["personal", "manage"];
+  // const types = ["accInfos", "items", "rolls", "codes", "blogs"];
+  // const effects = ["personal", "manage"];
 
-  let result = [];
+  // let result = [];
 
-  try {
-    if (!type && !effect) {
-      if (req.userData.roles != "admin") {
-        return res.status(403).json({
-          msg: "ValidatorError",
-          errors: {
-            user: `You don't have the permission!`,
-          },
-        });
-      }
+  // try {
+  //   if (!type && !effect) {
+  //     if (req.userData.roles != "admin") {
+  //       return res.status(403).json({
+  //         msg: "ValidatorError",
+  //         errors: {
+  //           user: `You don't have the permission!`,
+  //         },
+  //       });
+  //     }
 
-      result = await History.find({});
+  //     result = await History.find({});
 
-      return res.status(200).json({
-        msg: "success",
-        length: result.length,
-        history: result,
-      });
-    } else if (!types) {
-      return res.status(202).json({
-        msg: "ValidatorError",
-        errors: {
-          user: `Request body have to include 'type'!`,
-        },
-      });
-    } else if (!effect) {
-      return res.status(202).json({
-        msg: "ValidatorError",
-        errors: {
-          user: `Request body have to include 'effect'!`,
-        },
-      });
-    } else if (!types.includes(type) || !effects.includes(effect)) {
-      return res.status(202).json({
-        msg: "ValidatorError",
-        errors: {
-          user: `Value of 'type' and 'effect' must be valid!`,
-        },
-      });
-    }
+  //     return res.status(200).json({
+  //       msg: "success",
+  //       length: result.length,
+  //       history: result,
+  //     });
+  //   } else if (!types) {
+  //     return res.status(202).json({
+  //       msg: "ValidatorError",
+  //       errors: {
+  //         user: `Request body have to include 'type'!`,
+  //       },
+  //     });
+  //   } else if (!effect) {
+  //     return res.status(202).json({
+  //       msg: "ValidatorError",
+  //       errors: {
+  //         user: `Request body have to include 'effect'!`,
+  //       },
+  //     });
+  //   } else if (!types.includes(type) || !effects.includes(effect)) {
+  //     return res.status(202).json({
+  //       msg: "ValidatorError",
+  //       errors: {
+  //         user: `Value of 'type' and 'effect' must be valid!`,
+  //       },
+  //     });
+  //   }
 
-    result = await loadHistory(_id, type, effect);
+  //   result = await loadHistory(_id, type, effect);
 
-    res.status(200).json({
-      msg: "success",
-      history: result,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      msg: "Server error!",
-      error,
-    });
-  }
+  //   res.status(200).json({
+  //     msg: "success",
+  //     history: result,
+  //   });
+  // } catch (error) {
+  //   console.log(error);
+  res.status(500).json({
+    msg: "Not support!",
+    error,
+  });
+  // }
 };

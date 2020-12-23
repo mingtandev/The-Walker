@@ -4,6 +4,7 @@ const { saveUserItem } = require("./../utils/userItem");
 
 const Code = require("../models/giffcode");
 const User = require("./../models/user");
+const Item = require("./../models/item");
 
 exports.getAll = (req, res, next) => {
   if (req.userData.roles != "admin") {
@@ -212,6 +213,7 @@ exports.useOne = async (req, res, next) => {
 
   try {
     let validCode = await Code.findOne({ code });
+    const user = await User.findById(userId);
 
     if (!validCode) {
       return res.status(202).json({
@@ -233,8 +235,11 @@ exports.useOne = async (req, res, next) => {
       });
     }
 
-    let historyCodes = await loadHistory(userId, "codes", "personal");
-    historyCodes = historyCodes.map((his) => his.split(" ")[2]);
+    // Check code used
+    let historyCodes = req.userData.history.personal.filter(
+      (el) => el.collection === "code" && el.type === "use"
+    );
+    historyCodes = historyCodes.map((el) => el.task.split(" ").reverse()[0]);
 
     if (type === "Normal" && historyCodes.includes(code)) {
       return res.status(202).json({
@@ -253,27 +258,62 @@ exports.useOne = async (req, res, next) => {
         },
       });
     } else {
-      userItem = await saveUserItem(userId, items, 0);
+      // Push items
+      try {
+        for (let i = 0; i < items.length; i++) {
+          const result = await Item.findById(items[i]);
+          if (!result) continue;
+
+          const record = {
+            id: result._id,
+            name: result.name,
+            details: result.details,
+            description: result.description,
+            boughtAt: new Date(),
+          };
+
+          await user.items[`${result.type}s`].push(record);
+        }
+
+        await User.updateOne({ _id: user._id }, { $set: user });
+      } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+          msg: "Server error!",
+          error,
+        });
+      }
     }
 
     if (type === "Vip") {
       validCode.isUsed = true;
     }
 
-    await Promise.all([
-      Code.updateOne({ _id: validCode._id }, { $set: validCode }),
-      saveHistory(
-        userId,
-        "codes",
-        "personal",
-        `Used code: ${code} | ${new Date()}`
-      ),
-      saveStatistic(0, 0, 0, 1, 0, 0),
-    ]);
+    await Code.updateOne({ _id: validCode._id }, { $set: validCode });
 
+    const history = {
+      type: "use",
+      collection: "code",
+      task: `Use a code: ${code}`,
+      date: new Date(),
+      others: {
+        id: validCode._id,
+      },
+    };
+
+    await User.updateOne(
+      { _id: req.userData._id },
+      {
+        $push: {
+          "history.personal": history,
+        },
+      }
+    );
+
+    saveStatistic(0, 0, 0, 1, 0, 0);
     res.status(200).json({
       msg: "success",
-      userItem,
+      userItem: user.items,
     });
   } catch (error) {
     console.log(error);

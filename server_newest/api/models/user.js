@@ -64,18 +64,26 @@ const userScheme = mongoose.Schema({
         {
           id: "",
           name: "AWM",
-          detail: "Item detail",
+          details: {},
+          description: "Description",
           boughtAt: new Date(),
         },
       ],
       hats: [
-        { id: "", name: "Cowboy", detail: "Item detail", boughtAt: new Date() },
+        {
+          id: "",
+          name: "Cowboy",
+          details: {},
+          description: "Description",
+          boughtAt: new Date(),
+        },
       ],
       outfits: [
         {
           id: "",
           name: "Bikini",
-          detail: "Item detail",
+          details: {},
+          description: "Description",
           boughtAt: new Date(),
         },
       ],
