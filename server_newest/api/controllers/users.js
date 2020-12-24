@@ -202,11 +202,11 @@ exports.update = (req, res, next) => {
 
   if (roles === "user") {
     for (const key of Object.keys(newUser)) {
-      if (!["name", "password"].includes(key)) {
+      if (!["name", "password", "coin"].includes(key)) {
         return res.status(202).json({
           msg: "ValidatorError",
           errors: {
-            user: `You are only allowed to change the name and password!`,
+            user: `You are only allowed to change the coin, name and password!`,
           },
         });
       }
@@ -227,6 +227,7 @@ exports.update = (req, res, next) => {
       // Fin game update coin => cash
       if (newUser.coin) {
         newUser.cash = +user.cash + +newUser.coin;
+        user.cash = newUser.cash;
       }
 
       if (hasPassword) {

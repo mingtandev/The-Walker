@@ -62,48 +62,53 @@ const userScheme = mongoose.Schema({
     default: {
       guns: [
         {
-          id: "",
+          id: "5fe3f186fef3da1f042997cd",
           name: "AK47",
           details: {
             "Load ammo": 30,
             "Total ammo": 90,
             Type: "Rifle",
-            Delay: "0.12",
-            Dame: 7,
+            "Time delay": 0.12,
+            Damage: 7,
             "Bullet speed": 200,
             "Bullet drop": 3,
           },
           thumbnail:
             "https://i.ibb.co/2vXFgrt/Screenshot-2020-12-02-082158.png",
-          description: "Súng trường tự động Kalashnikov",
+          description: "Súng trường tự động Kalashnikov.",
           boughtAt: new Date(),
         },
       ],
       hats: [
         {
-          id: "",
+          id: "5fe3f88288e0a52be4dce664",
           name: "Noob Hat",
           details: {
-            HP: "100",
-            Amor: "10",
-            "Buff speed": 3,
+            HP: 30,
+            Ammo: 10,
+            "Damage buff": 3,
+            "Bullet speed down": 10,
+            "Bullet drop down": 0.1,
           },
           thumbnail: "https://i.ibb.co/5RpGjC6/Noob-Hat.png",
-          description: "Nón tân thủ",
+          description: "Nón tân thủ, cấu hình bullpup thử nghiệm của Đức",
           boughtAt: new Date(),
         },
       ],
       outfits: [
         {
-          id: "",
+          id: "5fe3feb70351732f504287ef",
           name: "Battery",
           details: {
-            HP: "120",
-            Amor: "20",
-            "Buff speed": 3,
+            HP: 40,
+            Ammo: 10,
+            "Damage buff": 1,
+            "Bullet speed down": 10,
+            "Bullet drop down": 0.5,
           },
           thumbnail: "https://i.ibb.co/YZqTM5v/Battery.png",
-          description: "Giáp tân thủ",
+          description:
+            "Giáp tân thủ, thiết kế và phát triển bởi Heckler & Koch.",
           boughtAt: new Date(),
         },
       ],
