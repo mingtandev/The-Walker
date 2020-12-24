@@ -1,9 +1,11 @@
-const express = require('express')
+const express = require("express");
 
-const StatisticController = require('../controllers/statistics')
+const StatisticController = require("../controllers/statistics");
 
-const router = express.Router()
+const router = express.Router();
 
-router.get('/', StatisticController.get)
+router.get("/", StatisticController.get);
 
-module.exports = router
+router.get("/chart-data", StatisticController.getChartDate);
+
+module.exports = router;
