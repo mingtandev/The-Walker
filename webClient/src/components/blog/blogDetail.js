@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import blogApi from "../../api/blogApi";
-import userApi from "../../api/userApi";
 import "./index.scss";
 
 function BlogDetail({ match }) {

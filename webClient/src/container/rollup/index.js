@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import Pagination from "@material-ui/lab/Pagination";
-import Table from "react-bootstrap/Table";
-import Button from "react-bootstrap/Button";
+import TodayIcon from "@material-ui/icons/Today";
+import Button from "@material-ui/core/Button";
 import rollApi from "../../api/rollApi";
+import RollSuccessBox from "../../components/dialog/roll/rollSuccess";
 import "./index.scss";
 
 function RollUp() {
@@ -11,12 +12,15 @@ function RollUp() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
 
+  const [rollData, setRollData] = useState(null);
+  const [rollSuccessBox, setRollSuccessBox] = useState(false);
+
   useEffect(() => {
     async function getAllRoll() {
-      console.log("thay doi", currentPage);
       try {
         const params = {
           page: currentPage,
+          limit: 8,
         };
         let res = await rollApi.get(params);
         console.log(res);
@@ -31,24 +35,22 @@ function RollUp() {
     getAllRoll();
   }, [currentPage]);
 
-  const getOneRoll = async (day) => {
-    console.log(day, typeof day);
+  const getOneRoll = async (item) => {
+    console.log(item, typeof item);
     try {
-      let res = await rollApi.use(day);
+      let res = await rollApi.use(item.day);
       console.log(res);
       if (res) {
-        if (res.msg === "success") toastr.success("Gell Roll Successfully");
-        else if (res.msg === "Rollup day invalid!")
-          toastr.error("Get Roll Failed!", "Rollup day invalid");
-        else if (res.msg === "You has been registered today!")
-          toastr.info("You has been registered today!");
-        else if (res.msg.includes("Today is not"))
-          toastr.warning("Get This Roll Failed!", "Rollup Day Is NOT Today");
+        if (res.msg === "success") {
+          setRollData(item);
+          setRollSuccessBox(true);
+          toastr.success("Gell Roll Successfully");
+        } else if (res.msg === "ValidatorError") toastr.error(res.errors.user);
         return;
       }
       toastr.error("Get Roll Failed! Try Login Again");
     } catch (error) {
-      alert("Error getting item");
+      toastr.error("Error getting item");
     }
   };
 
@@ -57,32 +59,48 @@ function RollUp() {
     setCurrentPage(value);
   };
 
+  const handleCloseRollPopUp = () => {
+    setRollSuccessBox(false);
+  };
+
   return (
-    <div className="rollup__container">
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Day</th>
-            <th>Coin</th>
-            <th>GET</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.length &&
-            items.map((item, key) => {
-              return (
-                <tr key={key}>
-                  <td>{item.day}</td>
-                  <td>{item.coin}</td>
-                  <td>
-                    <Button onClick={() => getOneRoll(item.day)}>GET</Button>
-                  </td>
-                </tr>
-              );
-            })}
-        </tbody>
-      </Table>
-      <div className="items__pagination">
+    <>
+      <div className="rollup__container">
+        {items.length ? (
+          items.map((item, id) => (
+            <div className="rollup__item" key={id}>
+              <div className="rollup__top">
+                <TodayIcon />
+                <span>{item.day}</span>
+              </div>
+              <div className="rollup__thumbnail">
+                <img src={item.item.thumbnail} alt="roll-thumbnail" />
+              </div>
+              <div>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => getOneRoll(item)}
+                >
+                  Get
+                </Button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div>NO ROLL-UPS</div>
+        )}
+      </div>
+
+      {items.length && (
+        <RollSuccessBox
+          show={rollSuccessBox}
+          onclose={handleCloseRollPopUp}
+          {...rollData}
+        />
+      )}
+
+      <div className="rollup__pagination">
         <Pagination
           count={totalPage}
           page={currentPage}
@@ -91,7 +109,7 @@ function RollUp() {
           shape="rounded"
         />
       </div>
-    </div>
+    </>
   );
 }
 

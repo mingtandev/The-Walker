@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import userApi from "../../api/userApi";
+import React from "react";
 
 import "./index.scss";
 
@@ -12,11 +11,7 @@ function Blog(props) {
 
   return (
     <div className="blog" onClick={showDetail}>
-      <img
-        className="blog__thumbnail"
-        src={"http://" + thumbnail}
-        alt="image"
-      />
+      <img className="blog__thumbnail" src={thumbnail} alt="blog-thumbnail" />
       <p className="blog__title">{title}</p>
       <p className="blog__caption">{date}</p>
       <p className="blog__caption">Writer: {name}</p>

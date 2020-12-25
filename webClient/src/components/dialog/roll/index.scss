@@ -1,0 +1,29 @@
+.rollup {
+  &__modal {
+    .MuiDialogTitle-root {
+      color: rgb(20, 173, 20);
+      .MuiSvgIcon-root {
+        font-size: 3rem;
+        margin-right: 1rem;
+      }
+      h2 {
+        display: flex;
+        font-size: 2rem;
+        font-weight: bold;
+      }
+    }
+    &__main {
+      display: grid;
+      grid-template-columns: 60% 40%;
+    }
+    &__left {
+      padding-right: 3rem;
+      span {
+        font-weight: bold;
+      }
+    }
+    &__thumbnail {
+      width: 100%;
+    }
+  }
+}

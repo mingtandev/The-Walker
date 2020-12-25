@@ -15,7 +15,7 @@ function Achievements() {
         {achievements.map((item, idx) => (
           <div data-aos="zoom-in" className="achievement__item" key={idx}>
             <div className="achievement__item-left">
-              <img src={item.img}></img>
+              <img src={item.img} alt="icon"></img>
             </div>
             <div className="achievement__item-right">
               {" "}

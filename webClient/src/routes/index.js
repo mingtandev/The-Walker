@@ -14,7 +14,6 @@ function Routes() {
             path={route.path}
             exact={route.exact}
             render={() => {
-              if (route.role === "notfound") return <route.component />;
               if (!route.role) return <route.component />;
               if (route.role === "noAuth") {
                 if (!localStorage.getItem("token")) return <route.component />;

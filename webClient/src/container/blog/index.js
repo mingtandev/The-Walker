@@ -14,6 +14,7 @@ function Blogs() {
   const history = useHistory();
 
   useEffect(() => {
+    console.log(23748738);
     async function getBlogs() {
       try {
         const params = {

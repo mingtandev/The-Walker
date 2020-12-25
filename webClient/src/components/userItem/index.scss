@@ -17,4 +17,12 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  &:hover {
+    z-index: 1;
+    transition: 0.2s;
+    transform: scale(1.05);
+    > .item__hover {
+      display: block;
+    }
+  }
 }

@@ -1,0 +1,29 @@
+.footer {
+  bottom: 0;
+  right: 0;
+  left: 0;
+  padding: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  background-color: white;
+  background-color: black;
+  background-image: url(https://themebeyond.com/demo/gecolive/wp-content/uploads/2020/08/area_bg02.jpg);
+  box-shadow: inset 0 2px 5px darkgray;
+  &__left span,
+  &__right span {
+    font-size: 1.8rem;
+  }
+  &__contact {
+    margin-right: 1.5rem;
+    font-weight: bold;
+  }
+  &__icon {
+    margin-right: 1.3rem;
+    > i {
+      color: rgb(106, 106, 243);
+      font-size: 2rem;
+    }
+  }
+}

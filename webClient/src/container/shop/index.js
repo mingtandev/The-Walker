@@ -79,11 +79,13 @@ function Shop() {
         <div className="items__container">
           {items.length ? (
             items.map((item, id) => (
-              <Item
-                onPurchase={() => handleConfirm(item._id)}
-                key={id}
-                {...item}
-              />
+              <>
+                <Item
+                  onPurchase={() => handleConfirm(item._id)}
+                  key={id}
+                  {...item}
+                />
+              </>
             ))
           ) : (
             <div>NO ITEMS</div>

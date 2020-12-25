@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { NavLink, Link, useHistory } from "react-router-dom";
+import Button from "@material-ui/core/Button";
 import jwt_decode from "jwt-decode";
 import { loadUser, signOut } from "../../actions/authAction";
 import userApi from "../../api/userApi";
@@ -65,7 +66,7 @@ function Navbar() {
           src="https://r2wteam.files.wordpress.com/2020/04/cropped-cropped-cropped-cropped-3-1-2-1-2.png"
           alt="Home"
         />
-        <span className="nav__logo-text">r2w fly team</span>
+        <span className="nav__logo-text">r2w team</span>
       </Link>
       <div className="nav__links">
         <ul className="nav__links--pages">
@@ -130,20 +131,19 @@ function Navbar() {
           )}
           {user.user && (
             <>
-              <div class="nav__user" ref={userDropdownRef}>
-                {
-                  <li
-                    className="nav__link nav__link--user"
-                    onClick={handleUserDropdownShow}
-                  >
-                    {user.user.name}
-                  </li>
-                }
+              <div className="nav__user" ref={userDropdownRef}>
+                <Button
+                  className="nav__user-name"
+                  variant="contained"
+                  onClick={handleUserDropdownShow}
+                >
+                  {user.user.name}
+                </Button>
                 {userDropdownOpen && <UserMenu />}
-                <li className="nav__link nav__link--logout" onClick={logOut}>
-                  Log Out <i className="fas fa-sign-out-alt"></i>
-                </li>
               </div>
+              <Button variant="contained" color="secondary" onClick={logOut}>
+                Log Out
+              </Button>
             </>
           )}
         </ul>

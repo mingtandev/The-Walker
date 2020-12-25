@@ -12,21 +12,6 @@
   margin-top: 5rem;
 }
 
-.MuiPagination-ul {
-  display: flex;
-  justify-content: center;
-  color: black;
-  button {
-    background-color: white;
-    opacity: 1 !important;
-  }
-  .Mui-selected {
-    background-color: #337ab7 !important;
-    color: white;
-    font-weight: bold;
-  }
-}
-
 .form {
   &__items {
     width: 100%;

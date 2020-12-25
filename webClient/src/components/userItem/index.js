@@ -1,21 +1,15 @@
 import React from "react";
+import UserItemHover from "../item/itemHover";
 import "./index.scss";
 
 function UserItemDetail(props) {
-  const { name, thumbnail, price, detail } = props;
+  const { name, thumbnail, details, description } = props;
 
   return (
     <div className="useritem">
-      <img
-        className="useritem__img"
-        src={"http://" + thumbnail}
-        alt="my-item"
-      />
+      <img className="useritem__img" src={thumbnail} alt="my-item" />
       <p className="useritem__name">{name}</p>
-      <p className="useritem__detail">{detail}</p>
-      <p className="useritem__price">
-        Price: <span style={{ color: "red" }}>{price}</span>
-      </p>
+      <UserItemHover data={props} />
     </div>
   );
 }
