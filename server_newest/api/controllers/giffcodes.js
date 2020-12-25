@@ -210,7 +210,7 @@ exports.useOne = async (req, res, next) => {
     }
 
     // Load code used
-    let historyCodes = req.userData.history.personal.filter(
+    let historyCodes = user.history.personal.filter(
       (el) => el.collection === "code" && el.type === "use"
     );
     historyCodes = historyCodes.map((el) => el.task.split(" ").reverse()[0]);
