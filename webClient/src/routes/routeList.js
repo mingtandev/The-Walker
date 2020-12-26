@@ -11,12 +11,14 @@ import ForgotPassword from "../pages/auth/forgot";
 import NotFound from "../components/notFound";
 
 const UserItem = lazy(() => import("../container/userItems"));
+const UserHistory = lazy(() => import("../container/history"));
 const UserInfo = lazy(() => import("../container/auth/userInfo"));
 const AcccountVerify = lazy(() => import("../pages/auth/accountVerify"));
 
 const routes = [
   { path: "/", exact: true, component: Home },
-  { path: "/my-items", exact: true, component: UserItem },
+  { path: "/my-items", exact: true, role: "user", component: UserItem },
+  { path: "/my-activities", exact: true, role: "user", component: UserHistory },
   {
     path: "/sign-in",
     role: "noAuth",

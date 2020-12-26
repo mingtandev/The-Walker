@@ -100,16 +100,6 @@ function UserItem() {
               ))}
             {/*  */}
             {showStatus === 2 &&
-              (show.hat ? (
-                <>
-                  {hatList.map((item, id) => (
-                    <UserItemDetail key={id} {...item} />
-                  ))}
-                </>
-              ) : (
-                <h1 className="useritem__title">You do not affort any hats</h1>
-              ))}
-            {showStatus === 2 &&
               show.hat &&
               (hatList.length ? (
                 <>

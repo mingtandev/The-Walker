@@ -1,4 +1,4 @@
-.useritem {
+.history {
   &__container {
     margin: 0 auto;
     padding-top: 15rem;
@@ -17,12 +17,13 @@
     border-top-right-radius: 10px;
     background-color: black;
   }
-  &__text {
+  &__caption {
     margin: auto;
+    margin-top: 2rem;
     padding: 1rem;
     color: white;
     border-radius: 10px;
-    background-color: rgb(60, 216, 130);
+    background-color: rgb(16, 245, 119);
     transform: skew(-10deg);
     -o-transform: skew(-10deg);
     -moz-transform: skew(-10deg);
@@ -36,7 +37,7 @@
   &__option {
     margin-bottom: 2rem;
     padding: 1rem;
-    width: 33.33%;
+    width: 50%;
     border: 1px solid black;
     outline: none;
     &:hover {
@@ -53,5 +54,31 @@
     justify-content: flex-start;
     flex-wrap: wrap;
     align-items: stretch;
+  }
+  &__list {
+    background-color: rgba(42, 197, 112, 0.8);
+    color: white;
+    margin: auto;
+    width: 100%;
+    letter-spacing: 1.5px;
+    &__item {
+      .MuiSvgIcon-root {
+        margin-right: 2rem;
+        color: rgba(255, 0, 0, 0.685);
+      }
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: 50% 50%;
+      text-align: left;
+      span {
+        font-size: 1.8rem;
+      }
+    }
+    &-date {
+      margin-right: 2rem;
+    }
+    &-content {
+      font-weight: bold;
+    }
   }
 }

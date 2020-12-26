@@ -127,10 +127,10 @@
   &__sub {
     position: absolute;
     top: 100%;
-    right: 4%;
+    right: 3%;
     padding: 5px 15px;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
     background-color: white;
     color: black;
     &Cash {
@@ -152,8 +152,12 @@
   a {
     margin-bottom: 0;
     p {
+      margin: 1rem;
       padding: 1rem;
       font-weight: bold;
+      &:hover {
+        color: rgb(36, 171, 224);
+      }
     }
   }
 }
