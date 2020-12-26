@@ -7,6 +7,7 @@ export const ITEM_COLUMNS = [
     render: (rowData) => (
       <img
         src={"http://" + rowData.thumbnail}
+        alt="item"
         style={{ width: 50, borderRadius: "50%" }}
       />
     ),
@@ -63,6 +64,7 @@ export const ROLLUP_COLUMNS = [
     render: (rowData) => (
       <img
         src={"http://" + rowData.thumbnail}
+        alt="thumbnail"
         style={{ width: 50, borderRadius: "50%" }}
       />
     ),
@@ -79,6 +81,7 @@ export const BLOG_COLUMNS = [
     render: (rowData) => (
       <img
         src={"http://" + rowData.thumbnail}
+        alt="blog"
         style={{ width: 50, borderRadius: "50%" }}
       />
     ),

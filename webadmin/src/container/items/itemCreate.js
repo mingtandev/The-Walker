@@ -14,7 +14,6 @@ function ItemCreate() {
     price: "",
     detail: "",
   });
-  const history = useHistory();
 
   const handleSubmit = (e) => {
     e.preventDefault();

@@ -11,7 +11,6 @@ import "./index.scss";
 import userApi from "../../api/userApi";
 
 function Login() {
-  const recaptchaRef = React.createRef();
   const [error, setError] = useState("");
   const history = useHistory();
   let dispatch = useDispatch();
