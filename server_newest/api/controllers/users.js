@@ -147,7 +147,7 @@ exports.create = (req, res, next) => {
 							expiresIn: TOKEN_LIFE,
 						});
 
-						sendMail(req, user.email, token, 'confirmation'),
+						sendMail(req, user.email, token, 'confirm'),
 							res.status(201).json({
 								msg: 'success',
 								user: user,
@@ -188,19 +188,6 @@ exports.update = async (req, res, next) => {
 			},
 		});
 	}
-
-	// if (roles === 'user') {
-	// 	for (const key of Object.keys(user)) {
-	// 		if (!['name', 'password', 'coin'].includes(key)) {
-	// 			return res.status(202).json({
-	// 				msg: 'ValidatorError',
-	// 				errors: {
-	// 					user: `You are only allowed to change the coin, name and password!`,
-	// 				},
-	// 			});
-	// 		}
-	// 	}
-	// }
 
 	try {
 		let hasPassword = false;
@@ -445,7 +432,7 @@ exports.resend = (req, res, next) => {
 				expiresIn: TOKEN_LIFE,
 			});
 
-			sendMail(req, user.email, token, 'confirmation');
+			sendMail(req, user.email, token, 'confirm');
 
 			// Save his
 			const history = {
@@ -608,7 +595,7 @@ exports.recovery = (req, res, next) => {
 				user.passwordResetToken = hashed;
 				user.passwordResetExpires = Date.now() + 5 * 60 * 1000; // 5h
 
-				sendMail(req, email, hashed, 'recovery');
+				sendMail(req, email, hashed, 'reset');
 
 				const history = {
 					type: 'recovery',

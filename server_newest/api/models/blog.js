@@ -1,47 +1,52 @@
-const mongoose = require('mongoose')
-const slug = require('mongoose-slug-generator')
+const mongoose = require('mongoose');
+const slug = require('mongoose-slug-generator');
 
 const blogSchema = mongoose.Schema({
-    date: {
-        type: Date,
-        default: Date.now()
-    },
-    writer: {
-        type: mongoose.Types.ObjectId,
-        required: [true, 'Writer is required!'],
-        ref: 'User'
-    },
-    name: {
-        type: String,
-        required: [true,'Name is required!'],
-    },
-    title: {
-        type: String,
-        required: [true, 'Title is required!'],
-        unique: true
-    },
-    slugTitle: {
-        type: String,
-        slug: 'title'
-    },
-    content: {
-        type: String,
-        required: [true, 'Content is required!'],
-    },
-    thumbnail: {
-        type: String,
-        default: ''
-    }
-})
+	date: {
+		type: Date,
+		default: Date.now(),
+	},
+	writer: {
+		type: mongoose.Types.ObjectId,
+		required: [true, 'Writer is required!'],
+		ref: 'User',
+	},
+	name: {
+		type: String,
+		required: [true, 'Name is required!'],
+	},
+	title: {
+		type: String,
+		required: [true, 'Title is required!'],
+		unique: true,
+	},
+	slugTitle: {
+		type: String,
+		slug: 'title',
+	},
+	content: {
+		type: String,
+		required: [true, 'Content is required!'],
+	},
+	thumbnail: {
+		type: String,
+		default: '',
+	},
+	cloudinary_id: {
+		type: String,
+		default: '',
+	},
+});
 
 blogSchema.path('title').validate(async (value) => {
-    const titleCount = await mongoose.models.Blog.countDocuments({title: value })
-    return !titleCount
-
-}, 'Title already exists!')
+	const titleCount = await mongoose.models.Blog.countDocuments({
+		title: value,
+	});
+	return !titleCount;
+}, 'Title already exists!');
 
 // Add plugins
-mongoose.plugin(slug)
-blogSchema.set('timestamps', true)
+mongoose.plugin(slug);
+blogSchema.set('timestamps', true);
 
-module.exports = mongoose.model('Blog', blogSchema)
+module.exports = mongoose.model('Blog', blogSchema);
