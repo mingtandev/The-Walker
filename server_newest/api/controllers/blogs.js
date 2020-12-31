@@ -194,11 +194,19 @@ exports.update = async (req, res, next) => {
 		const blog = await Blog.findById(_id);
 		const oldBlog = blog.title;
 
-		console.log(req.file);
-		console.log(req.body);
+		// Avatar upload/change
+		if (req.file) {
+			const ret = await cloudinary.uploadSingleAvatar(req.file.path);
+			if (ret) {
+				await cloudinary.destroySingle(blog.cloudinary_id);
+				blog.thumbnail = ret.url;
+				blog.cloudinary_id = ret.id;
+			}
+		}
 
-		for (const ops of req.body) {
-			blog[ops.propName] = ops.value;
+		const keys = Object.keys(req.body);
+		for (const key of keys) {
+			blog[key] = req.body[key];
 		}
 
 		const history = {
@@ -208,7 +216,7 @@ exports.update = async (req, res, next) => {
 			date: new Date(),
 			others: {
 				id: blog._id,
-				fields: req.body.map((ele) => `${ele.propName}: ${ele.value}`),
+				fields: keys.map((key) => `${key}: ${req.body[key]}`),
 			},
 		};
 

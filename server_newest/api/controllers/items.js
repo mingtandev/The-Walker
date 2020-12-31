@@ -1,6 +1,8 @@
 const Item = require('../models/item');
 const User = require('../models/user');
 
+const cloudinary = require('./../config/cloudinary');
+
 const { saveStatistic } = require('./../utils/statistic');
 
 exports.getAll = (req, res, next) => {
@@ -197,20 +199,16 @@ exports.create = async (req, res, next) => {
 	}
 
 	try {
-		const thumbnail = req.file
-			? req.hostname + '/' + req.file.path.replace(/\\/g, '/').replace('..', '')
-			: '';
+		let thumbnail = '';
+		let cloudinary_id = '';
 
-		// if(req.file) {
-		//   const ret = await cloudinary.uploadSingleAvatar(req.file.path);
-		//   if (ret) {
-		//     await cloudinary.destroySingle(user.cloudinary_id);
-		//     user.avatar = ret.url;
-		//     user.cloudinary_id = ret.id;
-		//   }
-
-		//   console.log(ret);
-		// }
+		if (req.file) {
+			const ret = await cloudinary.uploadSingleAvatar(req.file.path);
+			if (ret) {
+				thumbnail = ret.url;
+				cloudinary_id = ret.id;
+			}
+		}
 
 		const item = new Item({
 			name,
@@ -219,6 +217,7 @@ exports.create = async (req, res, next) => {
 			description,
 			details,
 			thumbnail,
+			cloudinary_id,
 		});
 
 		// Check sale
@@ -291,11 +290,22 @@ exports.update = async (req, res, next) => {
 		const item = await Item.findById(_id);
 		const oldName = item.name;
 
-		for (const ops of req.body) {
-			item[ops.propName] = ops.value;
+		// Avatar upload/change
+		if (req.file) {
+			const ret = await cloudinary.uploadSingleAvatar(req.file.path);
+			if (ret) {
+				await cloudinary.destroySingle(item.cloudinary_id);
+				item.thumbnail = ret.url;
+				item.cloudinary_id = ret.id;
+			}
+		}
 
-			if (ops.propName === 'saleExpiresTime') {
-				item[ops.propName] = Date.now() + +ops.value;
+		const keys = Object.keys(req.body);
+		for (const key of keys) {
+			item[key] = req.body[key];
+
+			if (key === 'saleExpiresTime') {
+				item[key] = Date.now() + +req.body[key];
 			}
 		}
 
@@ -314,7 +324,7 @@ exports.update = async (req, res, next) => {
 			date: new Date(),
 			others: {
 				id: item._id,
-				fields: req.body.map((ele) => `${ele.propName}: ${ele.value}`),
+				fields: keys.map((key) => `${key}: ${req.body[key]}`),
 			},
 		};
 

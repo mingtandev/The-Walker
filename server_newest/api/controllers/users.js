@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 
 const User = require('./../models/user');
 
+const cloudinary = require('./../config/cloudinary');
+
 const { sendMail } = require('./../config/nodemailer');
 
 const TOKEN_LIFE = process.env.TOKEN_LIFE;
@@ -122,12 +124,26 @@ exports.create = (req, res, next) => {
 					error,
 				});
 			} else {
+				let avatar = '';
+				let cloudinary_id = '';
+
+				if (req.file) {
+					cloudinary.uploadSingleAvatar(req.file.path).then((ret) => {
+						if (ret) {
+							avatar = ret.url;
+							cloudinary_id = ret.id;
+						}
+					});
+				}
+
 				const passwordResetToken = crypto.randomBytes(16).toString('hex');
 				const user = new User({
 					name,
 					email,
 					password: encryptedPassword,
 					passwordResetToken,
+					avatar,
+					cloudinary_id,
 				});
 
 				const history = {
@@ -180,14 +196,7 @@ exports.update = async (req, res, next) => {
 	const { userId: _id } = req.params;
 	const { roles } = req.userData;
 
-	if (roles != 'admin' && _id != req.userData._id) {
-		return res.status(403).json({
-			msg: 'ValidatorError',
-			errors: {
-				user: `You don't have the permission!`,
-			},
-		});
-	}
+	const validUserFieldUpdate = ['name', 'password', 'coin', 'thumbnail'];
 
 	try {
 		let hasPassword = false;
@@ -195,10 +204,24 @@ exports.update = async (req, res, next) => {
 
 		const user = await User.findById(_id);
 
-		for (const ops of req.body) {
-			user[ops.propName] = ops.value;
+		// Avatar upload/change
+		if (req.file) {
+			const ret = await cloudinary.uploadSingleAvatar(req.file.path);
+			if (ret) {
+				await cloudinary.destroySingle(user.cloudinary_id);
+				user.thumbnail = ret.url;
+				user.cloudinary_id = ret.id;
+			}
+		}
 
-			if (ops.propName === 'password') {
+		const keys = Object.keys(req.body);
+		for (const key of keys) {
+			user[key] = req.body[key];
+
+			if (roles === 'user' && !validUserFieldUpdate.includes(key))
+				throw new Error('User only to changes: name, avatar, password!');
+
+			if (key === 'password') {
 				hasPassword = true;
 			}
 		}
@@ -216,10 +239,14 @@ exports.update = async (req, res, next) => {
 			date: new Date(),
 			others: {
 				id: user._id,
-				fields: req.body.map(
-					(ele) =>
-						`${ele.propName}: ${
-							ele.propName === 'password' ? '*******' : ele.value
+				fields: keys.map(
+					(key) =>
+						`${key}: ${
+							key === 'password'
+								? `********
+									${req.body.password[req.body.password.length - 1]}
+									${req.body.password[req.body.password.length - 2]}`
+								: req.body[key]
 						}`
 				),
 			},
