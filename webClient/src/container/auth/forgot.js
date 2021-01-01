@@ -116,29 +116,31 @@ export default function ForgotPasswordContainer() {
   }
 
   return (
-    <div className="forgot__container">
-      <Stepper
-        className={classes.root}
-        activeStep={activeStep}
-        orientation="vertical"
-      >
-        {steps.map((label, index) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-            <StepContent>
-              <Typography>{getStepContent(index)}</Typography>
-            </StepContent>
-          </Step>
-        ))}
-      </Stepper>
-      {activeStep === steps.length && (
-        <Paper square elevation={0} className={classes.resetContainer}>
-          <Typography>Account Verified. Login Again</Typography>
-          <Button onClick={handleReset} variant="contained" color="primary">
-            Reset
-          </Button>
-        </Paper>
-      )}
+    <div className="form__container">
+      <div className="forgot__container">
+        <Stepper
+          className={classes.root}
+          activeStep={activeStep}
+          orientation="vertical"
+        >
+          {steps.map((label, index) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+              <StepContent>
+                <Typography>{getStepContent(index)}</Typography>
+              </StepContent>
+            </Step>
+          ))}
+        </Stepper>
+        {activeStep === steps.length && (
+          <Paper square elevation={0} className={classes.resetContainer}>
+            <Typography>Account Verified. Login Again</Typography>
+            <Button onClick={handleReset} variant="contained" color="primary">
+              Reset
+            </Button>
+          </Paper>
+        )}
+      </div>
     </div>
   );
 }

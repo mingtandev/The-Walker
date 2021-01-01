@@ -2,7 +2,7 @@
   bottom: 0;
   right: 0;
   left: 0;
-  padding: 2rem;
+  padding: 2rem 2rem 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -15,14 +15,28 @@
   &__right span {
     font-size: 1.8rem;
   }
-  &__contact {
-    margin-right: 1.5rem;
-    font-weight: bold;
-  }
-  &__icon {
-    margin-right: 1.3rem;
-    > i {
+  &__right {
+    display: flex;
+    align-items: flex-start;
+    &-title {
+      margin-right: 1.5rem;
+      font-weight: bold;
+    }
+    &-detail {
+      display: flex;
+      flex-direction: column;
+    }
+    &-main {
+      margin-bottom: 1rem;
+      &:hover {
+        color: orange;
+        font-weight: bold;
+      }
+    }
+    &-icon {
+      margin-right: 1rem;
       color: rgb(106, 106, 243);
+      color: #1095f4;
       font-size: 2rem;
     }
   }

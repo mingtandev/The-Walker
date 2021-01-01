@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import CheckIcon from "@material-ui/icons/Check";
@@ -18,12 +17,22 @@ function ItemCreate() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(e.target);
-    const { name, type, price, detail, thumbnail } = e.target;
+    const {
+      name,
+      type,
+      price,
+      description,
+      sale,
+      saleExpiresTime,
+      thumbnail,
+    } = e.target;
     let formData = new FormData();
     formData.append("name", name.value);
     formData.append("type", type.value);
     formData.append("price", price.value);
-    formData.append("detail", detail.value);
+    formData.append("description", description.value);
+    formData.append("sale", sale.value);
+    formData.append("saleExpiresTime", saleExpiresTime.value);
     formData.append("thumbnail", thumbnail.files[0]);
 
     itemApi
@@ -41,7 +50,9 @@ function ItemCreate() {
             name: res.errors.name ? "*" + res.errors.name : "",
             type: res.errors.type ? "*" + res.errors.type : "",
             price: res.errors.price ? "*" + res.errors.price : "",
-            detail: res.errors.detail ? "*" + res.errors.detail : "",
+            description: res.errors.description
+              ? "*" + res.errors.description
+              : "",
           });
         }
       })
@@ -60,7 +71,7 @@ function ItemCreate() {
       <form
         onChange={handleClearNotify}
         onSubmit={handleSubmit}
-        className="blogs__create"
+        className="items__create"
       >
         {noti && (
           <label className="items__notification">
@@ -109,10 +120,46 @@ function ItemCreate() {
           fullWidth
         />
         <TextField
-          label="Detail"
-          name="detail"
+          label="Description"
+          name="description"
           style={{ marginBottom: 20 }}
-          helperText={error.detail}
+          helperText={error.description}
+          FormHelperTextProps={{
+            style: { color: "red", fontStyle: "italic", fontSize: 10 },
+          }}
+          inputProps={{ style: { fontSize: 15 } }} // font size of input text
+          InputLabelProps={{ style: { fontSize: 15 } }}
+          fullWidth
+        />
+        <TextField
+          label="Sale (%)"
+          name="sale"
+          style={{ marginBottom: 20 }}
+          helperText={error.sale}
+          FormHelperTextProps={{
+            style: { color: "red", fontStyle: "italic", fontSize: 10 },
+          }}
+          inputProps={{ style: { fontSize: 15 } }} // font size of input text
+          InputLabelProps={{ style: { fontSize: 15 } }}
+          fullWidth
+        />
+        <TextField
+          label="Sale (%)"
+          name="sale"
+          style={{ marginBottom: 20 }}
+          helperText={error.sale}
+          FormHelperTextProps={{
+            style: { color: "red", fontStyle: "italic", fontSize: 10 },
+          }}
+          inputProps={{ style: { fontSize: 15 } }} // font size of input text
+          InputLabelProps={{ style: { fontSize: 15 } }}
+          fullWidth
+        />
+        <TextField
+          label="Sale Expired Time (ms)"
+          name="saleExpiresTime"
+          style={{ marginBottom: 20 }}
+          helperText={error.saleExpiresTime}
           FormHelperTextProps={{
             style: { color: "red", fontStyle: "italic", fontSize: 10 },
           }}

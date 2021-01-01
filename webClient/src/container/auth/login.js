@@ -45,27 +45,23 @@ function Login() {
 
     try {
       let res = await userApi.signIn({ email, password });
-      if (res.msg === "ValidatorError") {
-        if (res.errors.user === "User not found!") {
-          setLoginErr("Email or Password is not correct");
-          return;
-        }
-        if (res.errors.user === "Email or password does not match!") {
+      if (res && res.msg === "ValidatorError") {
+        if (res.errors.user === "User not found!")
+          setLoginErr("Account Does Not Exist");
+        else if (res.errors.user === "Email or password does not match!")
           setLoginErr("Wrong Password");
-          return;
-        }
-        if (res.errors.user === "Your account has not been verified!") {
-          toastr.error("Your account has not been verified!");
-          return;
-        }
-      } else if (res.msg === "success") {
-        setLoginErr("");
-        localStorage.setItem("token", res.token);
-        localStorage.setItem("refreshToken", res.refreshToken);
-        let user = jwt_decode(res.token);
-        dispatch(signIn(user));
-        history.push("/");
+        // "Your account has not been verified!"
+        else setLoginErr("Your account has not been verified!");
+
+        return;
       }
+
+      setLoginErr("");
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("refreshToken", res.refreshToken);
+      let user = jwt_decode(res.token);
+      dispatch(signIn(user));
+      history.push("/");
     } catch (error) {
       console.log(error);
       setLoginErr("Email or Password is not correct");

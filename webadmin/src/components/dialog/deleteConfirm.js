@@ -29,6 +29,7 @@ function DeleteConfirmBox(props) {
         <DialogTitle id="form-dialog-title">{title}</DialogTitle>
         <DialogContent>
           <Button
+            className="button__delete"
             variant="contained"
             color="secondary"
             onClick={handleDelete}

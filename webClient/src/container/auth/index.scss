@@ -19,6 +19,8 @@
   }
   &__container {
     padding-top: 20rem;
+    min-height: 100vh;
+    background-image: url("../../images/wall.png");
     &--smallertop {
       padding-top: 15rem;
     }
@@ -121,7 +123,6 @@
 
 .forgot__container {
   margin: auto;
-  padding-top: 20rem;
   width: 50%;
   .MuiPaper-root {
     background-color: rgb(230, 228, 228);
@@ -154,7 +155,7 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-around;
-    background-color: #f8f8ff;
+    background-color: #f5f4f4;
     &-form {
       width: 40%;
       display: flex;
@@ -166,25 +167,39 @@
     justify-content: space-between;
   }
   &__info {
-    width: calc(25% - 20px);
+    margin-bottom: 1rem;
     padding: 2rem;
+    width: calc(25% - 10px);
     display: flex;
     flex-direction: row;
     align-items: center;
     background-color: #87cefa;
     color: white;
+    border-radius: 5px;
     &-title {
       font-size: 2rem;
     }
     &-content {
-      margin: auto;
-      color: black;
+      font-size: 1vw;
       font-size: 2.3rem;
-      letter-spacing: 2px;
+      color: black;
+      font-weight: bold;
     }
     &-icon {
       width: 50px !important;
       height: 50px !important;
+    }
+    &:nth-child(1) .user__info-icon {
+      color: rgb(241, 57, 57);
+    }
+    &:nth-child(2) .user__info-icon {
+      color: rgb(238, 167, 34);
+    }
+    &:nth-child(3) .user__info-icon {
+      color: yellow;
+    }
+    &:nth-child(4) .user__info-icon {
+      color: rgb(34, 209, 34);
     }
     &--left {
       width: 30%;

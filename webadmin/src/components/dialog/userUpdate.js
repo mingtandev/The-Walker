@@ -1,10 +1,10 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
+import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -25,8 +25,7 @@ function UserEdit(props) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const { name, role, cash, password } = e.target;
-    console.log(name.value, role.value, cash.value, password.value);
+    const { name, role, cash, password, isVerified } = e.target;
     if (onsubmit)
       onsubmit(
         {
@@ -34,6 +33,7 @@ function UserEdit(props) {
           roles: role.value,
           cash: cash.value,
           password: password.value,
+          isVerified: isVerified.value,
         },
         data._id
       );
@@ -63,24 +63,22 @@ function UserEdit(props) {
               type="text"
               fullWidth
             />
-            <TextField
-              autoFocus
-              margin="dense"
-              defaultValue={data && data.roles}
-              name="role"
-              label="admin OR user"
-              type="text"
-              fullWidth
-            />
-            {/* <Select
-              labelId="demo-simple-select-label"
+            <InputLabel
+              className="form__update__select-tag"
+              htmlFor="user-role"
+            >
+              Role
+            </InputLabel>
+            <Select
+              labelId="user-role"
               id="demo-simple-select"
               name="role"
               defaultValue={data && data.roles}
+              fullWidth
             >
               <MenuItem value="user">User</MenuItem>
               <MenuItem value="admin">Admin</MenuItem>
-            </Select> */}
+            </Select>
             <TextField
               autoFocus
               margin="dense"
@@ -98,16 +96,34 @@ function UserEdit(props) {
               type="password"
               fullWidth
             />
-            <Button type="submit" color="primary">
-              Update
-            </Button>
+
+            <InputLabel
+              className="form__update__select-tag"
+              htmlFor="user-verified"
+            >
+              Activate Account
+            </InputLabel>
+            <Select
+              labelId="Activate Account"
+              id="user-verified"
+              name="isVerified"
+              defaultValue={data && data.isVerified}
+              fullWidth
+            >
+              <MenuItem value="true">activate</MenuItem>
+              <MenuItem value="false">Disactivate</MenuItem>
+            </Select>
+
+            <div className="form__update">
+              <Button type="submit" color="primary">
+                Update
+              </Button>
+              <Button onClick={handleCloseDialog} color="primary">
+                Cancel
+              </Button>
+            </div>
           </form>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Cancel
-          </Button>
-        </DialogActions>
       </Dialog>
     </ThemeProvider>
   );

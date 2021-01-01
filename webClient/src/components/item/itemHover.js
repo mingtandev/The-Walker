@@ -8,7 +8,9 @@ function ItemHover(props) {
     <div className="item__hover">
       {type && <p>Type: {type}</p>}
       {sale && <p>Sale: {sale}%</p>}
-      {saleExpiresTime && <p>Sale Expires Time: {saleExpiresTime}</p>}
+      {saleExpiresTime && (
+        <p>Sale Expires Time: {new Date(saleExpiresTime).toGMTString()}</p>
+      )}
       {description && <p>Description: {description}</p>}
       {props && props.data.details && (
         <div className="item__hover__detail">

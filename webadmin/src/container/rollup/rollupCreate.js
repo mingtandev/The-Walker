@@ -78,12 +78,12 @@ function RollUpCreate() {
         <TextField
           margin="dense"
           name="item"
-          label="Item ID(s)"
+          label="Item ID"
           helperText={errors.item}
           FormHelperTextProps={{
             style: { color: "red", fontStyle: "italic", fontSize: 10 },
           }}
-          placeholder="id1 id2 id3 ..."
+          placeholder="ID"
           inputProps={{ style: { fontSize: 15 } }} // font size of input text
           InputLabelProps={{ style: { fontSize: 15 } }}
           style={{ marginBottom: 15 }}

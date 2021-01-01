@@ -34,10 +34,12 @@ function CodeList() {
     getAllCodes();
   }, []);
 
-  const handleDialogOpen = (rowData, e) => {
+  const handleDialogOpen = async (rowData, e) => {
+    if (e === actions.EDIT) {
+      console.log(e, "edit");
+      setUpdateOpen(true);
+    } else setDeleteConfirm(true);
     setRowData(rowData);
-    if (e === actions.EDIT) setUpdateOpen(true);
-    else setDeleteConfirm(true);
   };
 
   const handleDialogClose = (e) => {
@@ -64,6 +66,7 @@ function CodeList() {
       if (object[property])
         body.push({ propName: property, value: object[property] });
     }
+    console.log(body);
     try {
       let res = await giftcodeApi.update(codeId, body);
       console.log(res);
@@ -76,10 +79,9 @@ function CodeList() {
       console.log(error);
     }
   };
-
   return (
     <>
-      <div className="giftcode__option">
+      <div className="giftcodes__option">
         <Link to="/giftcode/create">
           <Button variant="contained" color="primary">
             <AddIcon fontSize="large" />
@@ -102,38 +104,43 @@ function CodeList() {
             }),
           }}
           actions={[
-            {
+            () => ({
               tooltip: "Remove All Selected Users",
               icon: "delete",
               onClick: (evt, data) => {
                 handleDialogOpen(data, actions.DELETE);
               },
-            },
-            {
+            }),
+            () => ({
               tooltip: "Edit",
               icon: "edit",
               onClick: (evt, data) => {
                 handleDialogOpen(data, actions.EDIT);
               },
-            },
+            }),
           ]}
         />
       </div>
-      <GiftcodeEditDialog
-        onsubmit={handleUpdate}
-        data={rowData}
-        show={updateOpen}
-        error={error}
-        onClearError={() => setError("")}
-        onclose={() => handleDialogClose(actions.EDIT)}
-      />
-      <DeleteConfirmBox
-        onsubmit={handleDelete}
-        title="Delete this giftcode?"
-        data={rowData}
-        show={deleteConfirm}
-        onclose={() => handleDialogClose(actions.DELETE)}
-      />
+
+      {updateOpen && (
+        <GiftcodeEditDialog
+          onsubmit={handleUpdate}
+          data={rowData}
+          show={updateOpen}
+          error={error}
+          onClearError={() => setError("")}
+          onclose={() => handleDialogClose(actions.EDIT)}
+        />
+      )}
+      {deleteConfirm && (
+        <DeleteConfirmBox
+          onsubmit={handleDelete}
+          title="Delete this giftcode?"
+          data={rowData}
+          show={deleteConfirm}
+          onclose={() => handleDialogClose(actions.DELETE)}
+        />
+      )}
     </>
   );
 }

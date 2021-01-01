@@ -67,6 +67,7 @@ function BlogList() {
       if (object[property])
         body.push({ propName: property, value: object[property] });
     }
+    console.log(body);
     try {
       let res = await blogApi.update(blogId, body);
       console.log(res);

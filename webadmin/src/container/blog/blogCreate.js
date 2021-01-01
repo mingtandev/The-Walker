@@ -12,21 +12,12 @@ function BlogCreate() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(e.target);
     const { title, content, thumbnail } = e.target;
-    console.log(title.value, content.value, thumbnail.files[0]);
 
     let formData = new FormData();
-    formData.append(
-      "writer",
-      localStorage.getItem("token")
-        ? jwt_decode(localStorage.getItem("token"))._id
-        : null
-    );
     formData.append("title", title.value);
     formData.append("content", content.value);
     formData.append("thumbnail", thumbnail.files[0]);
-    console.log(formData);
 
     blogApi
       .create(formData)
@@ -69,20 +60,23 @@ function BlogCreate() {
           FormHelperTextProps={{
             style: { color: "red", fontStyle: "italic", fontSize: 10 },
           }}
-          inputProps={{ style: { fontSize: 15 } }} // font size of input text
+          inputProps={{ style: { paddingLeft: 5, fontSize: 15 } }} // font size of input text
           InputLabelProps={{ style: { fontSize: 15 } }}
           fullWidth
         />
         <TextField
-          style={{ marginBottom: 22 }}
+          style={{ marginBottom: 22, padding: 0 }}
           multiline
-          rows={5}
+          rows={8}
           name="content"
+          placeholder="Content..."
           helperText={errors.content}
           FormHelperTextProps={{
             style: { color: "red", fontStyle: "italic", fontSize: 10 },
           }}
-          inputProps={{ style: { fontSize: 15, lineHeight: 1.5 } }} // font size of input text
+          inputProps={{
+            style: { margin: 0, padding: 0, fontSize: 15, lineHeight: 1.5 },
+          }} // font size of input text
           InputLabelProps={{ style: { fontSize: 15 } }}
           variant="outlined"
         />

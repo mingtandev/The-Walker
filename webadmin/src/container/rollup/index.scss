@@ -1,0 +1,28 @@
+.rollups {
+  &__option {
+    display: flex;
+    justify-content: flex-end;
+    margin: 20px;
+  }
+  &__title {
+    color: rgb(0, 68, 255);
+  }
+  h1 {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  img {
+    width: 50%;
+    margin: auto;
+  }
+  &__item {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    margin: 10px auto;
+    text-align: left;
+    &--bold {
+      font-weight: bold;
+    }
+  }
+}

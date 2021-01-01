@@ -5,6 +5,10 @@ const giftcodeApi = {
     const url = "/giffcodes";
     return axiosClient.get(url, { params: { limit: 1000000000 } });
   },
+  getOne: (codeID) => {
+    const url = "/giffcodes/" + codeID;
+    return axiosClient.get(url);
+  },
   delete: (codeId) => {
     const url = "/giffcodes/" + codeId;
     return axiosClient.delete(url);

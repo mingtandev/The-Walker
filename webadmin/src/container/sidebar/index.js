@@ -1,8 +1,10 @@
 import React from "react";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import DashboardIcon from "@material-ui/icons/Dashboard";
 import PeopleAltIcon from "@material-ui/icons/PeopleAlt";
 import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
+import RedeemIcon from "@material-ui/icons/Redeem";
+import TodayIcon from "@material-ui/icons/Today";
 import StoreIcon from "@material-ui/icons/Store";
 import "./index.scss";
 
@@ -32,13 +34,13 @@ function Sidebar(props) {
         </li>
         <li className="sidebar__nav-link">
           <NavLink activeClassName="sidebar__nav-link--active" to="/giftcode">
-            <StoreIcon className="sidebar__nav-icon" fontSize="large" />
+            <RedeemIcon className="sidebar__nav-icon" fontSize="large" />
             GiftCode
           </NavLink>
         </li>
         <li className="sidebar__nav-link">
           <NavLink activeClassName="sidebar__nav-link--active" to="/rollup">
-            <StoreIcon className="sidebar__nav-icon" fontSize="large" />
+            <TodayIcon className="sidebar__nav-icon" fontSize="large" />
             Roll Up
           </NavLink>
         </li>
