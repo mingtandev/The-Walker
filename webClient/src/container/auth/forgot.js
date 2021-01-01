@@ -12,6 +12,10 @@ import Typography from "@material-ui/core/Typography";
 import ForgotPassword from "../../components/forgotPassword/emailSubmit";
 import ForgotRecovery from "../../components/forgotPassword/resetPassword";
 import userApi from "../../api/userApi";
+import {
+  EmailValidation,
+  PasswordValidation,
+} from "../../utils/formValidation";
 
 import "./index.scss";
 
@@ -58,49 +62,44 @@ export default function ForgotPasswordContainer() {
   };
 
   const handleEmailSubmit = async (email) => {
-    console.log(email);
+    if (!EmailValidation(email)) {
+      toastr.error("Email Format Is Not Correct");
+      return;
+    }
     try {
-      // let res = await userApi.forgot({ email: email });
-      // if (res && res.msg === "success")
-      handleNext();
-      // console.log(res);
+      let res = await userApi.forgot({ email });
+      if (res && res.msg === "success") handleNext();
+      else if (res.msg === "ValidatorError")
+        toastr.error("Validate Error", "Email Not Found");
+      else toastr.error("Server error!", "Please Try Again");
     } catch (error) {
       console.log(error);
+      toastr.error("Server error!", "Please Try Again");
     }
-    // userApi
-    //   .forgot({ email })
-    //   .then((res) => {
-    //     console.log(res);
-    //     if (res) {
-    //       if (res.msg === "success") {
-    //         handleNext();
-    //       } else if (res.msg === "ValidatorError")
-    //         toastr.error("Validate Error", "Email Not Found");
-    //       else toastr.error("Server error!", "Please Try Again");
-    //     }
-    //     toastr.error("Server error!", "Please Try Again");
-    //   })
-    //   .catch((error) => {
-    //     console.log(error);
-    //     toastr.error("Server error!", "Please Try Again");
-    //   });
   };
 
-  const handlePasswordReset = ({ newPassword, passwordResetToken }) => {
-    console.log(newPassword, passwordResetToken);
-    handleNext();
-    // userApi
-    //   .forgotConfirm({ newPassword, passwordResetToken })
-    //   .then((res) => {
-    //     if (res.msg !== "success") return;
-    //     alert("Change password successfully");
-    //     console.log(res);
-    //     history.push("/sign-in");
-    //   })
-    //   .catch((error) => {
-    //     console.log(error);
-    //     alert("Error in Confirming Your Reset Password");
-    //   });
+  const handlePasswordReset = async ({ newPassword, passwordResetToken }) => {
+    if (!PasswordValidation(newPassword)) {
+      toastr.error(
+        "Password MUST between 6-20 characters including digit and lowercase letter"
+      );
+      return;
+    }
+
+    try {
+      let res = await userApi.forgotConfirm({
+        newPassword,
+        passwordResetToken,
+      });
+      if (res && res.msg === "success") {
+        history.push("/sign-in");
+      } else if (res.msg === "ValidatorError")
+        toastr.error("Validate Error", "Password Reset Token false or expired");
+      else toastr.error("Server error!", "Please Try Again");
+    } catch (error) {
+      console.log(error);
+      toastr.error("Server error!", "Please Try Again");
+    }
   };
 
   function getStepContent(step) {
@@ -117,29 +116,31 @@ export default function ForgotPasswordContainer() {
   }
 
   return (
-    <div className="forgot__container">
-      <Stepper
-        // className={classes.root}
-        activeStep={activeStep}
-        orientation="vertical"
-      >
-        {steps.map((label, index) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-            <StepContent>
-              <Typography>{getStepContent(index)}</Typography>
-            </StepContent>
-          </Step>
-        ))}
-      </Stepper>
-      {activeStep === steps.length && (
-        <Paper square elevation={0} className={classes.resetContainer}>
-          <Typography>Account Verified. Login Again</Typography>
-          <Button onClick={handleReset} variant="contained" color="primary">
-            Reset
-          </Button>
-        </Paper>
-      )}
+    <div className="form__container">
+      <div className="forgot__container">
+        <Stepper
+          className={classes.root}
+          activeStep={activeStep}
+          orientation="vertical"
+        >
+          {steps.map((label, index) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+              <StepContent>
+                <Typography>{getStepContent(index)}</Typography>
+              </StepContent>
+            </Step>
+          ))}
+        </Stepper>
+        {activeStep === steps.length && (
+          <Paper square elevation={0} className={classes.resetContainer}>
+            <Typography>Account Verified. Login Again</Typography>
+            <Button onClick={handleReset} variant="contained" color="primary">
+              Reset
+            </Button>
+          </Paper>
+        )}
+      </div>
     </div>
   );
 }

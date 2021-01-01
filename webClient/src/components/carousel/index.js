@@ -1,7 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
+import AOS from "aos";
 import Carousel from "react-bootstrap/Carousel";
+import "./index.scss";
 
 function HomeSlideBanner() {
+  useEffect(() => {
+    AOS.init({ duration: 1000, easing: "ease-in-out" });
+  });
   return (
     <>
       <Carousel>
@@ -12,9 +17,27 @@ function HomeSlideBanner() {
             alt="First slide"
           />
           <Carousel.Caption>
-            <h3 className="carousel__title">First slide label</h3>
-            <p className="carousel__caption">
-              Nulla vitae elit libero, a pharetra augue mollis interdum.
+            <h2 className="carousel__toptitle carousel__toptitle--orange">
+              Island
+            </h2>
+            <h3
+              data-aos="slide-right"
+              data-aos-once="true"
+              data-aos-delay="80"
+              className="carousel__title"
+            >
+              The{" "}
+              <span className="carousel__title carousel__title--orange">
+                Walker
+              </span>
+            </h3>
+            <p
+              className="carousel__caption"
+              data-aos="fade-up"
+              data-aos-once="true"
+              data-aos-delay="700"
+            >
+              Survive on fighting with the Bloodthirsty Zombies
             </p>
           </Carousel.Caption>
         </Carousel.Item>

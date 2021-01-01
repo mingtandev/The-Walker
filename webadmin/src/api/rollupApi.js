@@ -5,6 +5,10 @@ const rollupApi = {
     const url = "/rolls";
     return axiosClient.get(url, { params: { limit: 1000000000 } });
   },
+  getOne: (day) => {
+    const url = "/rolls/" + day;
+    return axiosClient.get(url);
+  },
   delete: (day) => {
     const url = "/rolls/" + day;
     return axiosClient.delete(url);

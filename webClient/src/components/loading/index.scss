@@ -1,10 +1,16 @@
 .loading {
-  margin-top: 20rem;
-  padding: 2rem;
-  background-color: rgba($color: #ffffff, $alpha: 0.6);
-  border-radius: 10px;
-  &__title {
-    margin-left: 1rem;
-    font-size: 2rem;
+  position: relative;
+  min-height: 100vh;
+  height: 100%;
+  background-color: #242526;
+  &__main {
+    width: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    .MuiSkeleton-root {
+      background-color: #3c3e40;
+    }
   }
 }

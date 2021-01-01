@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Redirect, useHistory } from "react-router-dom";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 import { signIn } from "../../actions/authAction";
 
@@ -10,7 +11,6 @@ import "./index.scss";
 import userApi from "../../api/userApi";
 
 function Login() {
-  const recaptchaRef = React.createRef();
   const [error, setError] = useState("");
   const history = useHistory();
   let dispatch = useDispatch();
@@ -58,7 +58,7 @@ function Login() {
 
   return (
     <div className="form__container">
-      <div className="form">
+      <div className="form form__login">
         <div className="form__left">
           <img
             className="form__logo"
@@ -68,7 +68,7 @@ function Login() {
           <h1 className="form__title">The Walker</h1>
         </div>
 
-        <div className="form__login">
+        <div className="form__right">
           {error && <p className="form__error">{error}</p>}
           <form onSubmit={login}>
             <div className="form__input">
@@ -86,10 +86,11 @@ function Login() {
                 name="password"
                 id="password"
                 onChange={onInputChange}
-                placeholder="Your password"
+                placeholder="Password..."
               />
               <span class="form__input--focus"></span>
             </div>
+            <NavLink to="/forget">Forgot Password</NavLink>
             <input type="submit" value="LOG IN" />
           </form>
         </div>

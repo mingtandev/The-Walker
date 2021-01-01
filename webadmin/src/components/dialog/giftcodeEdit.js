@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
 import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -13,6 +15,8 @@ import { theme } from "../../utils/muiTheme";
 function GiftcodeEdit(props) {
   const { show, onclose, data, error, onClearError, onsubmit } = props;
   console.log(data);
+
+  console.log("typeee", data.type);
 
   const handleCloseDialog = () => {
     if (onclose) onclose();
@@ -24,10 +28,11 @@ function GiftcodeEdit(props) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const { type, isUsed } = e.target;
+    const { code, type, isUsed } = e.target;
     if (onsubmit)
       onsubmit(
         {
+          code: code.value,
           type: type.value,
           isUsed: isUsed.value,
         },
@@ -57,29 +62,49 @@ function GiftcodeEdit(props) {
             <TextField
               autoFocus
               margin="dense"
-              name="type"
-              label="Type"
+              name="code"
+              label="Code"
               type="text"
               fullWidth
             />
+
             <TextField
               autoFocus
               margin="dense"
-              name="isUsed"
-              label="Is Used (true/false)"
+              name="type"
+              label="Type"
+              placeholder="Normal / Vip"
               type="text"
               fullWidth
             />
-            <Button type="submit" color="primary">
-              Submit
-            </Button>
+
+            <InputLabel
+              className="form__update__select-tag"
+              htmlFor="giftcode-used"
+            >
+              Is Used
+            </InputLabel>
+            <Select
+              labelId="user-role"
+              id="giftcode-used"
+              name="isUsed"
+              defaultValue={data && data.isUsed}
+              fullWidth
+            >
+              <MenuItem value="true">true</MenuItem>
+              <MenuItem value="false">false</MenuItem>
+            </Select>
+
+            <div className="form__update">
+              <Button type="submit" color="primary">
+                Submit
+              </Button>{" "}
+              <Button onClick={handleCloseDialog} color="primary">
+                Cancel
+              </Button>
+            </div>
           </form>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Cancel
-          </Button>
-        </DialogActions>
       </Dialog>
     </ThemeProvider>
   );

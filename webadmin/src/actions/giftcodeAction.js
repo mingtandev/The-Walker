@@ -1,10 +1,9 @@
 import * as actionType from "./actionDefine";
 
-export const loadGiftcodes = (blogs) => {
-  console.log("loading");
+export const loadGiftcodes = (codes) => {
   return {
     type: actionType.GIFTCODE_LOAD,
-    payload: blogs,
+    payload: codes,
   };
 };
 

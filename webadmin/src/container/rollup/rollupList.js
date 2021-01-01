@@ -26,12 +26,14 @@ function RollUpList() {
       console.log(res);
       let rollupArray = res.rolls;
       dispatch(rollupAction.loadRollups(rollupArray));
+      console.log(rollupArray, rollups.rollups);
     } catch (error) {
       console.log(error);
     }
   }
   useEffect(() => {
     getAllRoll();
+    // return () => getAllRoll();
   }, []);
 
   const handleDialogOpen = (rowData, e) => {
@@ -79,7 +81,7 @@ function RollUpList() {
 
   return (
     <>
-      <div className="giftcode__option">
+      <div className="rollups__option">
         <Link to="/rollup/create">
           <Button variant="contained" color="primary">
             <AddIcon fontSize="large" />
@@ -94,6 +96,12 @@ function RollUpList() {
           title="ROLL-UPS"
           options={{
             actionsColumnIndex: -1,
+            rowStyle: (rowData) => ({
+              backgroundColor:
+                rowData.tableData.id % 2 === 0
+                  ? "rgba(249, 249, 249, 0.6)"
+                  : "#FFF",
+            }),
           }}
           actions={[
             {

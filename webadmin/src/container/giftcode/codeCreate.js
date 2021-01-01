@@ -5,6 +5,10 @@ import TextField from "@material-ui/core/TextField";
 import giftcodeApi from "../../api/giftcodeApi";
 import "./index.scss";
 
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+
 function CodeCreate() {
   const [errors, setErrors] = useState({ code: "", items: "", type: "" });
   const history = useHistory();
@@ -77,8 +81,10 @@ function CodeCreate() {
           }}
           inputProps={{ style: { fontSize: 15 } }} // font size of input text
           InputLabelProps={{ style: { fontSize: 15 } }}
+          placeholder="Vip / Normal"
           fullWidth
         />
+
         <TextField
           margin="dense"
           name="items"
@@ -88,6 +94,7 @@ function CodeCreate() {
           FormHelperTextProps={{
             style: { color: "red", fontStyle: "italic", fontSize: 10 },
           }}
+          placeholder="ID1 ID2 ..."
           inputProps={{ style: { fontSize: 15 } }} // font size of input text
           InputLabelProps={{ style: { fontSize: 15 } }}
           fullWidth
@@ -98,7 +105,11 @@ function CodeCreate() {
           label="Expire Time (ms)"
           type="number"
           style={{ marginBottom: 22 }}
-          inputProps={{ style: { fontSize: 15 } }} // font size of input text
+          inputProps={{
+            style: { fontSize: 15 },
+            min: 1,
+          }} // font size of input text
+          defaultValue={5}
           InputLabelProps={{ style: { fontSize: 15 } }}
           fullWidth
         />

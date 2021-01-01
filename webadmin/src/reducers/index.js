@@ -4,7 +4,6 @@ import usersReducer from "./usersReducer";
 import itemsReducer from "./itemsReducer";
 import giftcodeReducer from "./giftcodeReducer";
 import rollupReducer from "./rollupReducer";
-import { routerReducer } from "react-router-redux";
 import blogReducer from "./blogReducer";
 
 const rootReducer = combineReducers({
@@ -14,7 +13,6 @@ const rootReducer = combineReducers({
   codes: giftcodeReducer,
   rollup: rollupReducer,
   blogs: blogReducer,
-  // routing: routerReducer,
 });
 
 export default rootReducer;

@@ -1,11 +1,12 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import jwt_decode from "jwt-decode";
 import { toastr } from "react-redux-toastr";
 import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import userApi from "../../api/userApi";
+import { loadUser } from "../../actions/authAction";
 import { PasswordValidation } from "../../utils/formValidation";
 
 function UserUpdate() {
@@ -20,6 +21,7 @@ function UserUpdate() {
   const classes = useStyles();
 
   const user = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -57,7 +59,7 @@ function UserUpdate() {
     }
   };
 
-  const handleChangeUsername = (e) => {
+  const handleChangeUsername = async (e) => {
     e.preventDefault();
     if (!localStorage.getItem("token")) {
       toastr.error("Please Login Again!");
@@ -73,9 +75,12 @@ function UserUpdate() {
     const userID = jwt_decode(localStorage.getItem("token"))._id;
 
     try {
-      let res = userApi.update(userID, body);
+      let res = await userApi.update(userID, body);
       console.log(res);
-      toastr.success("Change Username Successfully");
+      if (res && res.msg === "success") {
+        toastr.success("Change Username Successfully");
+        dispatch(loadUser(res.user));
+      }
     } catch (error) {
       console.log(error);
       toastr.error("Error Changing Username! Try Again!");
@@ -95,6 +100,8 @@ function UserUpdate() {
               name="name"
               id="standard-required"
               label="New Username"
+              inputProps={{ style: { fontSize: 15 } }} // font size of input text
+              InputLabelProps={{ style: { fontSize: 15 } }}
             />
             <Button type="submit" variant="contained" color="primary">
               change username
@@ -108,11 +115,15 @@ function UserUpdate() {
               label="New Password"
               type="password"
               name="password"
+              inputProps={{ style: { fontSize: 15 } }} // font size of input text
+              InputLabelProps={{ style: { fontSize: 15 } }}
             />
             <TextField
               label="Retype New Password"
               name="passwordConfirm"
               type="password"
+              inputProps={{ style: { fontSize: 15 } }} // font size of input text
+              InputLabelProps={{ style: { fontSize: 15 } }}
             />
             <Button type="submit" variant="contained" color="primary">
               change password

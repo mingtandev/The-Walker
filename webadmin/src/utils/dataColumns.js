@@ -6,8 +6,9 @@ export const ITEM_COLUMNS = [
     title: "Thumbnail",
     render: (rowData) => (
       <img
-        src={"http://" + rowData.thumbnail}
-        style={{ width: 50, borderRadius: "50%" }}
+        src={rowData.thumbnail}
+        alt="item"
+        style={{ width: 60, height: 60, borderRadius: "50%" }}
       />
     ),
   },
@@ -16,10 +17,14 @@ export const ITEM_COLUMNS = [
   {
     field: "sale",
     title: "Sale",
+    render: (rowData) => <p>{rowData.sale}%</p>,
   },
   {
     field: "saleExpiresTime",
     title: "Sale Expire Time",
+    render: (rowData) => (
+      <p>{new Date(rowData.saleExpiresTime).toGMTString()}</p>
+    ),
   },
 ];
 
@@ -44,25 +49,53 @@ export const USER_COLUMNS = [
 
 export const GIFTCODE_COLUMNS = [
   { field: "_id", title: "ID" },
+  {
+    field: "code",
+    title: "Code",
+    render: (rowData) => (
+      <a
+        style={{ fontWeight: "500" }}
+        href={`/giftcode/${rowData._id}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {rowData.code}
+      </a>
+    ),
+  },
   { field: "type", title: "Type" },
-  { field: "code", title: "Code" },
-  { field: "items", title: "Items" },
   { field: "isUsed", title: "Is Used" },
-  { field: "items", title: "Items" },
-  { field: "expiresTime", title: "Expire Time" },
+  {
+    field: "expiresTime",
+    title: "Expire Time",
+    render: (rowData) => <p>{new Date(rowData.expiresTime).toGMTString()}</p>,
+  },
 ];
 
 export const ROLLUP_COLUMNS = [
   { field: "_id", title: "ID" },
-  { field: "day", title: "Day" },
+  {
+    field: "day",
+    title: "Day",
+    render: (rowData) => (
+      <a
+        style={{ fontWeight: "500" }}
+        href={`/rollup/${rowData.day}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {rowData.day}
+      </a>
+    ),
+  },
   { field: "coin", title: "Coin" },
-  { field: "item", title: "Item(s)" },
   {
     field: "thumbnail",
     title: "Thumbnail",
     render: (rowData) => (
       <img
-        src={"http://" + rowData.thumbnail}
+        src={rowData.thumbnail}
+        alt="thumbnail"
         style={{ width: 50, borderRadius: "50%" }}
       />
     ),
@@ -78,13 +111,14 @@ export const BLOG_COLUMNS = [
     title: "Thumbnail",
     render: (rowData) => (
       <img
-        src={"http://" + rowData.thumbnail}
+        src={rowData.thumbnail}
+        alt="blog"
         style={{ width: 50, borderRadius: "50%" }}
       />
     ),
   },
   {
-    field: "writer",
+    field: "name",
     title: "Writer",
   },
 ];

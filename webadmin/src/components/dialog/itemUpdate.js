@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -22,13 +21,15 @@ function ItemUpdate(props) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const { name, type, price } = e.target;
+    const { name, type, price, sale, saleExpiresTime } = e.target;
     if (onsubmit)
       onsubmit(
         {
           name: name.value,
           type: type.value,
           price: price.value,
+          sale: sale.value,
+          saleExpiresTime: saleExpiresTime.value,
         },
         data._id
       );
@@ -55,11 +56,11 @@ function ItemUpdate(props) {
               margin="dense"
               name="name"
               label="Name"
+              defaultValue={data && data.name}
               type="text"
               fullWidth
             />
             <TextField
-              autoFocus
               margin="dense"
               name="type"
               defaultValue={data && data.type}
@@ -68,7 +69,6 @@ function ItemUpdate(props) {
               fullWidth
             />
             <TextField
-              autoFocus
               margin="dense"
               name="price"
               defaultValue={data && data.price}
@@ -76,16 +76,37 @@ function ItemUpdate(props) {
               type="text"
               fullWidth
             />
-            <Button type="submit" color="primary">
-              Update
-            </Button>
+            <TextField
+              margin="dense"
+              name="sale"
+              defaultValue={data && data.sale}
+              label="Sale (%)"
+              type="number"
+              inputProps={{
+                min: 0,
+              }}
+              fullWidth
+            />
+            <TextField
+              margin="dense"
+              name="saleExpiresTime"
+              label="Sale Expired Time (ms)"
+              type="number"
+              inputProps={{
+                min: 0,
+              }}
+              fullWidth
+            />
+            <div className="form__update">
+              <Button type="submit" color="primary">
+                Update
+              </Button>
+              <Button onClick={handleCloseDialog} color="primary">
+                Cancel
+              </Button>
+            </div>
           </form>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Cancel
-          </Button>
-        </DialogActions>
       </Dialog>
     </ThemeProvider>
   );

@@ -61,6 +61,8 @@ function UsersList() {
       if (object[property])
         body.push({ propName: property, value: object[property] });
     }
+
+    console.log(body);
     try {
       let res = await userApi.update(userId, body);
       console.log(res);

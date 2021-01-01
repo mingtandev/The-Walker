@@ -1,0 +1,12 @@
+.home {
+  background-color: black;
+  background-image: url(https://themebeyond.com/demo/gecolive/wp-content/uploads/2020/08/area_bg02.jpg);
+  &__banner {
+    height: 100vh;
+  }
+  &__split {
+    width: 80%;
+    margin: auto;
+    background-color: white;
+  }
+}
