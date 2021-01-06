@@ -46,6 +46,7 @@ public class Gun : MonoBehaviour
     public int curAmmo;
     public int loadAmmo;
     public int totalAmmo;
+    int originTotalAmmo;
     public string nameGun;
     public typeGun type;
 
@@ -68,6 +69,7 @@ public class Gun : MonoBehaviour
 
     List<BulletGravity> bullets = new List<BulletGravity>();
 
+
     private void Awake()
     {
         // muzzle.Stop();
@@ -75,6 +77,7 @@ public class Gun : MonoBehaviour
         myUI = GameObject.FindGameObjectWithTag("UIManager").GetComponent<UIManager>();
         crossHairTarget = GameObject.FindGameObjectWithTag("Player").GetComponent<MyPlayerController>().CrossHairTarget;
         recoil = GetComponent<GunRecoil>();
+        originTotalAmmo = totalAmmo;
         // readyToUse = true;
 
     }
@@ -138,7 +141,7 @@ public class Gun : MonoBehaviour
     {
         if (canReload && !isReaload)
         {
-               
+
             StartCoroutine(myUI.reloadUpdateFill(2f));
 
             canShot = false;
@@ -241,7 +244,8 @@ public class Gun : MonoBehaviour
         bullet.initPosition = pos;
         bullet.initialVelocity = vel;
         bullet.time = 0;
-        bullet.tracer = Instantiate(bulletTrail, pos, Quaternion.identity);
+        bullet.tracer = BulletPool.Instance.SpawnPool("BulletTrail", pos, Quaternion.identity).GetComponent<TrailRenderer>();
+        bullet.tracer.Clear();
         bullet.tracer.AddPosition(pos);
         return bullet;
     }
@@ -267,7 +271,8 @@ public class Gun : MonoBehaviour
                 bullet.time = maxLifeTime;
                 if (bullet.tracer)
                     bullet.tracer.transform.position = hit.point;
-                if (1 << hit.transform.gameObject.layer != LayerMask.GetMask("EnemyLayer"))
+                int mask = 1 << hit.transform.gameObject.layer;
+                if (mask != LayerMask.GetMask("EnemyLayer"))
                 {
                     hitFX.transform.position = hit.point;
                     hitFX.transform.forward = hit.normal;
@@ -297,7 +302,34 @@ public class Gun : MonoBehaviour
 
     void DestroyBullet()
     {
-        bullets.RemoveAll(bullet => bullet.time > maxLifeTime);
+        for(int i = 0 ; i < bullets.Count ; i++)
+        {
+            if(bullets[i].time > maxLifeTime)
+            {
+                bullets[i].tracer.transform.gameObject.SetActive(false);
+                bullets.RemoveAt(i);
+            }
+        }
+        // foreach (BulletGravity bullet in bullets)
+        // {
+        //     if (bullet != null)
+        //     {
+        //         if (bullet.time > maxLifeTime)
+        //         {
+        //             bullet.tracer.transform.gameObject.SetActive(false);
+        //             bullets.Remove(bullet);
+        //         }
+        //     }
+        // }
+        // bullets.ForEach(bullet =>
+        // {
+        //     if (bullet.time > maxLifeTime)
+        //     {
+        //         bullets.Remove(bullet);
+        //         bullet.tracer.transform.gameObject.SetActive(false);
+        //     }
+        // });
+        //bullets.RemoveAll(bullet => bullet.time > maxLifeTime);
     }
 
     IEnumerator UnactiveBullet(GameObject obj, float time)
@@ -310,12 +342,22 @@ public class Gun : MonoBehaviour
 
     IEnumerator LockRotation()
     {
-        transform.localRotation = Quaternion.Euler(0f,0f,0f);
+        transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
 
         yield return new WaitForSeconds(0.5f);
 
         StartCoroutine(LockRotation());
 
+    }
+
+    public void AddTotalAmmo()
+    {
+        if (totalAmmo < originTotalAmmo)
+        {
+            totalAmmo += originTotalAmmo - totalAmmo;
+
+            //ADD SOUND
+        }
     }
 
 }

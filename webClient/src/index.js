@@ -1,15 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import 'bootstrap/dist/css/bootstrap.min.css';    
+import "bootstrap/dist/css/bootstrap.min.css";
+import "react-redux-toastr/lib/css/react-redux-toastr.min.css";
+import "aos/dist/aos.css"; // You can also use <link> for styles
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import { createStore } from "redux";
 import { Provider } from "react-redux";
-import rootStore from "./reducers/index";
+import reducers from "./reducers";
 
 const store = createStore(
-  rootStore,
+  reducers,
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__() //for CHROME REDUX DEVTOOLS extension
 );
 

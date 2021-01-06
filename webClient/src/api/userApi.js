@@ -5,8 +5,12 @@ const userApi = {
     const url = "/users";
     return axiosClient.get(url, { params });
   },
-  getUserInfo: () => {
-    const url = "/users/information";
+  getOne: (id) => {
+    const url = "/users/" + id;
+    return axiosClient.get(url);
+  },
+  getUserInfo: (userID) => {
+    const url = "/users/" + userID;
     return axiosClient.get(url);
   },
   signIn: (body) => {
@@ -14,12 +18,12 @@ const userApi = {
     return axiosClient.post(url, body);
   },
   signUp: (body) => {
-    const url = "/users/signup";
+    const url = "/users";
     return axiosClient.post(url, body);
   },
-  changePass: (body) => {
-    const url = "/users/information";
-    return axiosClient.post(url, body);
+  update: (userID, body) => {
+    const url = "/users/" + userID;
+    return axiosClient.patch(url, body);
   },
   forgot: (body) => {
     const url = "/users/recovery";
@@ -29,9 +33,13 @@ const userApi = {
     const url = "/users/forgot";
     return axiosClient.post(url, body);
   },
+  resend: (email) => {
+    const url = "/users/confirm/resend";
+    return axiosClient.post(url, email);
+  },
   delete: (body) => {
-    const url = "/users/delete";
-    return axiosClient.delete(url, body);
+    const url = "/users/" + body;
+    return axiosClient.delete(url);
   },
 };
 

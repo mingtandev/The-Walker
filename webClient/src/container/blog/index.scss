@@ -1,0 +1,14 @@
+.blogs {
+  &__container {
+    margin: 0 auto;
+    padding-top: 15rem;
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    width: 60%;
+    cursor: pointer;
+  }
+  &__pagination {
+    margin-top: 5rem;
+  }
+}

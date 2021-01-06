@@ -1,0 +1,213 @@
+.form {
+  margin: auto;
+  padding: 2rem 2rem;
+  padding-bottom: 0;
+  width: 30%;
+  background-color: rgb(230, 228, 228);
+  text-align: right;
+  border: 1px solid white;
+  a {
+    width: fit-content;
+    margin-left: auto;
+    padding: 2px 4px;
+    font-family: sans-serif;
+    font-weight: bold;
+    transition: 0.3s all ease;
+    &:hover {
+      color: orange;
+    }
+  }
+  &__container {
+    padding-top: 20rem;
+    min-height: 100vh;
+    background-image: url("../../images/wall.png");
+    &--smallertop {
+      padding-top: 15rem;
+    }
+  }
+  &__login {
+    width: 28%;
+  }
+  h1 {
+    font-size: 3rem;
+    text-align: center;
+  }
+  &__input {
+    position: relative;
+    margin-top: 2rem;
+    width: 100%;
+    border: 0;
+    text-align: left;
+    overflow: hidden;
+    input {
+      width: 100%;
+      max-width: 100%;
+      padding: 1rem;
+      border: 0;
+      outline: none;
+      font-weight: bold;
+      background-color: transparent;
+      border-bottom: 1.5px solid black;
+    }
+    label {
+      margin-left: 1rem;
+    }
+    &--focus {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 3px;
+      background-color: #3399ff;
+      transition: 0.5s;
+    }
+    &--eye {
+      position: absolute;
+      top: 50%;
+      right: 3%;
+      transform: translateY(-50%);
+      background-color: transparent;
+      border: 0;
+      outline: none;
+      cursor: pointer;
+    }
+    &--error {
+      font-style: italic;
+      color: red;
+      &::before {
+        content: "* ";
+      }
+    }
+    input:focus ~ .form__input--focus {
+      width: 100%;
+      transition: 0.4s;
+    }
+  }
+  &__error {
+    margin-top: 2rem;
+    text-align: left;
+    font-weight: bold;
+    font-style: italic;
+    color: red;
+    &::before {
+      content: "* ";
+    }
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    input[type="submit"] {
+      color: white;
+      padding: 1rem 3rem;
+      margin: 2rem auto;
+      width: fit-content;
+      border-radius: 20px;
+      border: 0;
+      outline: none;
+      font-weight: bold;
+      letter-spacing: 3px;
+      background-color: rgb(0, 174, 255);
+      transition: 0.3s ease-in-out;
+    }
+    input[type="submit"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 5px 0 rgba(123, 120, 248, 0.5);
+    }
+  }
+}
+
+.recaptcha {
+  margin: auto;
+  margin-top: 2rem;
+}
+
+.forgot__container {
+  margin: auto;
+  width: 50%;
+  .MuiPaper-root {
+    background-color: rgb(230, 228, 228);
+  }
+  .MuiStepLabel {
+    &-labelContainer {
+      width: fit-content;
+    }
+    &-label {
+      margin: 0;
+      color: black !important;
+      font-weight: bold !important;
+      font-size: 1.5rem;
+    }
+  }
+  .MuiSvgIcon-root {
+    font-size: 2.5rem;
+  }
+}
+
+.user {
+  &__container {
+    width: 90%;
+    margin: auto;
+    padding-top: 20rem;
+  }
+  &__update {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    background-color: #f5f4f4;
+    &-form {
+      width: 40%;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+  &__infos {
+    display: flex;
+    justify-content: space-between;
+  }
+  &__info {
+    margin-bottom: 1rem;
+    padding: 2rem;
+    width: calc(25% - 10px);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: #87cefa;
+    color: white;
+    border-radius: 5px;
+    &-title {
+      font-size: 2rem;
+    }
+    &-content {
+      font-size: 1vw;
+      font-size: 2.3rem;
+      color: black;
+      font-weight: bold;
+    }
+    &-icon {
+      width: 50px !important;
+      height: 50px !important;
+    }
+    &:nth-child(1) .user__info-icon {
+      color: rgb(241, 57, 57);
+    }
+    &:nth-child(2) .user__info-icon {
+      color: rgb(238, 167, 34);
+    }
+    &:nth-child(3) .user__info-icon {
+      color: yellow;
+    }
+    &:nth-child(4) .user__info-icon {
+      color: rgb(34, 209, 34);
+    }
+    &--left {
+      width: 30%;
+    }
+    &--right {
+      width: 70%;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}

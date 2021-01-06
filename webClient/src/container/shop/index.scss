@@ -1,0 +1,19 @@
+.items__container {
+  margin: 0 auto;
+  padding-top: 12rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  flex-wrap: wrap;
+  width: 55%;
+}
+
+.items__pagination {
+  margin-top: 5rem;
+}
+
+.form {
+  &__items {
+    width: 100%;
+  }
+}

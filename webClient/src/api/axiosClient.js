@@ -1,10 +1,12 @@
 import axios from "axios";
+import queryString from "query-string";
 
 const axiosClient = axios.create({
   baseURL: process.env.REACT_APP_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
+  paramsSerializer: (params) => queryString.stringify(params),
 });
 
 axiosClient.interceptors.request.use(async (config) => {
@@ -23,6 +25,7 @@ axiosClient.interceptors.response.use(
   },
   (error) => {
     const originalRequest = error.config;
+    console.log(originalRequest);
     if (error.response.status === 401) {
       if (originalRequest.url === "/users/login/refresh") {
         localStorage.removeItem("token");
@@ -42,7 +45,7 @@ axiosClient.interceptors.response.use(
               "Authorization"
             ] = `Bearer ${res.token}`;
             console.log("orginal req: ", originalRequest);
-            return axiosClient(originalRequest);
+            axiosClient(originalRequest);
           }
         })
         .catch((error) => {

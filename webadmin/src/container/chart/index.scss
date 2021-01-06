@@ -1,0 +1,24 @@
+.statistic {
+  &__chart {
+    &-top {
+      padding: 0rem 3rem 2rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    select {
+      margin-left: 1rem;
+      border-radius: 0.25em;
+      padding: 0.25em 0.5em;
+      cursor: pointer;
+    }
+    &-main {
+      padding-bottom: 4rem;
+      height: 50rem;
+    }
+    &-caption {
+      padding-right: 3rem;
+      text-align: right;
+    }
+  }
+}

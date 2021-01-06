@@ -78,8 +78,8 @@ public class MyPlayerController : MonoBehaviour
 
     void Start()
     {
-        firstGun = SaveLoadManager.chooseGun[0].gun.GetComponent<Gun>();
-        secondGun = SaveLoadManager.chooseGun[1].gun.GetComponent<Gun>();
+        firstGun = GameScene_SaveLoadManager.chooseGun[0].gun.GetComponent<Gun>();
+        secondGun = GameScene_SaveLoadManager.chooseGun[1].gun.GetComponent<Gun>();
         secondGun.gameObject.transform.parent = WeasponSlot;
         secondGun.transform.localPosition = Vector3.zero;
         secondGun.transform.localRotation = Quaternion.identity;
@@ -343,6 +343,18 @@ public class MyPlayerController : MonoBehaviour
             instance = this;
         else
             Destroy(gameObject);
+    }
+
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.transform.tag == "BuffAmmo")
+        {
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                MyGun.AddTotalAmmo();
+            }
+        }
     }
 
 }

@@ -1,12 +1,14 @@
-import { combineReducers } from "redux";
 import authReducer from "./authReducer";
 import blogReducer from "./blogReducer";
 import itemsReducer from "./itemsReducer";
+import { combineReducers } from "redux";
+import { reducer as toastrReducer } from "react-redux-toastr";
 
-const rootReducer = combineReducers({
+const reducer = combineReducers({
   auth: authReducer,
   blog: blogReducer,
   items: itemsReducer,
+  toastr: toastrReducer,
 });
 
-export default rootReducer;
+export default reducer;

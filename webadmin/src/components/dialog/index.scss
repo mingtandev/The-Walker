@@ -1,0 +1,22 @@
+.MuiFormControl-root {
+  margin: 1rem;
+}
+
+.MuiTypography-colorTextSecondary--error {
+  color: red !important;
+  font-style: italic;
+}
+
+.form {
+  &__update {
+    display: flex;
+    justify-content: flex-end;
+    &__select-tag {
+      margin-top: 2rem;
+    }
+  }
+}
+
+button.button__delete {
+  margin-right: 20px;
+}

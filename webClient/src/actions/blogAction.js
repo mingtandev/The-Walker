@@ -4,7 +4,7 @@ export const blogLoading = () => {
   };
 };
 
-export const blogLoaded = (blogs) => {
+export const blogLoaded = () => {
   return {
     type: "BLOG_LOADED",
   };
