@@ -3,7 +3,6 @@ import { useHistory } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import blogApi from "../../api/blogApi";
-import jwt_decode from "jwt-decode";
 import "./index.scss";
 
 function BlogCreate() {

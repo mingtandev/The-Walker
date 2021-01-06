@@ -5,13 +5,46 @@
     padding: 2rem;
   }
   &__create {
+    margin: auto;
     padding: 2rem;
-    width: 80%;
+    width: 70%;
     display: flex;
     flex-direction: column;
   }
   &__notification {
     color: #28a745;
     font-style: italic;
+  }
+}
+
+.item {
+  &__update {
+    &__thumbnail {
+      margin-bottom: 2rem;
+      width: 30rem;
+    }
+  }
+}
+
+.form {
+  &__details {
+    display: flex;
+    flex-direction: row;
+    &-left {
+      margin-right: 2rem;
+      padding-top: 2rem;
+    }
+    &-right {
+      width: 100%;
+    }
+    &-detail {
+      display: grid;
+      grid-template-columns: 35% 35% 12% 12%;
+      align-items: center;
+      justify-items: center;
+      .MuiButtonBase-root {
+        width: 60%;
+      }
+    }
   }
 }

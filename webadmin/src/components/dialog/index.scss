@@ -9,10 +9,36 @@
 
 .form {
   &__update {
-    display: flex;
-    justify-content: flex-end;
+    .MuiDialog-paperWidthSm {
+      max-width: 800px !important;
+    }
+    .MuiDialog-paper {
+      width: 70%;
+    }
     &__select-tag {
       margin-top: 2rem;
+    }
+
+    &__details {
+      display: flex;
+      flex-direction: row;
+      &-left {
+        margin-right: 2rem;
+        padding-top: 2rem;
+      }
+      &-right {
+        width: 100%;
+      }
+      &-detail {
+        display: grid;
+        grid-template-columns: 35% 35% 15% 15%;
+        align-items: center;
+        justify-items: center;
+      }
+    }
+    &__buttons {
+      display: flex;
+      justify-content: flex-end;
     }
   }
 }

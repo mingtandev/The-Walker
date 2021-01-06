@@ -1,7 +1,6 @@
 import * as actionType from "./actionDefine";
 
 export const signIn = (user) => {
-  console.log("action: ", user);
   return {
     type: actionType.LOGIN_REQUEST,
     payload: user,

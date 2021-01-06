@@ -63,10 +63,10 @@ function Navbar() {
       <Link to="/">
         <img
           className="nav__logo"
-          src="https://r2wteam.files.wordpress.com/2020/04/cropped-cropped-cropped-cropped-3-1-2-1-2.png"
+          src="https://e-store-r2w.herokuapp.com/img/logo.png"
           alt="Home"
         />
-        <span className="nav__logo-text">r2w team</span>
+        <span className="nav__logo-text">R2W</span>
       </Link>
       <div className="nav__links">
         <ul className="nav__links--pages">

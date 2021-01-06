@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useDispatch } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import { signIn } from "../../actions/authAction";
 import userApi from "../../api/userApi";
 import jwt_decode from "jwt-decode";
@@ -16,6 +16,9 @@ function Login() {
   const recaptchaRef = React.createRef();
   let dispatch = useDispatch();
   let history = useHistory();
+  let location = useLocation();
+
+  let { from } = location.state || { from: { pathname: "/" } };
 
   useEffect(() => {
     AOS.init({ duration: 500 });
@@ -61,10 +64,10 @@ function Login() {
       localStorage.setItem("refreshToken", res.refreshToken);
       let user = jwt_decode(res.token);
       dispatch(signIn(user));
-      history.push("/");
+      history.replace(from);
     } catch (error) {
       console.log(error);
-      setLoginErr("Email or Password is not correct");
+      setLoginErr("Error Logging In! Please Try again");
     }
   };
 

@@ -61,6 +61,7 @@ function UserEdit(props) {
               name="name"
               label="Name"
               type="text"
+              defaultValue={data && data.name}
               fullWidth
             />
             <InputLabel
@@ -110,11 +111,11 @@ function UserEdit(props) {
               defaultValue={data && data.isVerified}
               fullWidth
             >
-              <MenuItem value="true">activate</MenuItem>
-              <MenuItem value="false">Disactivate</MenuItem>
+              <MenuItem value="true">Activate</MenuItem>
+              <MenuItem value="false">Deactivate</MenuItem>
             </Select>
 
-            <div className="form__update">
+            <div className="form__update__buttons">
               <Button type="submit" color="primary">
                 Update
               </Button>

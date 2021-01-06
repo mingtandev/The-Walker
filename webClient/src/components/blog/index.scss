@@ -18,7 +18,9 @@
   margin: 0 20px;
   margin-bottom: 2rem;
   width: calc(33.33% - 40px);
-  background-color: rgb(250, 245, 245);
+  background-color: #242526;
+  color: white;
+  border-radius: 5px;
   transition: 0.4s ease-in-out;
   &__title {
     font-size: 2rem;
@@ -52,7 +54,7 @@
     color: blue;
   }
   &:hover {
-    box-shadow: 0px 2px 7px white;
+    box-shadow: 2px 3px 5px white;
     transform: translateY(-6px);
   }
 }

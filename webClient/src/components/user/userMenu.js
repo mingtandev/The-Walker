@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 function UserMenu() {
   return (
     <div className="userMenu">
-      <Link to="/user">
+      <Link to="/my-profile">
         <p>Account Information</p>
       </Link>
       <Link to="/my-items">

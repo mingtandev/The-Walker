@@ -71,19 +71,19 @@ function RollUp() {
             <div className="rollup__item" key={id}>
               <div className="rollup__top">
                 <TodayIcon />
-                <span>{item.day}</span>
+                {item.day}
               </div>
               <div className="rollup__thumbnail">
                 <img src={item.item.thumbnail} alt="roll-thumbnail" />
               </div>
               <div>
-                <Button
-                  variant="contained"
-                  color="primary"
+                <button
+                  className="rollup__get"
+                  type="button"
                   onClick={() => getOneRoll(item)}
                 >
                   Get
-                </Button>
+                </button>
               </div>
             </div>
           ))

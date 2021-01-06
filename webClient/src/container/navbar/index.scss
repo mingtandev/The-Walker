@@ -15,28 +15,10 @@
   &__logo {
     margin-right: 2rem;
     width: 5rem;
-    border-radius: 50%;
-    border: 2px solid darkgrey;
     &-text {
       font-size: 2rem;
-      font-weight: bold;
-      font-style: italic;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-image: linear-gradient(
-        to right,
-        orange,
-        orange 50%,
-        white 50%
-      );
-      background-size: 200% 100%;
-      background-position: 100%;
-      &:hover {
-        transition: all 0.2s cubic-bezier(0, 0, 0.23, 1);
-        background-position: 0%;
-      }
+      color: rgb(255, 136, 0);
+      font-family: Arial, Helvetica, sans-serif;
     }
   }
 

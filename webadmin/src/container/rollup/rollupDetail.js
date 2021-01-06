@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import itemApi from "../../api/itemApi";
+import { useParams } from "react-router-dom";
 import rollupApi from "../../api/rollupApi";
 import Loading from "../../components/loading";
 import "./index.scss";
@@ -7,11 +7,11 @@ import "./index.scss";
 function RollUpDetail({ match }) {
   const [rollItem, setRollItem] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { day } = useParams();
 
   useEffect(() => {
     async function getCode() {
       try {
-        let day = match.params.day;
         let res = await rollupApi.getOne(day);
         console.log(res);
         setRollItem(res.roll.item);

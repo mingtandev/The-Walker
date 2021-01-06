@@ -3,8 +3,6 @@ const initialState = {
   status: "",
 };
 
-console.log(initialState);
-
 const authReducer = (state = initialState, action) => {
   switch (action.type) {
     case "USER_LOAD":

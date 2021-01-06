@@ -14,9 +14,6 @@ import { theme } from "../../utils/muiTheme";
 
 function GiftcodeEdit(props) {
   const { show, onclose, data, error, onClearError, onsubmit } = props;
-  console.log(data);
-
-  console.log("typeee", data.type);
 
   const handleCloseDialog = () => {
     if (onclose) onclose();
@@ -65,6 +62,7 @@ function GiftcodeEdit(props) {
               name="code"
               label="Code"
               type="text"
+              defaultValue={data && data.code}
               fullWidth
             />
 
@@ -74,6 +72,7 @@ function GiftcodeEdit(props) {
               name="type"
               label="Type"
               placeholder="Normal / Vip"
+              defaultValue={data && data.type}
               type="text"
               fullWidth
             />
@@ -82,7 +81,7 @@ function GiftcodeEdit(props) {
               className="form__update__select-tag"
               htmlFor="giftcode-used"
             >
-              Is Used
+              Status
             </InputLabel>
             <Select
               labelId="user-role"
@@ -91,11 +90,11 @@ function GiftcodeEdit(props) {
               defaultValue={data && data.isUsed}
               fullWidth
             >
-              <MenuItem value="true">true</MenuItem>
-              <MenuItem value="false">false</MenuItem>
+              <MenuItem value="true">Used</MenuItem>
+              <MenuItem value="false">Not Used</MenuItem>
             </Select>
 
-            <div className="form__update">
+            <div className="form__update__buttons">
               <Button type="submit" color="primary">
                 Submit
               </Button>{" "}
