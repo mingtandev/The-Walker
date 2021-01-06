@@ -189,6 +189,8 @@ exports.create = async (req, res, next) => {
 		saleExpiresTime,
 	} = req.body;
 
+	console.log('Body', req.body);
+
 	if (req.userData.roles != 'admin') {
 		return res.status(403).json({
 			msg: 'ValidatorError',
@@ -215,7 +217,7 @@ exports.create = async (req, res, next) => {
 			type,
 			price,
 			description,
-			details,
+			details: JSON.parse(details),
 			thumbnail,
 			cloudinary_id,
 		});
@@ -308,6 +310,8 @@ exports.update = async (req, res, next) => {
 				item[key] = Date.now() + +req.body[key];
 			}
 		}
+
+		req.body.details ? (item.details = JSON.parse(req.body.details)) : '';
 
 		// Check sale
 		if (+req.body.sale > 0) {
