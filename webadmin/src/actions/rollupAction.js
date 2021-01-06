@@ -1,7 +1,6 @@
 import * as actionType from "./actionDefine";
 
 export const loadRollups = (rollups) => {
-  console.log("loading");
   return {
     type: actionType.ROLLUP_LOAD,
     payload: rollups,

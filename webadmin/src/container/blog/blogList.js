@@ -23,7 +23,6 @@ function BlogList() {
   async function getAllBlogs() {
     try {
       let res = await blogApi.getAll();
-      console.log(res);
       let blogArray = res.blogs;
       // blogArray.map((item, i) => (item.id = i));
       dispatch(blogsAction.loadBlogs(blogArray));
@@ -34,16 +33,15 @@ function BlogList() {
 
   useEffect(() => {
     getAllBlogs();
-    return () => getAllBlogs();
   }, []);
 
-  const handleDialogOpen = (rowData, e) => {
+  const handleClickOpen = (rowData, e) => {
     setRowData(rowData);
     if (e === actions.EDIT) setUpdateOpen(true);
     else setDeleteConfirm(true);
   };
 
-  const handleDialogClose = (e) => {
+  const handleClose = (e) => {
     if (e === actions.EDIT) setUpdateOpen(false);
     else setDeleteConfirm(false);
   };
@@ -51,7 +49,6 @@ function BlogList() {
   const handleDelete = async (data) => {
     try {
       let res = await blogApi.delete(data._id);
-      console.log(res);
       if (res && res.msg === "success") {
         setDeleteConfirm(false);
         dispatch(blogsAction.deleteBlog(data._id));
@@ -67,10 +64,8 @@ function BlogList() {
       if (object[property])
         body.push({ propName: property, value: object[property] });
     }
-    console.log(body);
     try {
       let res = await blogApi.update(blogId, body);
-      console.log(res);
       if (res && res.msg === "success") {
         setUpdateOpen(false);
         getAllBlogs();
@@ -87,7 +82,7 @@ function BlogList() {
   };
 
   return (
-    <div className="bloglist">
+    <>
       <div className="bloglist__option">
         <Link to="/blogs/create">
           <Button variant="contained" color="primary">
@@ -104,28 +99,22 @@ function BlogList() {
             title="BLOGS"
             options={{
               actionsColumnIndex: -1,
-              rowStyle: (rowData) => ({
-                backgroundColor:
-                  rowData.tableData.id % 2 === 0
-                    ? "rgba(249, 249, 249, 0.6)"
-                    : "#FFF",
-              }),
             }}
             actions={[
               {
                 tooltip: "Remove All Selected Users",
                 icon: "delete",
                 onClick: (evt, data) => {
-                  handleDialogOpen(data, actions.DELETE);
+                  handleClickOpen(data, actions.DELETE);
                 },
               },
-              {
-                tooltip: "Edit",
+              () => ({
                 icon: "edit",
+                tooltip: "Edit",
                 onClick: (evt, data) => {
-                  handleDialogOpen(data, actions.EDIT);
+                  handleClickOpen(data, actions.EDIT);
                 },
-              },
+              }),
             ]}
           />
         </div>
@@ -136,16 +125,16 @@ function BlogList() {
         show={updateOpen}
         error={error}
         onClearError={() => setError("")}
-        onclose={() => handleDialogClose(actions.EDIT)}
+        onclose={() => handleClose(actions.EDIT)}
       />
       <DeleteConfirmBox
         onsubmit={handleDelete}
         title="Delete this blog?"
         data={rowData}
         show={deleteConfirm}
-        onclose={() => handleDialogClose(actions.DELETE)}
+        onclose={() => handleClose(actions.DELETE)}
       />
-    </div>
+    </>
   );
 }
 

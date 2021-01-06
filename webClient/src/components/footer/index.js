@@ -1,5 +1,4 @@
 import React from "react";
-import EmailIcon from "@material-ui/icons/Email";
 import "./index.scss";
 
 export default function Footer() {

@@ -23,7 +23,6 @@ function CodeList() {
   async function getAllCodes() {
     try {
       let res = await giftcodeApi.getAll();
-      console.log(res);
       let giftcodeArray = res.giffcodes;
       dispatch(giftcodeAction.loadGiftcodes(giftcodeArray));
     } catch (error) {
@@ -36,7 +35,6 @@ function CodeList() {
 
   const handleDialogOpen = async (rowData, e) => {
     if (e === actions.EDIT) {
-      console.log(e, "edit");
       setUpdateOpen(true);
     } else setDeleteConfirm(true);
     setRowData(rowData);
@@ -50,7 +48,6 @@ function CodeList() {
   const handleDelete = async (data) => {
     try {
       let res = await giftcodeApi.delete(data.code);
-      console.log(res);
       if (res && res.msg === "success") {
         dispatch(giftcodeAction.deleteGiftcode(data.code));
         setDeleteConfirm(false);
@@ -66,10 +63,8 @@ function CodeList() {
       if (object[property])
         body.push({ propName: property, value: object[property] });
     }
-    console.log(body);
     try {
       let res = await giftcodeApi.update(codeId, body);
-      console.log(res);
       if (res && res.msg === "success") {
         setUpdateOpen(false);
         getAllCodes();
@@ -96,12 +91,6 @@ function CodeList() {
           title="GIFTCODES"
           options={{
             actionsColumnIndex: -1,
-            rowStyle: (rowData) => ({
-              backgroundColor:
-                rowData.tableData.id % 2 === 0
-                  ? "rgba(249, 249, 249, 0.6)"
-                  : "#FFF",
-            }),
           }}
           actions={[
             () => ({

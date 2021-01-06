@@ -23,10 +23,8 @@ function RollUpList() {
   async function getAllRoll() {
     try {
       let res = await rollupAPI.getAll();
-      console.log(res);
       let rollupArray = res.rolls;
       dispatch(rollupAction.loadRollups(rollupArray));
-      console.log(rollupArray, rollups.rollups);
     } catch (error) {
       console.log(error);
     }
@@ -56,7 +54,6 @@ function RollUpList() {
 
     try {
       let res = await rollupAPI.update(day, body);
-      console.log(res);
       if (res && res.msg === "success") {
         setUpdateOpen(false);
         getAllRoll();
@@ -69,7 +66,6 @@ function RollUpList() {
   const handleDelete = async (data) => {
     try {
       let res = await rollupAPI.delete(data.day);
-      console.log(res);
       if (res && res.msg === "success") {
         dispatch(rollupAction.deleteRollups(data.day));
         setDeleteConfirm(false);
@@ -96,12 +92,6 @@ function RollUpList() {
           title="ROLL-UPS"
           options={{
             actionsColumnIndex: -1,
-            rowStyle: (rowData) => ({
-              backgroundColor:
-                rowData.tableData.id % 2 === 0
-                  ? "rgba(249, 249, 249, 0.6)"
-                  : "#FFF",
-            }),
           }}
           actions={[
             {

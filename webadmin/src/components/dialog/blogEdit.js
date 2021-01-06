@@ -11,7 +11,6 @@ import "./index.scss";
 
 function BlogEdit(props) {
   const { show, onclose, data, error, onClearError, onsubmit } = props;
-  console.log(data);
 
   const handleCloseDialog = () => {
     if (onclose) onclose();
@@ -56,6 +55,7 @@ function BlogEdit(props) {
               name="title"
               label="Title"
               type="text"
+              defaultValue={data && data.title}
               fullWidth
             />
             <TextField
@@ -68,7 +68,7 @@ function BlogEdit(props) {
               type="text"
               fullWidth
             />
-            <div className="form__update">
+            <div className="form__update__buttons">
               <Button type="submit" color="primary">
                 Update
               </Button>

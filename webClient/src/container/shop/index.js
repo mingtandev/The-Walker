@@ -45,7 +45,12 @@ function Shop() {
 
   const handleConfirm = (data) => {
     if (!localStorage.getItem("token")) {
-      history.push("/sign-in");
+      let loginConfirm = window.confirm("Login to buy this item");
+      if (!loginConfirm) return;
+      history.push({
+        pathname: "/sign-in",
+        state: { from: window.location.pathname },
+      });
       return;
     }
     setItem(data);

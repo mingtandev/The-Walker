@@ -23,7 +23,6 @@ function ItemList() {
   async function getAllItems() {
     try {
       let res = await itemApi.getAll();
-      console.log(res);
       let itemArray = res.products;
       dispatch(itemsAction.loadItems(itemArray));
     } catch (error) {
@@ -32,7 +31,6 @@ function ItemList() {
   }
   useEffect(() => {
     getAllItems();
-    return () => getAllItems();
   }, []);
 
   const handleDialogOpen = (rowData, e) => {
@@ -52,9 +50,9 @@ function ItemList() {
       if (object[property])
         body.push({ propName: property, value: object[property] });
     }
+
     try {
       let res = await itemApi.update(codeId, body);
-      console.log(res);
       if (res && res.msg === "success") {
         setUpdateOpen(false);
         getAllItems();
@@ -73,7 +71,6 @@ function ItemList() {
   const handleDelete = async (data) => {
     try {
       let res = await itemApi.delete(data._id);
-      console.log(res);
       if (res && res.msg === "success") {
         setDeleteConfirm(false);
         dispatch(itemsAction.deleteItem(data._id));
@@ -100,12 +97,6 @@ function ItemList() {
           title="ITEMS"
           options={{
             actionsColumnIndex: -1,
-            rowStyle: (rowData) => ({
-              backgroundColor:
-                rowData.tableData.id % 2 === 0
-                  ? "rgba(249, 249, 249, 0.6)"
-                  : "#FFF",
-            }),
           }}
           actions={[
             {
