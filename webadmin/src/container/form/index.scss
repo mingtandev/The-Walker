@@ -3,7 +3,6 @@
     position: relative;
     min-height: 100vh;
     // background: -webkit-linear-gradient(-135deg, #c850c0, #4158d0);
-    background-color: #485461;
     background: linear-gradient(280deg, #566372 0%, #28313b 70%);
   }
   position: absolute;
@@ -16,9 +15,8 @@
   flex-wrap: wrap;
   justify-content: space-between;
   width: 40%;
-  background-color: rgb(221, 218, 218);
+  background-color: white;
   text-align: right;
-  border: 1px solid white;
   &__left {
     display: flex;
     flex-direction: column;

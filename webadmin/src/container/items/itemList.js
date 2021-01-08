@@ -44,15 +44,15 @@ function ItemList() {
     else setDeleteConfirm(false);
   };
 
-  const handleUpdate = async (object, codeId) => {
-    let body = [];
-    for (const property in object) {
-      if (object[property])
-        body.push({ propName: property, value: object[property] });
-    }
+  const handleUpdate = async (formData, codeId) => {
+    // let body = [];
+    // for (const property in object) {
+    //   if (object[property])
+    //     body.push({ propName: property, value: object[property] });
+    // }
 
     try {
-      let res = await itemApi.update(codeId, body);
+      let res = await itemApi.update(codeId, formData);
       if (res && res.msg === "success") {
         setUpdateOpen(false);
         getAllItems();
@@ -100,7 +100,7 @@ function ItemList() {
           }}
           actions={[
             {
-              tooltip: "Remove All Selected Users",
+              tooltip: "Remove",
               icon: "delete",
               onClick: (evt, data) => {
                 handleDialogOpen(data, actions.DELETE);
