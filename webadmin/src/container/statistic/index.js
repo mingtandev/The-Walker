@@ -20,7 +20,6 @@ function Statistics() {
         end_day: "",
       };
       let res = await statisticAPI.get(params);
-      console.log(res);
       if (res && res.msg === "success") setStatistics(res.statistics);
       setLoading(false);
     } catch (error) {

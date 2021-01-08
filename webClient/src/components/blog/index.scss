@@ -12,12 +12,15 @@
     background-color: whitesmoke;
     border-radius: 20px;
   }
+  &__pagination {
+    margin-bottom: 2rem;
+  }
 }
 
 .blog {
   margin: 0 20px;
   margin-bottom: 2rem;
-  width: calc(33.33% - 40px);
+  width: calc(25% - 40px);
   background-color: #242526;
   color: white;
   border-radius: 5px;
@@ -31,7 +34,7 @@
   }
   &__thumbnail {
     width: 100%;
-    height: 15rem;
+    height: 20rem;
   }
   &__caption {
     font-size: 1.4rem;

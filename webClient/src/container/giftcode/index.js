@@ -13,7 +13,7 @@ function GiftcodeForm() {
         if (res) {
           if (res.msg === "success")
             toastr.success("Successfully", "Check Your Items Now");
-          else toastr.error("Oops!", "Code does not exist or has been Expired");
+          else toastr.error(res.errors.user);
           return;
         }
         toastr.error("Please Login and Try again!");

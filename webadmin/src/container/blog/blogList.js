@@ -58,14 +58,14 @@ function BlogList() {
     }
   };
 
-  const handleUpdateBlog = async (object, blogId) => {
-    let body = [];
-    for (const property in object) {
-      if (object[property])
-        body.push({ propName: property, value: object[property] });
-    }
+  const handleUpdateBlog = async (formData, blogId) => {
+    // let body = [];
+    // for (const property in object) {
+    //   if (object[property])
+    //     body.push({ propName: property, value: object[property] });
+    // }
     try {
-      let res = await blogApi.update(blogId, body);
+      let res = await blogApi.update(blogId, formData);
       if (res && res.msg === "success") {
         setUpdateOpen(false);
         getAllBlogs();

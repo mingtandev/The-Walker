@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import Pagination from "@material-ui/lab/Pagination";
 import TodayIcon from "@material-ui/icons/Today";
-import Button from "@material-ui/core/Button";
 import rollApi from "../../api/rollApi";
 import RollSuccessBox from "../../components/dialog/roll/rollSuccess";
 import "./index.scss";
@@ -23,7 +22,6 @@ function RollUp() {
           limit: 8,
         };
         let res = await rollApi.get(params);
-        console.log(res);
         if (res.msg === "success") {
           setItems(res.rolls);
           setTotalPage(res.request.totalPages);
@@ -36,10 +34,8 @@ function RollUp() {
   }, [currentPage]);
 
   const getOneRoll = async (item) => {
-    console.log(item, typeof item);
     try {
       let res = await rollApi.use(item.day);
-      console.log(res);
       if (res) {
         if (res.msg === "success") {
           setRollData(item);
@@ -55,7 +51,6 @@ function RollUp() {
   };
 
   const handlePaginationChange = (e, value) => {
-    console.log(e, value);
     setCurrentPage(value);
   };
 

@@ -34,4 +34,35 @@
     justify-content: flex-end;
     padding: 2rem;
   }
+
+  &__error {
+    margin-bottom: 0;
+    text-align: left;
+    color: red;
+    font-style: italic;
+    font-size: 1rem;
+  }
+
+  &__create {
+    width: 70%;
+    margin: auto;
+    &__item {
+      display: flex;
+      flex-direction: row;
+      &-left {
+        padding-top: 2rem;
+        margin-right: 2rem;
+      }
+      &-right {
+        width: 50%;
+      }
+      &-item {
+        display: grid;
+        grid-template-columns: 70% 10% 10%;
+        .MuiButton-root {
+          min-width: 10px;
+        }
+      }
+    }
+  }
 }

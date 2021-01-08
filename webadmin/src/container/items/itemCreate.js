@@ -58,7 +58,6 @@ function ItemCreate() {
           Object.keys(res.errors).forEach(
             (key) => (err[key] = `* ${res.errors[key]}`)
           );
-
           setError(err);
         }
       })
@@ -104,12 +103,6 @@ function ItemCreate() {
         onSubmit={handleSubmit}
         className="items__create"
       >
-        {noti && (
-          <label className="items__notification">
-            <CheckIcon />
-            {noti}
-          </label>
-        )}
         <TextField
           label="* Item Name"
           name="name"
@@ -286,10 +279,17 @@ function ItemCreate() {
           fullWidth
         />
         {/*  */}
-        <label className="blogs__label">
+        <label className="items__label">
           Item Thumbnail (accepted: JPEG, JPG, PNG)
         </label>
         <input type="file" name="thumbnail" />{" "}
+        {noti && (
+          <label className="items__notification">
+            <CheckIcon />
+            {noti}
+          </label>
+        )}
+        {/*  */}
         <Button
           type="submit"
           className="blogs__submit"

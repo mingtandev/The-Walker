@@ -22,6 +22,9 @@
     &__details {
       display: flex;
       flex-direction: row;
+      .MuiSvgIcon-fontSizeLarge {
+        font-size: 2rem !important;
+      }
       &-left {
         margin-right: 2rem;
         padding-top: 2rem;
@@ -36,6 +39,31 @@
         justify-items: center;
       }
     }
+
+    .giftcodes {
+      &__edit {
+        width: 70%;
+        margin: auto;
+        &__item {
+          display: flex;
+          flex-direction: row;
+          &-left {
+            margin-right: 2rem;
+          }
+          &-right {
+            width: 100%;
+          }
+          &-item {
+            display: grid;
+            grid-template-columns: 70% 15% 15%;
+            .MuiButton-root {
+              min-width: 10px;
+            }
+          }
+        }
+      }
+    }
+
     &__buttons {
       display: flex;
       justify-content: flex-end;
