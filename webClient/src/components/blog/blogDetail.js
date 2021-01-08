@@ -12,7 +12,6 @@ function BlogDetail({ match }) {
       try {
         let id = match.params.id;
         let res = await blogApi.getOne(id);
-        console.log("blog", res);
         if (res && res.msg === "success") setBlog(res.blog);
         setLoading(false);
       } catch (error) {
@@ -29,7 +28,7 @@ function BlogDetail({ match }) {
         blog ? (
           <div className="blogDetail__main">
             <div className="blogDetail__caption">
-              <p>{blog.date}</p>
+              <p>{new Date(blog.date).toGMTString()}</p>
               <p>Writer: {blog.name}</p>
             </div>
             <h1 className="blogDetail__title">{blog.title}</h1>

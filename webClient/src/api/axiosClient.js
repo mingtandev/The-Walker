@@ -17,7 +17,6 @@ axiosClient.interceptors.request.use(async (config) => {
 
 axiosClient.interceptors.response.use(
   (response) => {
-    console.log("res from server ", response);
     if (response && response.data) {
       return response.data;
     }
@@ -25,12 +24,10 @@ axiosClient.interceptors.response.use(
   },
   (error) => {
     const originalRequest = error.config;
-    console.log(originalRequest);
     if (error.response.status === 401) {
       if (originalRequest.url === "/users/login/refresh") {
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
-        console.log("get refreshToken failed");
         return;
       }
       axiosClient
@@ -39,19 +36,16 @@ axiosClient.interceptors.response.use(
         })
         .then((res) => {
           if (res && res.msg === "success") {
-            console.log("new: ", res);
             localStorage.setItem("token", res.token);
             axios.defaults.headers.common[
               "Authorization"
             ] = `Bearer ${res.token}`;
-            console.log("orginal req: ", originalRequest);
             axiosClient(originalRequest);
           }
         })
         .catch((error) => {
           localStorage.removeItem("token");
           localStorage.removeItem("refreshToken");
-          console.log("day ne", error);
         });
     }
   }

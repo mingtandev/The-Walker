@@ -29,14 +29,21 @@
       padding: 0;
       list-style: none;
       display: flex;
+      align-items: center;
     }
   }
   &__user {
     position: relative;
-    margin-right: 2rem;
     &-name {
       margin: 0;
       padding: 0;
+      color: white;
+      user-select: none;
+    }
+    &-avatar {
+      img {
+        height: 4rem;
+      }
     }
     .MuiButton-root {
       color: white;
@@ -109,21 +116,27 @@
   &__sub {
     position: absolute;
     top: 100%;
-    right: 3%;
+    right: 6%;
     padding: 5px 15px;
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
-    background-color: white;
-    color: black;
+    background-color: black;
+    border: 1px solid white;
+    color: white;
     &Cash {
+      margin-left: 0.5rem;
+      font-weight: bold;
       font-size: 2rem;
-      color: red;
+      &-low {
+        color: red;
+      }
+      &-high {
+        color: rgb(57, 231, 57);
+      }
     }
   }
 }
 
 .userMenu {
-  min-width: 20rem;
+  min-width: 21rem;
   position: absolute;
   top: 100%;
   left: 50%;
@@ -131,14 +144,28 @@
   background-color: #f9f9f9;
   box-shadow: 0px 8px 5px 0px rgba(0, 0, 0, 0.5);
   z-index: 1;
-  a {
+  &__item {
+    // Link tag
     margin-bottom: 0;
-    p {
+    div {
       margin: 1rem;
       padding: 1rem;
       font-weight: bold;
+      display: grid;
+      grid-template-columns: 20% 80%;
+      justify-items: start;
+      .MuiSvgIcon-root {
+        font-size: 2rem;
+      }
       &:hover {
         color: rgb(36, 171, 224);
+      }
+    }
+    &-logout {
+      div {
+        &:hover {
+          color: red;
+        }
       }
     }
   }

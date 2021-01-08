@@ -51,7 +51,7 @@ function UserInfo() {
             </div>
           </div>
         </div>
-        <div className="user__update">
+        <div>
           <UserUpdate />
         </div>
       </div>
