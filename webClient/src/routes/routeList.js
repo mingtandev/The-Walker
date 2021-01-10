@@ -20,6 +20,12 @@ const routes = [
   { path: "/my-items", exact: true, role: "user", component: UserItem },
   { path: "/my-activities", exact: true, role: "user", component: UserHistory },
   {
+    path: "/my-profile",
+    exact: true,
+    role: "user",
+    component: UserInfo,
+  },
+  {
     path: "/sign-in",
     role: "noAuth",
     component: Login,
@@ -58,12 +64,6 @@ const routes = [
     path: "/account/verify",
     role: "noAuth",
     component: AcccountVerify,
-  },
-  {
-    path: "/user",
-    exact: true,
-    role: "user",
-    component: UserInfo,
   },
   {
     component: NotFound,

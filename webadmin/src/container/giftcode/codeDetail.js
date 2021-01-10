@@ -13,10 +13,8 @@ function CodeDetail({ match }) {
       try {
         let id = match.params.id;
         let res = await giftcodeApi.getOne(id);
-        console.log(res);
         let itemArray = res.code.items.map((itemID) => itemApi.getOne(itemID));
         itemArray = await Promise.all(itemArray);
-        console.log(itemArray);
         setCodeItems(itemArray);
         setLoading(false);
       } catch (error) {

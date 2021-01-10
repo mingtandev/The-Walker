@@ -19,7 +19,6 @@ function UsersList() {
   async function fetchAllUsers() {
     try {
       let res = await userApi.getAll();
-      console.log(res);
       if (res && res.msg === "success") {
         let usersArray = res.users;
         dispatch(usersAction.loadUser(usersArray));
@@ -56,15 +55,8 @@ function UsersList() {
   };
 
   const handleUpdateUser = async (object, userId) => {
-    let body = [];
-    for (const property in object) {
-      if (object[property])
-        body.push({ propName: property, value: object[property] });
-    }
-
-    console.log(body);
     try {
-      let res = await userApi.update(userId, body);
+      let res = await userApi.update(userId, object);
       console.log(res);
       if (res && res.msg === "success") {
         fetchAllUsers();

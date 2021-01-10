@@ -27,7 +27,6 @@ function Login() {
 
     try {
       let res = await userApi.signIn({ email, password });
-      console.log(res);
       if (res && res.msg === "ValidatorError") {
         if (res.errors.user === "User not found!")
           setError("Account Does Not Exist");

@@ -19,9 +19,7 @@ function Header(props) {
       try {
         if (!localStorage.getItem("token")) return;
         const id = jwt_decode(localStorage.getItem("token"))._id;
-        console.log("id: ", id);
         let res = await userApi.getUserInfo(id);
-        console.log(res);
         if (res && res.msg === "success") {
           dispatch(authActions.loadUser(res.user));
         }

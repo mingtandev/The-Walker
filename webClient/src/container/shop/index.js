@@ -30,7 +30,6 @@ function Shop() {
       };
       try {
         let res = await itemApi.getAll(params);
-        console.log(res);
         if (res && res.msg === "success") {
           setItems(res.products);
           setTotalPage(res.request.totalPages);
@@ -45,7 +44,12 @@ function Shop() {
 
   const handleConfirm = (data) => {
     if (!localStorage.getItem("token")) {
-      history.push("/sign-in");
+      let loginConfirm = window.confirm("Login to buy this item");
+      if (!loginConfirm) return;
+      history.push({
+        pathname: "/sign-in",
+        state: { from: window.location.pathname },
+      });
       return;
     }
     setItem(data);
@@ -58,14 +62,16 @@ function Shop() {
       let userRes = await userApi.getUserInfo(
         jwt_decode(localStorage.getItem("token"))._id
       );
-      if (itemRes && itemRes.msg === "success") {
-        toastr.success("Buy Item Successfully", "Check Your Items Now");
-        dispatch(loadUser(userRes.user));
-      } else if (itemRes && itemRes.msg === "Cash not enough!")
-        toastr.error("NOT ENOUGH CASH !", "Buy Item Fail");
-      else toastr.warning("Cannot Afford Item", "Please Try Again");
+      if (itemRes) {
+        if (itemRes.msg === "success") {
+          toastr.success("Buy Item Successfully", "Check Your Items Now");
+          dispatch(loadUser(userRes.user));
+        } else toastr.error(itemRes.errors.user);
+        return;
+      }
     } catch (error) {
       console.log(error);
+      toastr.error("Cannot Afford Item", "Please Try Again");
     }
   };
 

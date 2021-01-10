@@ -58,6 +58,7 @@ function RollUpEdit(props) {
               label="Coin"
               type="number"
               min={0}
+              defaultValue={data && data.coin}
               fullWidth
             />
             <TextField
@@ -66,9 +67,10 @@ function RollUpEdit(props) {
               name="item"
               label="Item ID"
               type="text"
+              defaultValue={data && data.item._id}
               fullWidth
             />
-            <div className="form__update">
+            <div className="form__update__buttons">
               <Button type="submit" color="primary">
                 Update
               </Button>{" "}

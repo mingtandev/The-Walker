@@ -3,7 +3,6 @@ import { useHistory } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import blogApi from "../../api/blogApi";
-import jwt_decode from "jwt-decode";
 import "./index.scss";
 
 function BlogCreate() {
@@ -22,16 +21,18 @@ function BlogCreate() {
     blogApi
       .create(formData)
       .then((res) => {
-        console.log(res);
         if (res && res.msg === "success") {
           history.push("/blogs");
           return;
         }
         if (res && res.msg === "ValidatorError") {
+          let error = {};
+          Object.keys(res.errors).forEach(
+            (key) => (error[key] = res.errors[key])
+          );
           setErrors({
             ...errors,
-            title: res.errors.title ? "*" + res.errors.title : "",
-            content: res.errors.content ? "*" + res.errors.content : "",
+            ...error,
           });
         }
       })
@@ -55,7 +56,6 @@ function BlogCreate() {
           label="Title"
           name="title"
           style={{ marginBottom: 22 }}
-          placeholder="Placeholder"
           helperText={errors.title}
           FormHelperTextProps={{
             style: { color: "red", fontStyle: "italic", fontSize: 10 },

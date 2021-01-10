@@ -20,7 +20,7 @@
   &__container {
     padding-top: 20rem;
     min-height: 100vh;
-    background-image: url("../../images/wall.png");
+    background-image: url("https://res.cloudinary.com/dghvjalhh/image/upload/v1610126077/products/wall_hu6vta.png");
     &--smallertop {
       padding-top: 15rem;
     }
@@ -145,44 +145,54 @@
 
 .user {
   &__container {
-    width: 90%;
     margin: auto;
-    padding-top: 20rem;
+    padding-top: 17rem;
+    width: 90%;
+    display: grid;
+    grid-template-columns: 30% 70%;
+    align-items: stretch;
   }
   &__update {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-around;
-    background-color: #f5f4f4;
     &-form {
-      width: 40%;
-      display: flex;
-      flex-direction: column;
+      margin-bottom: 2rem;
+      background-color: #f3f6ff;
+      form {
+        padding: 3rem 5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        label {
+          text-align: left;
+        }
+        .MuiButton-root {
+          margin: auto;
+          min-width: 10%;
+        }
+      }
     }
   }
   &__infos {
-    display: flex;
-    justify-content: space-between;
+    width: 90%;
   }
   &__info {
-    margin-bottom: 1rem;
-    padding: 2rem;
-    width: calc(25% - 10px);
+    width: 100%;
+    margin-bottom: 2rem;
+    padding: 2rem 1rem;
     display: flex;
     flex-direction: row;
     align-items: center;
-    background-color: #87cefa;
+    background-color: #b0dcf7;
     color: white;
     border-radius: 5px;
     &-title {
+      font-weight: bold;
       font-size: 2rem;
     }
     &-content {
       font-size: 1vw;
       font-size: 2.3rem;
       color: black;
+      letter-spacing: 2px;
       font-weight: bold;
     }
     &-icon {
@@ -202,10 +212,10 @@
       color: rgb(34, 209, 34);
     }
     &--left {
-      width: 30%;
+      width: 20%;
     }
     &--right {
-      width: 70%;
+      width: 80%;
       display: flex;
       flex-direction: column;
     }

@@ -11,7 +11,6 @@ import "./index.scss";
 
 function BlogEdit(props) {
   const { show, onclose, data, error, onClearError, onsubmit } = props;
-  console.log(data);
 
   const handleCloseDialog = () => {
     if (onclose) onclose();
@@ -23,15 +22,13 @@ function BlogEdit(props) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const { title, content } = e.target;
-    if (onsubmit)
-      onsubmit(
-        {
-          title: title.value,
-          content: content.value,
-        },
-        data._id
-      );
+    const { title, content, thumbnail } = e.target;
+    let formData = new FormData();
+    if (title.value !== "") formData.append("title", title.value);
+    formData.append("content", content.value);
+    formData.append("thumbnail", thumbnail.files[0]);
+
+    if (onsubmit) onsubmit(formData, data._id);
   };
 
   return (
@@ -55,11 +52,14 @@ function BlogEdit(props) {
               margin="dense"
               name="title"
               label="Title"
+              defaultValue={data && data.title}
               type="text"
               fullWidth
             />
+            {/*  */}
             <TextField
               multiline
+              style={{ marginBottom: 15, padding: 0 }}
               rows={5}
               margin="dense"
               name="content"
@@ -68,7 +68,12 @@ function BlogEdit(props) {
               type="text"
               fullWidth
             />
-            <div className="form__update">
+            {/*  */}
+            <label className="blogs__label">
+              Item Thumbnail (accepted: JPEG, JPG, PNG)
+            </label>
+            <input type="file" name="thumbnail" />
+            <div className="form__update__buttons">
               <Button type="submit" color="primary">
                 Update
               </Button>

@@ -1,7 +1,6 @@
 import * as actionType from "./actionDefine";
 
 export const loadUser = (users) => {
-  console.log("loading");
   return {
     type: actionType.USERS_LOADED,
     payload: users,
