@@ -12,15 +12,15 @@ function LayOut() {
   };
 
   return (
-    <div>
-      <div className="sidebarHeader">
-        <Header onToggleSidebar={onToggleSidebar} />
+    <>
+      <Header onToggleSidebar={onToggleSidebar} />
+      <div className="layout__main">
         <Sidebar show={sidebarShow} />
+        <div className={sidebarShow ? "wrapper" : "wrapper--fullscreen"}>
+          <Content />
+        </div>
       </div>
-      <div className={sidebarShow ? "wrapper" : "wrapper--fullscreen"}>
-        <Content />
-      </div>
-    </div>
+    </>
   );
 }
 

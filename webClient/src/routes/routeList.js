@@ -10,13 +10,21 @@ import Blog from "../pages/blog";
 import ForgotPassword from "../pages/auth/forgot";
 import NotFound from "../components/notFound";
 
+const UserItem = lazy(() => import("../container/userItems"));
+const UserHistory = lazy(() => import("../container/history"));
 const UserInfo = lazy(() => import("../container/auth/userInfo"));
-const BlogByID = lazy(() => import("../components/blog/blogDetail"));
-const ItemByID = lazy(() => import("../components/item/itemByID"));
 const AcccountVerify = lazy(() => import("../pages/auth/accountVerify"));
 
 const routes = [
   { path: "/", exact: true, component: Home },
+  { path: "/my-items", exact: true, role: "user", component: UserItem },
+  { path: "/my-activities", exact: true, role: "user", component: UserHistory },
+  {
+    path: "/my-profile",
+    exact: true,
+    role: "user",
+    component: UserInfo,
+  },
   {
     path: "/sign-in",
     role: "noAuth",
@@ -32,10 +40,6 @@ const routes = [
     exact: true,
     component: Shop,
   },
-  // {
-  //   path: "/shop/:id",
-  //   component: ItemByID,
-  // },
   {
     path: "/roll-up",
     role: "user",
@@ -51,10 +55,6 @@ const routes = [
     exact: true,
     component: Blog,
   },
-  // {
-  //   path: `/blog/:id`,
-  //   component: BlogByID,
-  // },
   {
     path: "/account/forgot",
     role: "noAuth",
@@ -64,12 +64,6 @@ const routes = [
     path: "/account/verify",
     role: "noAuth",
     component: AcccountVerify,
-  },
-  {
-    path: "/user",
-    exact: true,
-    role: "user",
-    component: UserInfo,
   },
   {
     component: NotFound,

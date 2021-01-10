@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useDispatch } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import { signIn } from "../../actions/authAction";
 import userApi from "../../api/userApi";
 import jwt_decode from "jwt-decode";
 import { toastr } from "react-redux-toastr";
 import { EmailValidation } from "../../utils/formValidation";
+import AOS from "aos";
 
 import "./index.scss";
 
@@ -15,14 +16,13 @@ function Login() {
   const recaptchaRef = React.createRef();
   let dispatch = useDispatch();
   let history = useHistory();
+  let location = useLocation();
 
-  const togglePassword = (e) => {
-    e.preventDefault();
-    let x = document.getElementById("password");
-    let passwordEye = document.getElementById("togglePassword");
-    x.type === "password" ? (x.type = "text") : (x.type = "password");
-    passwordEye.classList.toggle("fa-eye-slash");
-  };
+  let { from } = location.state || { from: { pathname: "/" } };
+
+  useEffect(() => {
+    AOS.init({ duration: 500 });
+  }, []);
 
   const onInputChange = (e) => {
     setLoginErr("");
@@ -48,36 +48,32 @@ function Login() {
 
     try {
       let res = await userApi.signIn({ email, password });
-      if (res.msg === "ValidatorError") {
-        if (res.errors.user === "User not found!") {
-          setLoginErr("Email or Password is not correct");
-          return;
-        }
-        if (res.errors.user === "Email or password does not match!") {
+      if (res && res.msg === "ValidatorError") {
+        if (res.errors.user === "User not found!")
+          setLoginErr("Account Does Not Exist");
+        else if (res.errors.user === "Email or password does not match!")
           setLoginErr("Wrong Password");
-          return;
-        }
-        if (res.errors.user === "Your account has not been verified!") {
-          toastr.error("Your account has not been verified!");
-          return;
-        }
-      } else if (res.msg === "success") {
-        setLoginErr("");
-        localStorage.setItem("token", res.token);
-        localStorage.setItem("refreshToken", res.refreshToken);
-        let user = jwt_decode(res.token);
-        dispatch(signIn(user));
-        history.push("/");
+        // "Your account has not been verified!"
+        else setLoginErr("Your account has not been verified!");
+
+        return;
       }
+
+      setLoginErr("");
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("refreshToken", res.refreshToken);
+      let user = jwt_decode(res.token);
+      dispatch(signIn(user));
+      history.replace(from);
     } catch (error) {
       console.log(error);
-      setLoginErr("Email or Password is not correct");
+      setLoginErr("Error Logging In! Please Try again");
     }
   };
 
   return (
     <div className="form__container">
-      <div className="form form__login">
+      <div data-aos="flip-right" className="form form__login">
         <form onSubmit={login}>
           <Link to="/account/forgot">Forgot Password</Link>
           <Link to="/sign-up">Not have an account?</Link>
@@ -100,13 +96,6 @@ function Login() {
               placeholder="Your password"
             />
             <span class="form__input--focus"></span>
-            <button
-              class="form__input--eye"
-              type="button"
-              onClick={togglePassword}
-            >
-              <i class="far fa-eye" id="togglePassword"></i>
-            </button>
           </div>
           <div className="recaptcha">
             <ReCAPTCHA

@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
+import Button from "@material-ui/core/Button";
 import { IconButton } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import jwt_decode from "jwt-decode";
@@ -18,9 +19,7 @@ function Header(props) {
       try {
         if (!localStorage.getItem("token")) return;
         const id = jwt_decode(localStorage.getItem("token"))._id;
-        console.log("id: ", id);
         let res = await userApi.getUserInfo(id);
-        console.log(res);
         if (res && res.msg === "success") {
           dispatch(authActions.loadUser(res.user));
         }
@@ -30,16 +29,11 @@ function Header(props) {
     }
     getUserInfo();
   }, []);
-  const [submenuShow, setSubmenuShow] = useState(false);
 
   const { onToggleSidebar } = props;
 
   const toggleSidebar = () => {
     if (onToggleSidebar) onToggleSidebar();
-  };
-
-  const handleSubmenuShow = () => {
-    setSubmenuShow((prevState) => !prevState);
   };
 
   const handleLogOut = () => {
@@ -67,21 +61,11 @@ function Header(props) {
         <span className="header__user-name">
           {user.user ? user.user.name : "Admin"}
         </span>
-        <span className="submenu__link" onClick={handleLogOut}>
-          Log Out
+        <span>
+          <Button variant="outlined" color="primary" onClick={handleLogOut}>
+            Log Out
+          </Button>
         </span>
-        {/* <div className="header__avatar">
-          <img src="" alt="avatar" onClick={handleSubmenuShow} />
-          <div
-            className={
-              submenuShow ? "header__submenu" : "header__submenu--hide"
-            }
-          >
-            <span className="submenu__link" onClick={handleLogOut}>
-              Log Out
-            </span>
-          </div>
-        </div> */}
       </div>
     </div>
   );

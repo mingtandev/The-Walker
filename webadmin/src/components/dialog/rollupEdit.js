@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -59,6 +58,7 @@ function RollUpEdit(props) {
               label="Coin"
               type="number"
               min={0}
+              defaultValue={data && data.coin}
               fullWidth
             />
             <TextField
@@ -67,18 +67,19 @@ function RollUpEdit(props) {
               name="item"
               label="Item ID"
               type="text"
+              defaultValue={data && data.item._id}
               fullWidth
             />
-            <Button type="submit" color="primary">
-              Update
-            </Button>
+            <div className="form__update__buttons">
+              <Button type="submit" color="primary">
+                Update
+              </Button>{" "}
+              <Button onClick={handleCloseDialog} color="primary">
+                Cancel
+              </Button>
+            </div>
           </form>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Cancel
-          </Button>
-        </DialogActions>
       </Dialog>
     </ThemeProvider>
   );

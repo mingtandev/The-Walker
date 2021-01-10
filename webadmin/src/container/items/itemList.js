@@ -23,7 +23,6 @@ function ItemList() {
   async function getAllItems() {
     try {
       let res = await itemApi.getAll();
-      console.log(res);
       let itemArray = res.products;
       dispatch(itemsAction.loadItems(itemArray));
     } catch (error) {
@@ -45,15 +44,15 @@ function ItemList() {
     else setDeleteConfirm(false);
   };
 
-  const handleUpdate = async (object, codeId) => {
-    let body = [];
-    for (const property in object) {
-      if (object[property])
-        body.push({ propName: property, value: object[property] });
-    }
+  const handleUpdate = async (formData, codeId) => {
+    // let body = [];
+    // for (const property in object) {
+    //   if (object[property])
+    //     body.push({ propName: property, value: object[property] });
+    // }
+
     try {
-      let res = await itemApi.update(codeId, body);
-      console.log(res);
+      let res = await itemApi.update(codeId, formData);
       if (res && res.msg === "success") {
         setUpdateOpen(false);
         getAllItems();
@@ -72,7 +71,6 @@ function ItemList() {
   const handleDelete = async (data) => {
     try {
       let res = await itemApi.delete(data._id);
-      console.log(res);
       if (res && res.msg === "success") {
         setDeleteConfirm(false);
         dispatch(itemsAction.deleteItem(data._id));
@@ -102,7 +100,7 @@ function ItemList() {
           }}
           actions={[
             {
-              tooltip: "Remove All Selected Users",
+              tooltip: "Remove",
               icon: "delete",
               onClick: (evt, data) => {
                 handleDialogOpen(data, actions.DELETE);

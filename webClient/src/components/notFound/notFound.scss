@@ -1,5 +1,8 @@
 .notfound {
   padding-top: 20rem;
+  &__firstNoti {
+    color: white;
+  }
   &__secondNoti {
     color: orangered;
     font-size: 10rem;

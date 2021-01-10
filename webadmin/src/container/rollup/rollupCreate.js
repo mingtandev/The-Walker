@@ -56,9 +56,9 @@ function RollUpCreate() {
           FormHelperTextProps={{
             style: { color: "red", fontStyle: "italic", fontSize: 10 },
           }}
-          placeholder="0 - 31"
+          placeholder="1 - 31"
           InputProps={{
-            inputProps: { min: 0, max: 31 },
+            inputProps: { min: 1, max: 31 },
             style: { fontSize: 15 },
           }}
           style={{ marginBottom: 15 }}
@@ -78,12 +78,12 @@ function RollUpCreate() {
         <TextField
           margin="dense"
           name="item"
-          label="Item ID(s)"
+          label="Item ID"
           helperText={errors.item}
           FormHelperTextProps={{
             style: { color: "red", fontStyle: "italic", fontSize: 10 },
           }}
-          placeholder="id1 id2 id3 ..."
+          placeholder="ID"
           inputProps={{ style: { fontSize: 15 } }} // font size of input text
           InputLabelProps={{ style: { fontSize: 15 } }}
           style={{ marginBottom: 15 }}

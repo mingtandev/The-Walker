@@ -1,0 +1,102 @@
+.history {
+  &__container {
+    margin: 0 auto;
+    padding-top: 13rem;
+    padding-bottom: 5rem;
+    width: 50%;
+  }
+  &__title {
+    width: 100%;
+    margin-bottom: 0;
+    padding: 1rem;
+    color: white;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 4px;
+    user-select: none;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background-color: black;
+  }
+  &__caption {
+    margin: auto;
+    margin-top: 2rem;
+    padding: 1rem;
+    color: white;
+    border-radius: 10px;
+    background-color: rgb(16, 245, 119);
+    transform: skew(-10deg);
+    -o-transform: skew(-10deg);
+    -moz-transform: skew(-10deg);
+    -webkit-transform: skew(-10deg);
+    user-select: none;
+  }
+  &__select {
+    display: flex;
+    justify-content: center;
+  }
+  &__option {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    width: 50%;
+    border: 1px solid black;
+    outline: none;
+    &:hover {
+      background-color: rgb(68, 68, 235);
+      color: white;
+    }
+    &--selected {
+      background-color: rgb(68, 68, 235);
+      color: white;
+    }
+  }
+  &__main {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+  &__list {
+    padding: 1rem;
+    max-height: 50rem;
+    overflow-y: scroll;
+    background-color: rgba(42, 197, 112, 0.8);
+    color: white;
+    margin: auto;
+    width: 100%;
+    letter-spacing: 1.5px;
+
+    &::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    &::-webkit-scrollbar-track {
+      -webkit-box-shadow: inset 0 0 4px white;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 10px;
+      -webkit-box-shadow: inset 0px 0px 3px black;
+    }
+
+    &__item {
+      .MuiSvgIcon-root {
+        margin-right: 2rem;
+        color: rgba(255, 0, 0, 0.685);
+      }
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: 50% 50%;
+      text-align: left;
+      span {
+        font-size: 1.8rem;
+      }
+    }
+    &-date {
+      margin-right: 2rem;
+    }
+    &-content {
+      font-weight: bold;
+    }
+  }
+}

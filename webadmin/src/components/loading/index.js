@@ -1,11 +1,11 @@
 import React from "react";
-import { Link, NavLink } from "react-router-dom";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import "./index.scss";
 
 function Loading() {
   return (
-    <div>
-      Loading
-      <Link to="/login"> Login</Link>
+    <div className="loading">
+      <CircularProgress />
     </div>
   );
 }

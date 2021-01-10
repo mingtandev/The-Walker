@@ -1,10 +1,13 @@
 import React from "react";
-import Statistic from "./../statistic";
+import Statistic from "../statistic";
+import Chart from "../chart";
+import "./index.scss";
 
 function DashBoard() {
   return (
-    <div>
+    <div className="dashboard">
       <Statistic />
+      <Chart />
     </div>
   );
 }

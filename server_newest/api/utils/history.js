@@ -1,51 +1,40 @@
-const History = require('../models/history')
+// const History = require('../models/history')
 
-exports.saveHistory = async (userId, type, effect, msg) => {
-    let user = await History.findOne({userId})
+// exports.saveHistory = async (userId, type, effect, msg) => {
+//     try {
+//         let user = await History.findOne({userId})
 
-    if (!user) {
-        user = new History({
-            userId,
-            actions: {
-                accInfos: {
-                    personal: [],
-                    manage: []
-                },
-                items:  {
-                    personal: [],
-                    manage: []
-                },
-                rolls:  {
-                    personal: [],
-                    manage: []
-                },
-                codes:  {
-                    personal: [],
-                    manage: []
-                },
-                blogs:  {
-                    personal: [],
-                    manage: []
-                }
-            }
-        })
-    }
+//         if (!user) {
+//             user = new History({userId})
+//         }
 
-    await user.actions[type][effect].push(msg)
-    await user.save()
+//         await user.actions[type][effect].push(msg)
+//         await user.save()
 
-    return []
-}
+//         return user
+//     }
+//     catch (error) {
+//         console.log(error)
+//         return error.message
+//     }
 
-exports.loadHistory = async (userId, type, effect) => {
-    let user = await History.findOne({userId})
-    let result = []
+// }
 
-    if (!user) {
-        return result
-    }
+// exports.loadHistory = async (userId, type, effect) => {
+//     try {
+//         let user = await History.findOne({userId})
+//         let result = []
 
-    result = await user.actions[type][effect]
+//         if (!user) {
+//             return result
+//         }
 
-    return result
-}
+//         result = await user.actions[type][effect]
+
+//         return result
+//     }
+//     catch (error) {
+//         console.log(error)
+//         return error.message
+//     }
+// }

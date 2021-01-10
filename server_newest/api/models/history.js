@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const slug = require('mongoose-slug-generator')
 
 const historySchema = mongoose.Schema({
     userId: {
@@ -9,64 +8,39 @@ const historySchema = mongoose.Schema({
     },
     actions: {
         accInfos: {
-            personal: [
-                {
-                    type: String,
-                }
-            ],
-            manage: [
-                {
-                    type: String,
-                }
-            ]
+            type: Object,
+            default: {
+                personal: [],
+                manage: []
+            }
         },
         items: {
-            personal: [
-                {
-                    type: String,
-                }
-            ],
-            manage: [
-                {
-                    type: String,
-                }
-            ]
+            type: Object,
+            default: {
+                personal: [],
+                manage: []
+            }
         },
         rolls: {
-            personal: [
-                {
-                    type: String,
-                }
-            ],
-            manage: [
-                {
-                    type: String,
-                }
-            ]
+            type: Object,
+            default: {
+                personal: [],
+                manage: []
+            }
         },
         codes: {
-            personal: [
-                {
-                    type: String,
-                }
-            ],
-            manage: [
-                {
-                    type: String,
-                }
-            ]
+            type: Object,
+            default: {
+                personal: [],
+                manage: []
+            }
         },
         blogs: {
-            personal: [
-                {
-                    type: String,
-                }
-            ],
-            manage: [
-                {
-                    type: String,
-                }
-            ]
+            type: Object,
+            default: {
+                personal: [],
+                manage: []
+            }
         }
     }
 })

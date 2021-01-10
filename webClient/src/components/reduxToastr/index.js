@@ -7,7 +7,7 @@ export default function Notification() {
       timeOut={7000}
       newestOnTop={false}
       preventDuplicates
-      position="top-right"
+      position="bottom-right"
       getState={(state) => state.toastr} // This is the default
       transitionIn="bounceIn"
       transitionOut="bounceOut"

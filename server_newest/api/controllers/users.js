@@ -1,710 +1,767 @@
-const bcrypt = require('bcrypt')
-const crypto = require('crypto')
-const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
-const User = require('./../models/user')
-const History = require('./../models/history')
+const User = require('./../models/user');
 
-const {sendMail} =  require('./../config/nodemailer')
-const {loadHistory, saveHistory} = require('./../utils/history')
-const {saveStatistic} = require('./../utils/statistic')
+const cloudinary = require('./../config/cloudinary');
 
-const tokenLife = process.env.TOKEN_LIFE
-const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE
-const jwtKey = process.env.JWT_KEY
+const { sendMail } = require('./../config/nodemailer');
+
+const TOKEN_LIFE = process.env.TOKEN_LIFE;
+const REFRESH_TOKEN_LIFE = process.env.REFRESH_TOKEN_LIFE;
+const JWT_KEY = process.env.JWT_KEY;
 
 exports.getAll = (req, res, next) => {
-    if (req.userData.roles != 'admin'){
-        return res.status(403).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `You don't have the permission!`
-            }
-        })
-    }
+	if (req.userData.roles != 'admin') {
+		return res.status(403).json({
+			msg: 'ValidatorError',
+			errors: {
+				user: `You don't have the permission!`,
+			},
+		});
+	}
 
-    const page = parseInt(req.query.page) || 1
-    const items_per_page = parseInt(req.query.limit) || 100
+	const page = parseInt(req.query.page) || 1;
+	const items_per_page = parseInt(req.query.limit) || 100;
 
-    if (page < 1) page = 1
+	if (page < 1) page = 1;
 
-    User.find({})
-    .select('name slugName email cash roles isVerified')
-    .skip((page - 1) * items_per_page)
-    .limit(items_per_page)
-    .then(async users => {
-        const request = {}
-        const len = await User.find({}).count()
+	User.find({})
+		.skip((page - 1) * items_per_page)
+		.limit(items_per_page)
+		.then(async (users) => {
+			const request = {};
+			const len = await User.find({}).countDocuments();
 
-        request.currentPage = page
-        request.totalPages = Math.ceil(len / items_per_page)
+			request.currentPage = page;
+			request.totalPages = Math.ceil(len / items_per_page);
 
-        if (page > 1) {
-            request.previous = {
-                page: page - 1,
-                limit: items_per_page
-            }
-        }
+			if (page > 1) {
+				request.previous = {
+					page: page - 1,
+					limit: items_per_page,
+				};
+			}
 
-        if (page * items_per_page < len) {
-            request.next = {
-                page: page + 1,
-                limit: items_per_page
-            }
-        }
+			if (page * items_per_page < len) {
+				request.next = {
+					page: page + 1,
+					limit: items_per_page,
+				};
+			}
 
-        const response = {
-            msg: 'success',
-            length: users.length,
-            users: users.map(user => {
-                return {
-                    _id: user._id,
-                    name: user.name,
-                    slugName: user.slugName,
-                    email: user.email,
-                    cash: user.cash,
-                    roles: user.roles,
-                    isVerified: user.isVerified,
-                    request: {
-                        type: 'GET',
-                        url: req.hostname + '/users/' + user._id
-                    }
-                }
-            }),
-            request
-        }
+			const response = {
+				msg: 'success',
+				length: users.length,
+				users: users.map((user) => {
+					return {
+						...user['_doc'],
+						request: {
+							type: 'GET',
+							url: req.hostname + '/users/' + user._id,
+						},
+					};
+				}),
+				request,
+			};
 
-        res.status(200).json(response)
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+			res.status(200).json(response);
+		})
+		.catch((error) => {
+			console.log(error);
+			res.status(500).json({
+				msg: 'Server error!',
+				error,
+			});
+		});
+};
 
 exports.getOne = (req, res, next) => {
-    const _id = req.params.userId
+	const _id = req.params.userId;
 
-    let selectStr = ''
+	let selectStr = '';
 
-    if(_id === req.userData._id) selectStr = 'name email roles cash isVerified'
-    else selectStr = 'name email roles'
+	if (_id !== req.userData._id && req.userData.roles === 'user')
+		selectStr = 'name email roles slugName';
+	else selectStr = 'name email roles cash isVerified history items slugName';
 
-    User.findById(_id)
-    .select(selectStr)
-    .then(user => {
-        if(!user){
-            return res.status(403).json({
-                msg: 'ValidatorError',
-                errors: {
-                    user: `User not found!`
-                }
-            })
-        }else{
-            res.status(200).json({
-                msg: 'success',
-                user
-            })
-        }
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+	User.findById(_id)
+		.select(selectStr)
+		.then((user) => {
+			if (!user) {
+				return res.status(202).json({
+					msg: 'ValidatorError',
+					errors: {
+						user: `User not found!`,
+					},
+				});
+			}
+
+			res.status(200).json({
+				msg: 'success',
+				user,
+			});
+		})
+		.catch((error) => {
+			console.log(error);
+			res.status(500).json({
+				msg: 'Server error!',
+				error,
+			});
+		});
+};
 
 exports.create = (req, res, next) => {
-    const {name, email, password} = req.body
+	const { name, email, password } = req.body;
 
-    bcrypt.hash(password, 10, (error, encryptedPassword) => {
-        if(error){
-            return res.status(500).json({
-                msg: 'Server error!',
-                error
-            })
+	try {
+		bcrypt.hash(password, 10, (error, encryptedPassword) => {
+			if (error) {
+				console.log(error);
+				return res.status(500).json({
+					msg: 'Server error!',
+					error,
+				});
+			} else {
+				let avatar = '';
+				let cloudinary_id = '';
 
-        }else{
-            const passwordResetToken = crypto.randomBytes(16).toString('hex')
-            const user = new User({
-                name,
-                email,
-                password: encryptedPassword,
-                passwordResetToken
-            })
+				if (req.file) {
+					cloudinary.uploadSingleAvatar(req.file.path).then((ret) => {
+						if (ret) {
+							avatar = ret.url;
+							cloudinary_id = ret.id;
+						}
+					});
+				}
 
-            user.save()
-            .then(async newUser => {
-                const token = jwt.sign( {_id: newUser._id}, jwtKey, {
-                    expiresIn: tokenLife
-                })
+				const passwordResetToken = crypto.randomBytes(16).toString('hex');
+				const user = new User({
+					name,
+					email,
+					password: encryptedPassword,
+					passwordResetToken,
+					avatar,
+					cloudinary_id,
+				});
 
-                sendMail(req, newUser.email, token, 'confirmation')
-                await saveStatistic(1, 0, 0, 0, 0, 0)
+				const history = {
+					type: 'create',
+					collection: 'user',
+					task: `Create a new user: ${user.name}`,
+					date: new Date(),
+					others: {
+						id: user._id,
+					},
+				};
+				user.history.personal.push(history);
+				user
+					.save()
+					.then(async (user) => {
+						const token = jwt.sign({ _id: user._id }, JWT_KEY, {
+							expiresIn: TOKEN_LIFE,
+						});
 
-                res.status(201).json({
-                    msg: "success",
-                    user: newUser
-                })
-            })
-            .catch(error => {
-                let respond = {}
-                error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+						sendMail(req, user.email, token, 'confirm'),
+							res.status(201).json({
+								msg: 'success',
+								user: user,
+							});
+					})
+					.catch((error) => {
+						console.log(error);
+						let respond = {};
+						error.errors &&
+							Object.keys(error.errors).forEach(
+								(err) => (respond[err] = error.errors[err].message)
+							);
+						res.status(202).json({
+							msg: 'ValidatorError',
+							errors: respond,
+						});
+					});
+			}
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			msg: 'Server error!',
+			error,
+		});
+	}
+};
 
-                res.status(422).json({
-                    msg: 'ValidatorError',
-                    errors: respond
-                })
+exports.update = async (req, res, next) => {
+	const { userId: _id } = req.params;
+	const { roles } = req.userData;
 
-                // res
-                // {
-                //     "msg": "ValidatorError",
-                //     "errors": {
-                //         "name": "Name already exists!",
-                //         "email": "Email already exists!"
-                //     }
-                // }
-            })
-        }
-    })
-}
+	const validUserFieldUpdate = ['name', 'password', 'coin', 'thumbnail'];
 
-exports.update = (req, res, next) => {
-    const {userId: _id} = req.params
-    const {roles} = req.userData
+	try {
+		let hasPassword = false;
+		let coinUpdate = false;
 
-    if(roles != 'admin' && _id != req.userData._id){
-        return res.status(403).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `You don't have the permission!`
-            }
-        })
-    }
+		const user = await User.findById(_id);
 
-    let hasPassword = false
+		// Avatar upload/change
+		if (req.file) {
+			const ret = await cloudinary.uploadSingleAvatar(req.file.path);
+			if (ret) {
+				await cloudinary.destroySingle(user.cloudinary_id);
+				user.thumbnail = ret.url;
+				user.cloudinary_id = ret.id;
+			}
+		}
 
-    let newUser = {}
+		const keys = Object.keys(req.body);
+		for (const key of keys) {
+			user[key] = req.body[key];
 
-    for (const ops of req.body) {
-        newUser[ops.propName] = ops.value
+			if (roles === 'user' && !validUserFieldUpdate.includes(key))
+				throw new Error('User only to changes: name, avatar, password!');
 
-        if(ops.propName === 'password'){
-            hasPassword = true
-        }
-    }
+			if (key === 'password') {
+				hasPassword = true;
+			}
+		}
 
-    if (roles === 'user') {
-        for (const key of Object.keys(newUser)) {
-            if (!['name', 'password'].includes(key)) {
-                return res.status(400).json({
-                    msg: 'ValidatorError',
-                    errors: {
-                        user: `You are only allowed to change the name and password!`
-                    }
-                })
-            }
-        }
-    }
+		if (hasPassword) {
+			await bcrypt.hash(user.password, 10).then((encryptedPassword) => {
+				user.password = encryptedPassword;
+			});
+		}
 
-    User.findById(_id)
-    .then(user => {
-        if(!user){
-            return res.status(403).json({
-                msg: 'ValidatorError',
-                errors: {
-                    user: `User not found!`
-                }
-            })
-        }
+		const history = {
+			type: 'update',
+			collection: 'user',
+			task: `Update a user: ${user.name || user.name}`,
+			date: new Date(),
+			others: {
+				id: user._id,
+				fields: keys.map(
+					(key) =>
+						`${key}: ${
+							key === 'password'
+								? `********
+									${req.body.password[req.body.password.length - 1]}
+									${req.body.password[req.body.password.length - 2]}`
+								: req.body[key]
+						}`
+				),
+			},
+		};
 
-        if(hasPassword){
-            bcrypt.hash(newUser.password, 10, (error, encryptedPassword) => {
-                if(error){
-                    return res.status(500).json({
-                        msg: 'Server error!',
-                        error
-                    })
-                }
+		// Finish game update coin => cash
+		if (user.coin) {
+			user.cash += +user.coin;
+			coinUpdate = true;
+		}
 
-                newUser.password = encryptedPassword
+		if (!coinUpdate) {
+			user.history.personal.push(history);
+		}
 
-                User.updateOne({_id}, {$set: newUser}, { runValidators: true })
-                .then(async result => {
+		await User.updateOne({ _id }, { $set: user });
 
-                    await saveHistory(_id, 'accInfos', 'personal', `Update an account: ${_id}-${Object.keys(newUser).join('-')} | ${new Date()}`)
+		if (!coinUpdate && req.userData.roles === 'admin') {
+			await User.updateOne(
+				{ _id: req.userData._id },
+				{
+					$push: {
+						'history.manage': history,
+					},
+				}
+			);
+		}
 
-                    res.status(200).json({
-                        msg: 'success',
-                        request: {
-                            type: 'GET',
-                            url: req.hostname + '/users/' + _id
-                        }
-                    })
-                })
-                .catch(error => {
-                    let respond = {}
-                    error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+		res.status(200).json({
+			msg: 'success',
+			user,
+			request: {
+				type: 'GET',
+				url: req.hostname + '/users/' + _id,
+			},
+		});
+	} catch (error) {
+		console.log(error);
+		let respond = {};
+		error.errors &&
+			Object.keys(error.errors).forEach(
+				(err) => (respond[err] = error.errors[err].message)
+			);
+		res.status(202).json({
+			msg: 'ValidatorError',
+			errors: respond,
+		});
+	}
+};
 
-                    res.status(422).json({
-                        msg: 'ValidatorError',
-                        errors: respond
-                    })
+exports.delete = (req, res, next) => {
+	const { roles } = req.userData;
+	const { userId: _id } = req.params;
 
-                    // {
-                    //     "msg": "ValidatorError",
-                    //     "errors": {
-                    //         "name": "Name already exists!"
-                    //     }
-                    // }
-                })
-            })
-        }
-        else{
-            User.updateOne({_id}, {$set: newUser}, {runValidators: true})
-            .then(async result => {
+	if (roles != 'admin') {
+		return res.status(403).json({
+			msg: 'ValidatorError',
+			errors: {
+				user: `You don't have the permission!`,
+			},
+		});
+	}
 
-                await saveHistory(_id, 'accInfos', 'personal', `Update an account: ${_id}-${Object.keys(newUser).join('-')} | ${new Date()}`)
+	try {
+		User.findById(_id)
+			.then(async (user) => {
+				if (!user) {
+					return res.status(202).json({
+						msg: 'ValidatorError',
+						errors: {
+							user: `User not found!`,
+						},
+					});
+				}
 
-                res.status(200).json({
-                    msg: "success",
-                    request: {
-                        type: 'GET',
-                        url: req.hostname + '/users/' + _id
-                    }
-                })
-            })
-            .catch(error => {
-                let respond = {}
-                error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+				const history = {
+					type: 'delete',
+					collection: 'user',
+					task: `Delete a user: ${user.name}`,
+					date: new Date(),
+					others: {
+						id: user._id,
+					},
+				};
 
-                res.status(422).json({
-                    msg: 'ValidatorError',
-                    errors: respond
-                })
+				await Promise.all([
+					User.deleteOne({ _id }),
+					User.updateOne(
+						{ _id: req.userData._id },
+						{
+							$push: {
+								'history.manage': history,
+							},
+						}
+					),
+				]);
 
-                // {
-                //     "msg": "ValidatorError",
-                //     "errors": {
-                //         "name": "Name already exists!"
-                //     }
-                // }
-            })
-        }
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
-
-exports.delete =  (req, res, next) => {
-    const {roles} = req.userData
-    const {userId: _id} = req.params
-
-    if(roles != 'admin'){
-        return res.status(403).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `You don't have the permission!`
-            }
-        })
-    }
-
-    User.findById(_id)
-    .then(user => {
-        if(!user){
-            return res.status(403).json({
-                msg: 'ValidatorError',
-                errors: {
-                    user: `User not found!`
-                }
-            })
-        }
-
-        User.deleteOne({_id})
-        .then(async result => {
-
-            await saveHistory(req.userData._id, 'accInfos', 'manage', `Delete an account: ${_id}-${user.name}-${user.email} | ${new Date()}`)
-            await saveHistory(_id, 'accInfos', 'manage', `Account has been deleted by: ${_id}-${user.name}-${user.email} | ${new Date()}`)
-
-            res.status(200).json({
-                msg: 'success'
-            })
-        })
-        .catch(error => {
-            res.status(500).json({
-                msg: 'Server error!',
-                error
-            })
-        })
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+				res.status(200).json({
+					msg: 'success',
+					request: {
+						type: 'POST',
+						url: req.hostname + '/users',
+						body: {
+							name: 'String',
+							email: 'String',
+							password: 'String',
+						},
+					},
+				});
+			})
+			.catch((error) => {
+				res.status(500).json({
+					msg: 'Server error!',
+					error,
+				});
+			});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({
+			msg: 'Server error!',
+			error,
+		});
+	}
+};
 
 // --------------------------------------------------------------------
 
 exports.confirmation = (req, res, next) => {
-    const {verifyToken: token} = req.params
+	const { verifyToken: token } = req.params;
 
-    try {
-        const decoded = jwt.verify(token, jwtKey)
-        const {_id} = decoded
+	try {
+		const decoded = jwt.verify(token, JWT_KEY);
+		const { _id } = decoded;
 
-        User.findOne({_id})
-        .then(user => {
-            if(!user) {
-                return res.status(404).json({
-                    msg: 'ValidatorError',
-                    errors: {
-                        user: 'User not found!'
-                    }
-                })
-            }
+		User.findOne({ _id })
+			.then(async (user) => {
+				if (!user) {
+					return res.status(202).json({
+						msg: 'ValidatorError',
+						errors: {
+							user: 'User not found!',
+						},
+					});
+				}
 
-            if(user.isVerified){
-                return res.status(200).json({
-                    msg: 'success'
-                })
-            }
+				if (user.isVerified) {
+					return res.status(200).json({
+						msg: 'success',
+					});
+				}
 
-            user.isVerified = true
+				const history = {
+					type: 'confirm',
+					collection: 'user',
+					task: `Confirm a new user: ${user.name}`,
+					date: new Date(),
+					others: {
+						id: user._id,
+					},
+				};
 
-            User.updateOne({_id}, {$set: user})
-            .then (async result => {
-                await saveHistory(_id, 'accInfos', 'manage', `Confirm this account | ${new Date()}`)
+				user.isVerified = true;
+				user.history.personal.push(history);
+				await User.updateOne({ _id }, { $set: user });
 
-                res.status(200).json({
-                    msg: 'success'
-                })
-            })
-            .catch(error => {
-                res.status(500).json({
-                    msg: 'Server error!',
-                    error
-                })
-            })
-        })
-        .catch(error => {
-            res.status(500).json({
-                msg: 'Server error!',
-                error
-            })
-        })
-    }
-    catch (error) {
-        res.status(404).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: 'Token is invalid or has been expired. Please click resend confirmation email!'
-            }
-        })
-    }
-}
+				res.status(200).json({
+					msg: 'success',
+				});
+			})
+			.catch((error) => {
+				res.status(500).json({
+					msg: 'Server error!',
+					error,
+				});
+			});
+	} catch (error) {
+		console.log(error);
+		res.status(202).json({
+			msg: 'ValidatorError',
+			errors: {
+				user:
+					'Token is invalid or has been expired. Please click resend confirmation email!',
+			},
+		});
+	}
+};
 
 exports.resend = (req, res, next) => {
-    const {email} = req.body
+	const { email } = req.body;
 
-    User.findOne({email})
-    .then(async user => {
-        if(!user) {
-            return res.status(404).json({
-                msg: 'ValidatorError',
-                errors: {
-                    user: 'User not found!'
-                }
-            })
-        }
+	User.findOne({ email })
+		.then(async (user) => {
+			if (!user) {
+				return res.status(202).json({
+					msg: 'ValidatorError',
+					errors: {
+						user: 'User not found!',
+					},
+				});
+			}
 
-        if(user.isVerified) {
-            return res.status(200).json({
-                msg: 'success'
-            })
-        }
+			if (user.isVerified) {
+				return res.status(200).json({
+					msg: 'Your account has been verified!',
+				});
+			}
 
-        const token = jwt.sign( {_id: user._id}, jwtKey, {
-            expiresIn: tokenLife
-        })
+			// Send mail
+			const token = jwt.sign({ _id: user._id }, JWT_KEY, {
+				expiresIn: TOKEN_LIFE,
+			});
 
-        sendMail(req, user.email, token, 'confirmation')
+			sendMail(req, user.email, token, 'confirm');
 
-        await saveHistory(user._id, 'accInfos', 'manage', `Resend confirm email: ${user._id}-${user.name}-${user.email} | ${new Date()}`)
+			// Save his
+			const history = {
+				type: 'resend',
+				collection: 'user',
+				task: `Resend a email confirm: ${user.name}`,
+				date: new Date(),
+				others: {
+					id: user._id,
+				},
+			};
 
-        res.status(201).json({
-            msg: "success"
-        })
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+			await User.updateOne(
+				{ _id: user._id },
+				{
+					$push: {
+						'history.personal': history,
+					},
+				}
+			);
+
+			res.status(201).json({
+				msg: 'success',
+			});
+		})
+		.catch((error) => {
+			console.log(error);
+			res.status(500).json({
+				msg: 'Server error!',
+				error,
+			});
+		});
+};
 
 exports.login = (req, res, next) => {
-    const {email, password} = req.body
+	const { email, password } = req.body;
 
-    User.findOne({email})
-    .then(user => {
-        if(!user){
-            return res.status(404).json({
-                msg: 'ValidatorError',
-                errors: {
-                    user: 'User not found!'
-                }
-            })
+	User.findOne({ email })
+		.then((user) => {
+			if (!user) {
+				return res.status(202).json({
+					msg: 'ValidatorError',
+					errors: {
+						user: 'User not found!',
+					},
+				});
+			}
 
-        }else{
-            bcrypt.compare(password, user.password, (error, matched) => {
-                if(error){
-                    return res.status(500).json({
-                        msg: 'Server error!',
-                        error
-                    })
+			bcrypt.compare(password, user.password, (error, matched) => {
+				if (error) {
+					console.log(error);
+					return res.status(500).json({
+						msg: 'Server error!',
+						error,
+					});
+				}
 
-                }else{
-                    if(matched){
-                        const { email, _id, isVerified, name, cash, slugName, roles } = user
-                        const payloadToken = { _id, roles, name, cash, slugName, email }
-                        const token = jwt.sign( payloadToken, jwtKey, {
-                            expiresIn: tokenLife
-                        })
-                        const refreshToken = jwt.sign(payloadToken, jwtKey, {
-                            expiresIn: refreshTokenLife
-                        })
+				if (matched) {
+					const { email, _id, isVerified, name, cash, slugName, roles } = user;
 
-                        if(!isVerified) {
-                            return res.status(401).json({
-                                msg: 'ValidatorError',
-                                errors: {
-                                    user: 'Your account has not been verified!'
-                                }
-                            })
-                        }
+					const payloadToken = {
+						_id,
+						roles,
+						name,
+						cash,
+						slugName,
+						email,
+					};
 
-                        res.status(200).json({
-                            msg: 'success',
-                            token,
-                            refreshToken
-                        })
+					const token = jwt.sign(payloadToken, JWT_KEY, {
+						expiresIn: TOKEN_LIFE,
+					});
 
-                    }else{
-                        return res.status(401).json({
-                            msg: 'ValidatorError',
-                            errors: {
-                                user: 'Email or password does not match!'
-                            }
-                        })
-                    }
-                }
-            })
-        }
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+					const refreshToken = jwt.sign(payloadToken, JWT_KEY, {
+						expiresIn: REFRESH_TOKEN_LIFE,
+					});
+
+					if (!isVerified) {
+						return res.status(202).json({
+							msg: 'ValidatorError',
+							errors: {
+								user: 'Your account has not been verified!',
+							},
+						});
+					}
+
+					res.status(200).json({
+						msg: 'success',
+						token,
+						refreshToken,
+					});
+				} else {
+					return res.status(202).json({
+						msg: 'ValidatorError',
+						errors: {
+							user: 'Email or password does not match!',
+						},
+					});
+				}
+			});
+		})
+		.catch((error) => {
+			console.log(error);
+			res.status(500).json({
+				msg: 'Server error!',
+				error,
+			});
+		});
+};
 
 exports.refresh = (req, res, next) => {
-    const { refreshToken } = req.body
+	const { refreshToken } = req.body;
 
-    try {
-        const decoded = jwt.verify(refreshToken, jwtKey)
-        const { _id, roles, name, cash, slugName, email} = decoded
-        const user = {_id, roles, name, cash, slugName, email}
+	try {
+		const decoded = jwt.verify(refreshToken, JWT_KEY);
+		const { _id, roles, name, cash, slugName, email } = decoded;
+		const payloadToken = {
+			_id,
+			roles,
+			name,
+			cash,
+			slugName,
+			email,
+		};
 
-        const token = jwt.sign(user, jwtKey, {
-            expiresIn: tokenLife,
-        })
+		const token = jwt.sign(payloadToken, JWT_KEY, {
+			expiresIn: TOKEN_LIFE,
+		});
 
-        res.status(200).json({
-            msg: 'success',
-            token
-        })
-
-    } catch (error) {
-        return res.status(401).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: 'Token has been expired. Please login!'
-            }
-        })
-    }
-}
+		res.status(200).json({
+			msg: 'success',
+			token,
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(404).json({
+			msg: 'ValidatorError',
+			errors: {
+				user: 'Token has been expired. Please login!',
+			},
+		});
+	}
+};
 
 exports.recovery = (req, res, next) => {
-    const {email} = req.body
+	const { email } = req.body;
 
-    User.findOne({email})
-    .then(user => {
-        if(!user) {
-            return res.status(401).json({
-                msg: 'ValidatorError',
-                errors: {
-                    user: 'Email not found!'
-                }
-            })
-        }
+	User.findOne({ email })
+		.then((user) => {
+			if (!user) {
+				return res.status(202).json({
+					msg: 'ValidatorError',
+					errors: {
+						user: 'Email not found!',
+					},
+				});
+			}
 
-        bcrypt.hash(email, 10)
-        .then(hashed => {
-            user.passwordResetToken = hashed
-            user.passwordResetExpires = Date.now() + 5*60*1000 // 5h
+			bcrypt.hash(email, 10).then(async (hashed) => {
+				user.passwordResetToken = hashed;
+				user.passwordResetExpires = Date.now() + 5 * 60 * 1000; // 5h
 
-            User.updateOne({_id: user._id}, {$set: user})
-            .then(async newUser => {
+				sendMail(req, email, hashed, 'reset');
 
-                sendMail(req, email, hashed, 'recovery')
-                await saveHistory(user._id, 'accInfos', 'manage', `Send password reset token: ${user._id}-${user.email} | ${new Date()}`)
+				const history = {
+					type: 'recovery',
+					collection: 'user',
+					task: `Sent the token to your email for reset password: ${user.email}`,
+					date: new Date(),
+					others: {
+						id: user._id,
+					},
+				};
+				user.history.personal.push(history);
+				await User.updateOne({ _id: user._id }, { $set: user });
 
-                res.status(200).json({
-                    msg: 'success'
-                })
-            })
-            .catch(error => {
-                res.status(500).json({
-                    msg: 'Server error!',
-                    error
-                })
-            })
-        })
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+				res.status(200).json({
+					msg: 'success',
+				});
+			});
+		})
+		.catch((error) => {
+			console.log(error);
+			res.status(500).json({
+				msg: 'Server error!',
+				error,
+			});
+		});
+};
 
-exports.forgot = (req, res, next)  => {
-    const {newPassword, passwordResetToken} = req.body
+exports.forgot = (req, res, next) => {
+	const { newPassword, passwordResetToken } = req.body;
 
-    User.findOne({
-        passwordResetToken,
-        passwordResetExpires: {
-            $gt: Date.now()
-        }
-    })
-    .then(user => {
-        console.log(user)
-        if(!user){
-            return res.status(401).json({
-                msg: 'ValidatorError',
-                errors: {
-                    user: 'User not found or reset password token has been expired!'
-                }
-            })
-        }
+	User.findOne({
+		passwordResetToken,
+		passwordResetExpires: {
+			$gt: Date.now(),
+		},
+	})
+		.then((user) => {
+			if (!user) {
+				return res.status(202).json({
+					msg: 'ValidatorError',
+					errors: {
+						user: 'User not found or reset password token has been expired!',
+					},
+				});
+			}
 
-        bcrypt.hash(newPassword, 10)
-        .then(hashed => {
-            user.password = hashed
-            user.passwordResetToken = 'randomStringHere'
-            user.passwordResetExpires = Date.now()
+			bcrypt.hash(newPassword, 10).then(async (hashed) => {
+				user.password = hashed;
+				user.passwordResetToken = 'randomStringHere';
+				user.passwordResetExpires = Date.now();
 
-            User.updateOne({_id: user._id}, {$set: user})
-            .then(async newUser => {
-                console.log(newUser._id)
-                await saveHistory(user._id, 'accInfos', 'personal', `Recovery password: ${user._id}-${user.name}-${user.email} | ${new Date()}`)
+				const history = {
+					type: 'forgot',
+					collection: 'user',
+					task: `Update new password successfully for: ${user.name}`,
+					date: new Date(),
+					others: {
+						id: user._id,
+					},
+				};
 
-                res.status(200).json({
-                    msg: 'success'
-                })
-            })
-            .catch(error => {
-                res.status(500).json({
-                    msg: 'Server error!',
-                    error
-                })
-            })
-        })
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+				user.history.personal.push(history);
+				await User.updateOne({ _id: user._id }, { $set: user });
 
-exports.history = async (req, res, next)  => {
-    const {_id} = req.userData
-    const {type, effect} = req.body
+				res.status(200).json({
+					msg: 'success',
+				});
+			});
+		})
+		.catch((error) => {
+			console.log(error);
+			res.status(500).json({
+				msg: 'Server error!',
+				error,
+			});
+		});
+};
 
-    const types = ['accInfos', 'items', 'rolls', 'codes', 'blogs']
-    const effects = ['personal', 'manage']
+// exports.history = async (req, res, next) => {
+// const { _id } = req.userData;
+// const { type, effect } = req.body;
 
-    let result = []
+// const types = ["accInfos", "items", "rolls", "codes", "blogs"];
+// const effects = ["personal", "manage"];
 
-    if (!type && !effect) {
-        if (req.userData.roles != 'admin'){
-            return res.status(403).json({
-                msg: 'ValidatorError',
-                errors: {
-                    user: `You don't have the permission!`
-                }
-            })
-        }
+// let result = [];
 
-        result = await History.find({})
+// try {
+//   if (!type && !effect) {
+//     if (req.userData.roles != "admin") {
+//       return res.status(403).json({
+//         msg: "ValidatorError",
+//         errors: {
+//           user: `You don't have the permission!`,
+//         },
+//       });
+//     }
 
-        return res.status(200).json({
-            msg: 'success',
-            length: result.length,
-            history: result
-        })
-    }
-    else if (!types) {
-        return res.status(400).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `Request body have to include 'type'!`
-            }
-        })
-    }
-    else if (!effect) {
-        return res.status(400).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `Request body have to include 'effect'!`
-            }
-        })
-    }
-    else if (!types.includes(type) || !effects.includes(effect)) {
-        return res.status(400).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `Value of 'type' and 'effect' must be valid!`
-            }
-        })
-    }
+//     result = await History.find({});
 
-    result = await loadHistory(_id, type, effect)
+//     return res.status(200).json({
+//       msg: "success",
+//       length: result.length,
+//       history: result,
+//     });
+//   } else if (!types) {
+//     return res.status(202).json({
+//       msg: "ValidatorError",
+//       errors: {
+//         user: `Request body have to include 'type'!`,
+//       },
+//     });
+//   } else if (!effect) {
+//     return res.status(202).json({
+//       msg: "ValidatorError",
+//       errors: {
+//         user: `Request body have to include 'effect'!`,
+//       },
+//     });
+//   } else if (!types.includes(type) || !effects.includes(effect)) {
+//     return res.status(202).json({
+//       msg: "ValidatorError",
+//       errors: {
+//         user: `Value of 'type' and 'effect' must be valid!`,
+//       },
+//     });
+//   }
 
-    if (result) {
-        res.status(200).json({
-            msg: 'success',
-            history: result
-        })
-    }
-    else {
-        re.status(500).json({
-            msg: 'Server error!',
-        })
-    }
-}
+//   result = await loadHistory(_id, type, effect);
+
+//   res.status(200).json({
+//     msg: "success",
+//     history: result,
+//   });
+// } catch (error) {
+//   console.log(error);
+// res.status(500).json({
+//   msg: "Not support!",
+//   error,
+// });
+// }
+// };

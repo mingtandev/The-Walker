@@ -23,7 +23,6 @@ function RollUpList() {
   async function getAllRoll() {
     try {
       let res = await rollupAPI.getAll();
-      console.log(res);
       let rollupArray = res.rolls;
       dispatch(rollupAction.loadRollups(rollupArray));
     } catch (error) {
@@ -32,6 +31,7 @@ function RollUpList() {
   }
   useEffect(() => {
     getAllRoll();
+    // return () => getAllRoll();
   }, []);
 
   const handleDialogOpen = (rowData, e) => {
@@ -54,7 +54,6 @@ function RollUpList() {
 
     try {
       let res = await rollupAPI.update(day, body);
-      console.log(res);
       if (res && res.msg === "success") {
         setUpdateOpen(false);
         getAllRoll();
@@ -67,7 +66,6 @@ function RollUpList() {
   const handleDelete = async (data) => {
     try {
       let res = await rollupAPI.delete(data.day);
-      console.log(res);
       if (res && res.msg === "success") {
         dispatch(rollupAction.deleteRollups(data.day));
         setDeleteConfirm(false);
@@ -79,7 +77,7 @@ function RollUpList() {
 
   return (
     <>
-      <div className="giftcode__option">
+      <div className="rollups__option">
         <Link to="/rollup/create">
           <Button variant="contained" color="primary">
             <AddIcon fontSize="large" />

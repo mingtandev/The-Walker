@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Link, useHistory } from "react-router-dom";
 import userApi from "../../api/userApi";
@@ -8,6 +8,8 @@ import {
   NameValidation,
   PasswordValidation,
 } from "../../utils/formValidation";
+import AOS from "aos";
+
 import "./index.scss";
 
 function Register() {
@@ -20,6 +22,10 @@ function Register() {
   });
 
   let history = useHistory();
+
+  useEffect(() => {
+    AOS.init({ duration: 500 });
+  }, []);
 
   const onInputChange = (e) => {
     let name = e.target.name;
@@ -110,14 +116,12 @@ function Register() {
               "Check your email for validation"
             );
             history.push("/sign-in");
-          } else if (res.msg === "Email has been used!")
-            toastr.error("Register Failed", "Email has been used");
-          else if (res.msg === "Fields: name, email and password are required!")
-            toastr.error(
-              "Register Failed",
-              "Fields: name, email and password are required!"
-            );
-          else toastr.warning("Register Failed", "Try Again Later");
+          } else {
+            if (res.errors) {
+              for (let error in res.errors)
+                toastr.error("Register Failed", res.errors[error]);
+            }
+          }
           return;
         }
         toastr.warning("Register Failed", "Try Again Later");
@@ -130,7 +134,7 @@ function Register() {
 
   return (
     <div className="form__container form__container--smallertop">
-      <div className="form form__register">
+      <div data-aos="flip-right" className="form form__register">
         <form id="register" onSubmit={register}>
           <Link to="/account/verify">Verify account</Link>
           <Link to="/sign-in">I have an account</Link>

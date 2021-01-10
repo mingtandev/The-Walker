@@ -1,249 +1,315 @@
-const {saveHistory} = require('./../utils/history')
-const {saveStatistic} = require('./../utils/statistic')
+const mongoose = require('mongoose');
 
-const Blog = require('../models/blog')
+const cloudinary = require('./../config/cloudinary');
+
+const { saveStatistic } = require('./../utils/statistic');
+
+const Blog = require('../models/blog');
+const User = require('./../models/user');
 
 exports.getAll = (req, res, next) => {
+	const page = parseInt(req.query.page) || 1;
+	const items_per_page = parseInt(req.query.limit) || 100;
 
-    const page = parseInt(req.query.page) || 1
-    const items_per_page = parseInt(req.query.limit) || 100
+	if (page < 1) page = 1;
 
-    if (page < 1) page = 1
+	Blog.find({})
+		.skip((page - 1) * items_per_page)
+		.limit(items_per_page)
+		.then(async (blogs) => {
+			const request = {};
+			const len = await Blog.find({}).countDocuments();
 
-    Blog.find({})
-    .select('_id date writer name title content thumbnail')
-    .skip((page - 1) * items_per_page)
-    .limit(items_per_page)
-    .then(async blogs => {
-        const request = {}
-        const len = await Blog.find({}).count()
+			request.currentPage = page;
+			request.totalPages = Math.ceil(len / items_per_page);
 
-        request.currentPage = page
-        request.totalPages = Math.ceil(len / items_per_page)
+			if (page > 1) {
+				request.previous = {
+					page: page - 1,
+					limit: items_per_page,
+				};
+			}
 
-        if (page > 1) {
-            request.previous = {
-                page: page - 1,
-                limit: items_per_page
-            }
-        }
+			if (page * items_per_page < len) {
+				request.next = {
+					page: page + 1,
+					limit: items_per_page,
+				};
+			}
 
-        if (page * items_per_page < len) {
-            request.next = {
-                page: page + 1,
-                limit: items_per_page
-            }
-        }
+			const response = {
+				msg: 'success',
+				length: blogs.length,
+				blogs: blogs.map((blog) => {
+					return {
+						...blog['_doc'],
+						request: {
+							type: 'GET',
+							url: req.hostname + '/blogs/' + blog._id,
+						},
+					};
+				}),
+				request,
+			};
 
-        const response = {
-            msg: 'success',
-            length: blogs.length,
-            blogs: blogs.map(blog => {
-                return {
-                    _id: blog._id,
-                    date: blog.date,
-                    writer: blog.writer,
-                    name: blog.name,
-                    title: blog.title,
-                    content: blog.content,
-                    thumbnail: blog.thumbnail,
-                    request: {
-                        type: 'GET',
-                        url: req.hostname + '/blogs/' + blog._id
-                    }
-                }
-            }),
-            request
-        }
-
-        res.set("x-total-count", blogs.length);
-        res.status(200).json(response)
-    })
-    .catch(error => {
-        console.log(error)
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+			res.status(200).json(response);
+		})
+		.catch((error) => {
+			console.log(error);
+			res.status(500).json({
+				msg: 'Server error!',
+				error,
+			});
+		});
+};
 
 exports.getOne = (req, res, next) => {
-    const {blogId} = req.params
+	const { blogId } = req.params;
 
-    Blog.findById(blogId)
-    .select('_id date writer name title content thumbnail')
-    .then(blog => {
-        if(!blog){
-            return res.status(404).json({
-                msg: 'ValidatorError',
-                errors: {
-                    user: `Blog not found!`
-                }
-            })
-        }
+	Blog.findById(blogId)
+		.then((blog) => {
+			if (!blog) {
+				return res.status(202).json({
+					msg: 'ValidatorError',
+					errors: {
+						user: `Blog not found!`,
+					},
+				});
+			}
 
-        res.status(200).json({
-            msg: 'success',
-            blog: {
-                _id: blog._id,
-                date: blog.date,
-                writer: blog.writer,
-                name: blog.name,
-                title: blog.title,
-                content: blog.content,
-                thumbnail: blog.thumbnail,
-                request: {
-                    type: 'GET',
-                    url: req.hostname + '/blogs'
-                }
-            }
-        })
-    })
-    .catch(error => {
-        console.log(error)
-        res.status(500).json({
-            msg: "Server error!",
-            error
-        })
-    })
-}
+			res.status(200).json({
+				msg: 'success',
+				blog: {
+					...blog['_doc'],
+					request: {
+						type: 'GET',
+						url: req.hostname + '/blogs',
+					},
+				},
+			});
+		})
+		.catch((error) => {
+			console.log(error);
+			res.status(500).json({
+				msg: 'Server error!',
+				error,
+			});
+		});
+};
 
-exports.create = (req, res, next) => {
-    const {title, content} = req.body
+exports.create = async (req, res, next) => {
+	const { title, content } = req.body;
 
-    if (req.userData.roles != 'admin'){
-        return res.status(403).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `You don't have the permission!`
-            }
-        })
-    }
+	if (req.userData.roles != 'admin') {
+		return res.status(403).json({
+			msg: 'ValidatorError',
+			errors: {
+				user: `You don't have the permission!`,
+			},
+		});
+	}
+	try {
+		let thumbnail = '';
+		let cloudinary_id = '';
 
-    const thumbnail = req.file ? req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '') : ''
+		if (req.file) {
+			const ret = await cloudinary.uploadSingleAvatar(req.file.path);
+			if (ret) {
+				thumbnail = ret.url;
+				cloudinary_id = ret.id;
+			}
+		}
 
-    const blog = new Blog({
-        writer: req.userData._id,
-        name: req.userData.name,
-        title,
-        content,
-        thumbnail
-    })
+		const blog = new Blog({
+			_id: mongoose.Types.ObjectId(),
+			writer: req.userData._id,
+			name: req.userData.name,
+			title,
+			content,
+			thumbnail,
+			cloudinary_id,
+		});
 
-    blog.save()
-    .then(async blog => {
+		const history = {
+			type: 'create',
+			collection: 'blog',
+			task: `Create a new blog: ${blog.title}`,
+			date: new Date(),
+			others: {
+				id: blog._id,
+			},
+		};
 
-        await saveHistory(req.userData._id, 'blogs', 'manage', `Create a blog: ${blog._id}-${title} | ${new Date()}`)
-        await saveStatistic(0, 0, 0, 0, 1, 0)
+		const [newBlog] = await Promise.all([
+			blog.save(),
+			saveStatistic(0, 0, 0, 0, 1, 0),
+			User.updateOne(
+				{ _id: req.userData._id },
+				{
+					$push: {
+						'history.manage': history,
+					},
+				}
+			),
+		]);
 
-        res.status(201).json({
-            msg: "success",
-            blog: {
-                _id: blog._id,
-                date: blog.date,
-                writer: req.userData._id,
-                name: req.userData.name,
-                title: blog.title,
-                content: blog.content,
-                thumbnail: blog.thumbnail,
-                request: {
-                    type: 'GET',
-                    url: req.hostname + '/blogs/' + blog._id
-                }
-            }
-        })
-    })
-    .catch(error => {
-        let respond = {}
-        error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+		res.status(201).json({
+			msg: 'success',
+			blog: {
+				...newBlog['_doc'],
+				request: {
+					type: 'GET',
+					url: req.hostname + '/blogs/' + blog._id,
+				},
+			},
+		});
+	} catch (error) {
+		console.log(error);
+		let respond = {};
+		error.errors &&
+			Object.keys(error.errors).forEach(
+				(err) => (respond[err] = error.errors[err].message)
+			);
 
-        res.status(422).json({
-            msg: 'ValidatorError',
-            errors: respond
-        })
-    })
-}
+		res.status(202).json({
+			msg: 'ValidatorError',
+			errors: respond,
+		});
+	}
+};
 
-exports.update = (req, res, next) => {
-    const {blogId: _id} = req.params
+exports.update = async (req, res, next) => {
+	const { blogId: _id } = req.params;
 
-    if (req.userData.roles != 'admin'){
-        return res.status(403).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `You don't have the permission!`
-            }
-        })
-    }
+	if (req.userData.roles != 'admin') {
+		return res.status(403).json({
+			msg: 'ValidatorError',
+			errors: {
+				user: `You don't have the permission!`,
+			},
+		});
+	}
 
-    const blog = {}
+	try {
+		const blog = await Blog.findById(_id);
+		const oldBlog = blog.title;
 
-    for (const ops of req.body) {
-        blog[ops.propName] = ops.value
-    }
+		// Avatar upload/change
+		if (req.file) {
+			const ret = await cloudinary.uploadSingleAvatar(req.file.path);
+			if (ret) {
+				await cloudinary.destroySingle(blog.cloudinary_id);
+				blog.thumbnail = ret.url;
+				blog.cloudinary_id = ret.id;
+			}
+		}
 
-    Blog.updateOne({_id}, {$set: blog}, {runValidators: true})
-    .then(async result => {
- 
-        await saveHistory(req.userData._id, 'blogs', 'manage', `Update a blog: ${_id}-${Object.keys(blog).join('-')} | ${new Date()}`)
+		const keys = Object.keys(req.body);
+		for (const key of keys) {
+			blog[key] = req.body[key];
+		}
 
-        res.status(200).json({
-            msg: "success",
-            request: {
-                type: 'GET',
-                url: req.hostname + '/blogs/' + _id
-            }
-        })
-    })
-    .catch(error => {
-        let respond = {}
-        error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+		const history = {
+			type: 'update',
+			collection: 'blog',
+			task: `Update a blog: ${oldBlog}`,
+			date: new Date(),
+			others: {
+				id: blog._id,
+				fields: keys.map((key) => `${key}: ${req.body[key]}`),
+			},
+		};
 
-        res.status(422).json({
-            msg: 'ValidatorError',
-            errors: respond
-        })
-    })
-}
+		const [newBlog] = await Promise.all([
+			blog.save(),
+			User.updateOne(
+				{ _id: req.userData._id },
+				{
+					$push: {
+						'history.manage': history,
+					},
+				}
+			),
+		]);
+
+		res.status(200).json({
+			msg: 'success',
+			blog: newBlog,
+			request: {
+				type: 'GET',
+				url: req.hostname + '/blogs/' + _id,
+			},
+		});
+	} catch (error) {
+		console.log(error);
+		let respond = {};
+		error.errors &&
+			Object.keys(error.errors).forEach(
+				(err) => (respond[err] = error.errors[err].message)
+			);
+
+		res.status(202).json({
+			msg: 'ValidatorError',
+			errors: respond,
+		});
+	}
+};
 
 exports.delete = async (req, res, next) => {
-    const {blogId: _id} = req.params
+	const { blogId: _id } = req.params;
 
-    if (req.userData.roles != 'admin'){
-        return res.status(403).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `You don't have the permission!`
-            }
-        })
-    }
+	if (req.userData.roles != 'admin') {
+		return res.status(403).json({
+			msg: 'ValidatorError',
+			errors: {
+				user: `You don't have the permission!`,
+			},
+		});
+	}
 
-    const blog = await Blog.findById(_id)
+	try {
+		const blog = await Blog.findById(_id);
 
-    Blog.deleteOne({_id})
-    .then(async result => {
+		const history = {
+			type: 'delete',
+			collection: 'blog',
+			task: `Delete a blog: ${blog.title}`,
+			date: new Date(),
+			others: {
+				id: blog._id,
+			},
+		};
 
-        await saveHistory(req.userData._id, 'blogs', 'manage', `Delete a blog: ${blog._id}-${blog.title} | ${new Date()}`)
+		await Promise.all([
+			Blog.deleteOne({ _id }),
+			User.updateOne(
+				{ _id: req.userData._id },
+				{
+					$push: {
+						'history.manage': history,
+					},
+				}
+			),
+		]);
 
-        res.status(200).json({
-            msg: 'success',
-            request: {
-                type: 'POST',
-                url: req.hostname + '/blogs',
-                body: {
-                    writer: 'ObjectId',
-                    title: 'String',
-                    content: 'String',
-                    thumbnail: 'File: .jpeg, .jpg, .png'
-                }
-            }
-        })
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+		res.status(200).json({
+			msg: 'success',
+			request: {
+				type: 'POST',
+				url: req.hostname + '/blogs',
+				body: {
+					writer: 'ObjectId',
+					title: 'String',
+					content: 'String',
+					thumbnail: 'File: .jpeg, .jpg, .png',
+				},
+			},
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({
+			msg: 'Server error!',
+			error,
+		});
+	}
+};

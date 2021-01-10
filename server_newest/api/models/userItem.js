@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const slug = require('mongoose-slug-generator')
 
 const userItemSchema = mongoose.Schema({
     userId: {
@@ -13,23 +12,37 @@ const userItemSchema = mongoose.Schema({
     items: {
         guns: {
             type: Array,
-            default: ['M16A4']
+            default: [{
+                id: '',
+                name: 'AWM',
+                detail: 'Item detail',
+                boughtAt: new Date()
+            }]
         }
         ,
         hats: {
             type: Array,
-            default: ['Cowboy']
+                default: [{id: '',
+                name: 'Cowboy',
+                detail: 'Item detail',
+                boughtAt: new Date()
+            }]
         }
         ,
         outfits: {
             type: Array,
-            default: ['Bikini']
+            default: [{
+                id: '',
+                name: 'Bikini',
+                detail: 'Item detail',
+                boughtAt: new Date()
+            }]
         }
+
     }
 })
 
 // Add plugins
-mongoose.plugin(slug)
 userItemSchema.set('timestamps', true)
 
 module.exports = mongoose.model('UserItem', userItemSchema)

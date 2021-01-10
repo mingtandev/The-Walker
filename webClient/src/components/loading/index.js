@@ -1,14 +1,13 @@
 import React from "react";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import "./index.scss";
-import { Spinner } from "react-bootstrap";
 
 function Loading() {
   return (
     <div className="loading">
-      <Spinner animation="border" role="status">
-        <span className="sr-only">Loading...</span>
-      </Spinner>
-      <span className="loading__title">LOADING CONTENT...</span>
+      <div className="loading__main">
+        <CircularProgress />
+      </div>
     </div>
   );
 }

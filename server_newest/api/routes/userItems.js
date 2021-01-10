@@ -1,14 +1,12 @@
-const express = require('express')
+// const express = require("express");
 
-const UserItemController = require('./../controllers/userItems')
-const checkAuth = require('./../middleware/checkAuth')
+// const UserItemController = require("./../controllers/userItems");
+// const checkAuth = require("./../middleware/checkAuth");
 
-const router = express.Router()
+// const router = express.Router();
 
-router.get('/', UserItemController.getAll)
-router.get('/:userId', UserItemController.getOne)
-router.patch('/:userId', UserItemController.update)
-// router.delete('/:userId', UserItemController.delete)
-// router.post('/', UserItemController.create)
+// router.get("/", UserItemController.getAll);
+// router.get("/:userId", UserItemController.getOne);
+// router.patch("/:userId", UserItemController.update);
 
-module.exports = router
+// module.exports = router;

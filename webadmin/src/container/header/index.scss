@@ -1,14 +1,17 @@
 .header {
-  position: relative;
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+  right: 0;
+  left: 0;
   padding: 1rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  right: 0;
-  left: auto;
   background: #fff;
   border-bottom: 1px solid #d8dbe0;
   box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 4px 1px;
+  z-index: 100;
   &__left {
     display: flex;
     align-items: center;
@@ -55,6 +58,15 @@
   &__right {
     display: flex;
     align-items: center;
+  }
+  &__user {
+    &-name {
+      margin-right: 20px;
+      -webkit-user-select: none; /* Chrome all / Safari all */
+      -moz-user-select: none; /* Firefox all */
+      -ms-user-select: none; /* IE 10+ */
+      user-select: none; /* Likely future */
+    }
   }
   &__avatar {
     position: relative;

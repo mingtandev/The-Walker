@@ -1,0 +1,21 @@
+.member {
+  padding: 7rem;
+  &__avatar {
+    margin-bottom: 1rem;
+    width: 100%;
+    border-radius: 50%;
+  }
+  &__info {
+    padding-top: 1rem;
+    font-size: 2rem;
+  }
+  &__text {
+    &--bold {
+      font-weight: bold;
+    }
+    &--upper {
+      text-transform: uppercase;
+      font-size: 2rem;
+    }
+  }
+}

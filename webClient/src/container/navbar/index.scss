@@ -11,47 +11,49 @@
   background-color: black;
   box-shadow: 0 1px 2px deepskyblue;
   transition: 0.3s ease-in-out;
-  z-index: 10;
+  z-index: 100;
   &__logo {
     margin-right: 2rem;
     width: 5rem;
-    border-radius: 50%;
-    border: 2px solid darkgrey;
     &-text {
       font-size: 2rem;
-      font-weight: bold;
-      font-style: italic;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-image: linear-gradient(
-        to right,
-        orange,
-        orange 50%,
-        white 50%
-      );
-      background-size: 200% 100%;
-      background-position: 100%;
-      &:hover {
-        transition: all 0.2s cubic-bezier(0, 0, 0.23, 1);
-        background-position: 0%;
-      }
+      color: rgb(255, 136, 0);
+      font-family: Arial, Helvetica, sans-serif;
     }
   }
 
   &__links {
     &--pages,
     &--auth {
-      position: relative;
       margin: 0;
       padding: 0;
       list-style: none;
       display: flex;
+      align-items: center;
     }
   }
   &__user {
-    display: flex;
+    position: relative;
+    &-name {
+      margin: 0;
+      padding: 0;
+      color: white;
+      user-select: none;
+    }
+    &-avatar {
+      img {
+        height: 4rem;
+      }
+    }
+    .MuiButton-root {
+      color: white;
+      border: none;
+      outline: 0;
+      background-color: transparent;
+      &:hover {
+        background-color: transparent;
+      }
+    }
   }
   &__link {
     position: relative;
@@ -73,32 +75,8 @@
       font-weight: bold;
       color: orange;
     }
-    &--user {
-      cursor: pointer;
-      position: relative;
-      // margin-right: 2rem;
-      // &dropdown {
-      //   display: none;
-      //   position: absolute;
-      //   background-color: #f9f9f9;
-      //   min-width: 160px;
-      //   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-      //   transform: translateX(-30%);
-      //   z-index: 1;
-      // }
-      &:hover ~ .nav__link--userdropdown {
-        display: block;
-      }
-      &dropdown:hover {
-        display: block;
-      }
-    }
-    &--logout {
-      margin-right: 2rem;
-      color: red;
-      font-weight: bold;
+    &--capitalize {
       text-transform: capitalize;
-      cursor: pointer;
     }
     &:last-child {
       margin-right: 0;
@@ -138,39 +116,57 @@
   &__sub {
     position: absolute;
     top: 100%;
-    right: 4%;
+    right: 6%;
     padding: 5px 15px;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
-    background-color: white;
-    color: black;
+    background-color: black;
+    border: 1px solid white;
+    color: white;
     &Cash {
+      margin-left: 0.5rem;
+      font-weight: bold;
       font-size: 2rem;
-      color: red;
+      &-low {
+        color: red;
+      }
+      &-high {
+        color: rgb(57, 231, 57);
+      }
     }
   }
 }
 
 .userMenu {
-  // display: none;
+  min-width: 21rem;
   position: absolute;
   top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
   background-color: #f9f9f9;
-  min-width: 20rem;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  transform: translateX(-30%);
+  box-shadow: 0px 8px 5px 0px rgba(0, 0, 0, 0.5);
   z-index: 1;
-  a {
+  &__item {
+    // Link tag
     margin-bottom: 0;
-    p {
+    div {
+      margin: 1rem;
       padding: 1rem;
       font-weight: bold;
+      display: grid;
+      grid-template-columns: 20% 80%;
+      justify-items: start;
+      .MuiSvgIcon-root {
+        font-size: 2rem;
+      }
+      &:hover {
+        color: rgb(36, 171, 224);
+      }
     }
-  }
-}
-
-@keyframes stripes {
-  to {
-    background-size: 100% 100%;
+    &-logout {
+      div {
+        &:hover {
+          color: red;
+        }
+      }
+    }
   }
 }

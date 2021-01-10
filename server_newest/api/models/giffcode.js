@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const Item = require('./item')
 
 const enu = {
     values: ['Normal', 'Vip'],
@@ -39,17 +38,6 @@ codeSchema.path('code').validate(async (value) => {
     return !codeCount
 
 }, 'Code already exists!')
-
-// codeSchema.path('items').validate((value) => {
-//     for (const ele of value) {
-//         const respond = mongoose.Types.ObjectId.isValid(ele)
-//         console.log(respond)
-//         if (!respond) return 0
-//     }
-
-//     return 1
-
-// }, 'Code already exists!')
 
 // Add plugins
 codeSchema.set('timestamps', true)

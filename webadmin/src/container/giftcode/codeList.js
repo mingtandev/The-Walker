@@ -23,7 +23,6 @@ function CodeList() {
   async function getAllCodes() {
     try {
       let res = await giftcodeApi.getAll();
-      console.log(res);
       let giftcodeArray = res.giffcodes;
       dispatch(giftcodeAction.loadGiftcodes(giftcodeArray));
     } catch (error) {
@@ -34,10 +33,11 @@ function CodeList() {
     getAllCodes();
   }, []);
 
-  const handleDialogOpen = (rowData, e) => {
+  const handleDialogOpen = async (rowData, e) => {
+    if (e === actions.EDIT) {
+      setUpdateOpen(true);
+    } else setDeleteConfirm(true);
     setRowData(rowData);
-    if (e === actions.EDIT) setUpdateOpen(true);
-    else setDeleteConfirm(true);
   };
 
   const handleDialogClose = (e) => {
@@ -48,7 +48,6 @@ function CodeList() {
   const handleDelete = async (data) => {
     try {
       let res = await giftcodeApi.delete(data.code);
-      console.log(res);
       if (res && res.msg === "success") {
         dispatch(giftcodeAction.deleteGiftcode(data.code));
         setDeleteConfirm(false);
@@ -66,7 +65,6 @@ function CodeList() {
     }
     try {
       let res = await giftcodeApi.update(codeId, body);
-      console.log(res);
       if (res && res.msg === "success") {
         setUpdateOpen(false);
         getAllCodes();
@@ -76,10 +74,9 @@ function CodeList() {
       console.log(error);
     }
   };
-
   return (
     <>
-      <div className="giftcode__option">
+      <div className="giftcodes__option">
         <Link to="/giftcode/create">
           <Button variant="contained" color="primary">
             <AddIcon fontSize="large" />
@@ -96,38 +93,43 @@ function CodeList() {
             actionsColumnIndex: -1,
           }}
           actions={[
-            {
+            () => ({
               tooltip: "Remove All Selected Users",
               icon: "delete",
               onClick: (evt, data) => {
                 handleDialogOpen(data, actions.DELETE);
               },
-            },
-            {
+            }),
+            () => ({
               tooltip: "Edit",
               icon: "edit",
               onClick: (evt, data) => {
                 handleDialogOpen(data, actions.EDIT);
               },
-            },
+            }),
           ]}
         />
       </div>
-      <GiftcodeEditDialog
-        onsubmit={handleUpdate}
-        data={rowData}
-        show={updateOpen}
-        error={error}
-        onClearError={() => setError("")}
-        onclose={() => handleDialogClose(actions.EDIT)}
-      />
-      <DeleteConfirmBox
-        onsubmit={handleDelete}
-        title="Delete this giftcode?"
-        data={rowData}
-        show={deleteConfirm}
-        onclose={() => handleDialogClose(actions.DELETE)}
-      />
+
+      {updateOpen && (
+        <GiftcodeEditDialog
+          onsubmit={handleUpdate}
+          data={rowData}
+          show={updateOpen}
+          error={error}
+          onClearError={() => setError("")}
+          onclose={() => handleDialogClose(actions.EDIT)}
+        />
+      )}
+      {deleteConfirm && (
+        <DeleteConfirmBox
+          onsubmit={handleDelete}
+          title="Delete this giftcode?"
+          data={rowData}
+          show={deleteConfirm}
+          onclose={() => handleDialogClose(actions.DELETE)}
+        />
+      )}
     </>
   );
 }

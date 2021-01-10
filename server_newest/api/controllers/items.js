@@ -1,334 +1,427 @@
-const mongoose = require('mongoose')
+const Item = require('../models/item');
+const User = require('../models/user');
 
-const Item = require('../models/item')
-const User = require('../models/user')
+const cloudinary = require('./../config/cloudinary');
 
-const {saveHistory} = require('./../utils/history')
-const {saveStatistic} = require('./../utils/statistic')
-const {saveUserItem} = require('./../utils/userItem')
+const { saveStatistic } = require('./../utils/statistic');
 
 exports.getAll = (req, res, next) => {
-    const page = parseInt(req.query.page) || 1
-    const items_per_page = parseInt(req.query.limit) || 100
+	const page = parseInt(req.query.page) || 1;
+	const items_per_page = parseInt(req.query.limit) || 100;
 
-    if (page < 1) page = 1
+	if (page < 1) page = 1;
 
-    Item.find({})
-    .select('_id name slugName thumbnail type price sale saleExpiresTime')
-    .skip((page - 1) * items_per_page)
-    .limit(items_per_page)
-    .then(async items => {
-        const request = {}
-        const len = await Item.find({}).count()
+	Item.find({})
+		.skip((page - 1) * items_per_page)
+		.limit(items_per_page)
+		.then(async (items) => {
+			const request = {};
+			const len = await Item.find({}).countDocuments();
 
-        request.currentPage = page
-        request.totalPages = Math.ceil(len / items_per_page)
+			request.currentPage = page;
+			request.totalPages = Math.ceil(len / items_per_page);
 
-        if (page > 1) {
-            request.previous = {
-                page: page - 1,
-                limit: items_per_page
-            }
-        }
+			if (page > 1) {
+				request.previous = {
+					page: page - 1,
+					limit: items_per_page,
+				};
+			}
 
-        if (page * items_per_page < len) {
-            request.next = {
-                page: page + 1,
-                limit: items_per_page
-            }
-        }
+			if (page * items_per_page < len) {
+				request.next = {
+					page: page + 1,
+					limit: items_per_page,
+				};
+			}
 
-        const response = {
-            msg: 'success',
-            length: items.length,
-            products: items.map(item => {
-                return {
-                    _id: item._id,
-                    name: item.name,
-                    slugName: item.slugName,
-                    thumbnail: item.thumbnail,
-                    type: item.type,
-                    price: item.price,
-                    sale: item.sale,
-                    saleExpiresTime: item.saleExpiresTime,
-                    request: {
-                        type: 'GET',
-                        url: req.hostname + '/items/' + item._id
-                    }
-                }
-            }),
-            request
-        }
+			const response = {
+				msg: 'success',
+				length: items.length,
+				products: items.map((item) => {
+					return {
+						...item['_doc'],
+						request: {
+							type: 'GET',
+							url: req.hostname + '/items/' + item._id,
+						},
+					};
+				}),
+				request,
+			};
 
-        res.set('Content-Range', `items 0-4/${items.length}`)
-        res.status(200).json(response)
-    })
-    .catch(error => {
-        console.log(error)
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+			res.status(200).json(response);
+		})
+		.catch((error) => {
+			console.log(error);
+			res.status(500).json({
+				msg: 'Server error!',
+				error,
+			});
+		});
+};
 
 exports.getOne = (req, res, next) => {
-    const {itemId} = req.params
+	const { itemId } = req.params;
 
-    Item.findById(itemId)
-    .select('_id name slugName thumbnail type price sale saleExpiresTime')
-    .then(item => {
-        if(!item){
-            return res.status(404).json({
-                msg: 'ValidatorError',
-                errors: {
-                    user: `Item not found!`
-                }
-            })
-        }
+	Item.findById(itemId)
+		.then((item) => {
+			if (!item) {
+				return res.status(202).json({
+					msg: 'ValidatorError',
+					errors: {
+						user: `Item not found!`,
+					},
+				});
+			}
 
-        res.status(200).json({
-            msg: "success",
-            item: {
-                _id: item._id,
-                name: item.name,
-                slugName: item.slugName,
-                thumbnail: item.thumbnail,
-                type: item.type,
-                price: item.price,
-                sale: item.sale,
-                saleExpiresTime: item.saleExpiresTime,
-                request: {
-                    type: 'GET',
-                    url: req.hostname + '/items'
-                }
-            }
-        })
-    })
-    .catch(error => {
-        console.log(error)
-        res.status(500).json({
-            msg: "Server error!",
-            error
-        })
-    })
-}
+			res.status(200).json({
+				msg: 'success',
+				item: {
+					...item['_doc'],
+					request: {
+						type: 'GET',
+						url: req.hostname + '/items',
+					},
+				},
+			});
+		})
+		.catch((error) => {
+			console.log(error);
+			res.status(500).json({
+				msg: 'Server error!',
+				error,
+			});
+		});
+};
 
 exports.buyOne = async (req, res, next) => {
-    const {itemId} = req.params
-    const {_id} = req.userData
+	const { itemId } = req.params;
+	const { _id } = req.userData;
 
-    const [user, item] = await Promise.all([
-        User.findById(_id),
-        Item.findById(itemId)
-    ])
+	try {
+		const [user, item] = await Promise.all([
+			User.findById(_id),
+			Item.findById(itemId),
+		]);
 
-    const {cash} = user
-    const {name, type, price, sale, saleExpiresTime} = item
+		// Destructuring
+		const { cash } = user;
+		const {
+			name,
+			type,
+			price,
+			sale,
+			thumbnail,
+			saleExpiresTime,
+			details,
+			description,
+		} = item;
 
-    let salePrice = price
+		let salePrice = price;
 
-    if(saleExpiresTime >= Date.now()){
-        salePrice = (price - sale/100*price).toFixed(2)
+		// Check sale
+		if (saleExpiresTime >= Date.now()) {
+			salePrice = (price - (sale / 100) * price).toFixed(2);
+		}
 
-        console.log(`Sale: ${sale}%`)
-        console.log(`Sale price: ${salePrice}`)
-    }
+		if (cash < salePrice) {
+			return res.status(202).json({
+				msg: 'ValidatorError',
+				errors: {
+					user: `Cash not enough!`,
+				},
+			});
+		}
 
-    if(cash < salePrice) {
-        return res.status(200).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `Cash not enough!`
-            }
-        })
-    }
+		// Update cash
+		user.cash = +cash - +salePrice;
 
-    await Promise.all([
-        saveHistory(_id, 'items', 'personal', `Buy a item: ${name}-${type}-${price}-${salePrice}-${sale}-${saleExpiresTime}} | ${new Date()}`),
-        saveStatistic(0, 0, 1, 0, 0, salePrice),
-        saveUserItem(_id, [itemId], 0)
-    ])
+		// Add to user items
+		const record = {
+			id: item._id,
+			name,
+			details,
+			thumbnail,
+			description,
+			boughtAt: new Date(),
+		};
 
-    user.cash = cash - salePrice
-    User.updateOne({_id: user._id}, {$set: user})
-    .then(result => {
-        res.status(200).json({
-            msg: 'success',
-            user: {
-                _id: user._id,
-                roles: user.roles,
-                name: user.name,
-                slugName: user.slugName,
-                email: user.email,
-                cash: user.cash
-            }
-        })
-    })
-    .catch(error => {
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+		const history = {
+			type: 'buy',
+			collection: 'item',
+			task: `Buy a new item: ${item.name}`,
+			date: new Date(),
+			others: {
+				id: item._id,
+			},
+		};
 
-exports.create = (req, res, next) => {
-    const {name, type, price, sale, saleExpiresTime} = req.body
+		user.history.personal.push(history);
+		user.items[`${type}s`].push(record);
 
-    if (req.userData.roles != 'admin'){
-        return res.status(403).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `You don't have the permission!`
-            }
-        })
-    }
+		await Promise.all([
+			saveStatistic(0, 0, 1, 0, 0, salePrice),
+			User.updateOne({ _id: user._id }, { $set: user }),
+		]);
 
-    const thumbnail = req.file ? req.hostname + '/' + req.file.path.replace(/\\/g,'/').replace('..', '') : ''
+		res.status(200).json({
+			msg: 'success',
+			user,
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({
+			msg: 'Server error!',
+			error,
+		});
+	}
+};
 
-    const item = new Item({
-        name,
-        type,
-        price,
-        thumbnail
-    })
+exports.create = async (req, res, next) => {
+	const {
+		name,
+		type,
+		price,
+		description,
+		details,
+		sale,
+		saleExpiresTime,
+	} = req.body;
 
-    if(+sale > 0){
-        item['sale'] = +sale,
-        +saleExpiresTime > 0 ? item['saleExpiresTime'] = Date.now() + +saleExpiresTime*24*60*60*1000 : item['saleExpiresTime'] = Date.now() + 259200000
-    }
+	console.log('Body', req.body);
 
-    item.save()
-    .then(async newItem => {
+	if (req.userData.roles != 'admin') {
+		return res.status(403).json({
+			msg: 'ValidatorError',
+			errors: {
+				user: `You don't have the permission!`,
+			},
+		});
+	}
 
-        await saveHistory(req.userData._id, 'items', 'manage', `Create a new item: ${newItem._id}-${name}-${type}-${price}-${newItem.sale}-${newItem.saleExpiresTime} | ${new Date()}`)
+	try {
+		let thumbnail = '';
+		let cloudinary_id = '';
 
-        res.status(201).json({
-            msg: "success",
-            item: {
-                _id: newItem._id,
-                name: newItem.name,
-                slugName: newItem.slugName,
-                thumbnail: newItem.thumbnail,
-                type: newItem.type,
-                price: newItem.price,
-                sale: item.sale,
-                saleExpiresTime: item.saleExpiresTime,
-                request: {
-                    type: 'GET',
-                    url: req.hostname + '/items/' + newItem._id
-                }
-            }
-        })
-    })
-    .catch(error => {
-        let respond = {}
-        error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+		if (req.file) {
+			const ret = await cloudinary.uploadSingleAvatar(req.file.path);
+			if (ret) {
+				thumbnail = ret.url;
+				cloudinary_id = ret.id;
+			}
+		}
 
-        res.status(422).json({
-            msg: 'ValidatorError',
-            errors: respond
-        })
+		const item = new Item({
+			name,
+			type,
+			price,
+			description,
+			details: JSON.parse(details),
+			thumbnail,
+			cloudinary_id,
+		});
 
-        // {
-        //     "msg": "ValidatorError",
-        //     "errors": {
-        //         "name": "Name is required!",
-        //         "type": "Type is required!",
-        //         "price": "Price is required!"
-        //     }
-        // }
-    })
-}
+		// Check sale
+		if (+sale > 0) {
+			(item['sale'] = +sale),
+				+saleExpiresTime > 0
+					? (item['saleExpiresTime'] =
+							Date.now() + +saleExpiresTime * 24 * 60 * 60 * 1000)
+					: (item['saleExpiresTime'] = Date.now() + 259200000);
+		}
+
+		const history = {
+			type: 'create',
+			collection: 'item',
+			task: `Create a new item: ${item.name}`,
+			date: new Date(),
+			others: {
+				id: item._id,
+			},
+		};
+
+		await Promise.all([
+			item.save(),
+			User.updateOne(
+				{ _id: req.userData._id },
+				{
+					$push: {
+						'history.manage': history,
+					},
+				}
+			),
+		]);
+
+		res.status(201).json({
+			msg: 'success',
+			item: {
+				...item['_doc'],
+				request: {
+					type: 'GET',
+					url: req.hostname + '/items/' + item._id,
+				},
+			},
+		});
+	} catch (error) {
+		let respond = {};
+		error.errors &&
+			Object.keys(error.errors).forEach(
+				(err) => (respond[err] = error.errors[err].message)
+			);
+		res.status(202).json({
+			msg: 'ValidatorError',
+			errors: respond,
+		});
+	}
+};
 
 exports.update = async (req, res, next) => {
-    const {itemId: _id} = req.params
+	const { itemId: _id } = req.params;
 
-    if (req.userData.roles != 'admin'){
-        return res.status(403).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `You don't have the permission!`
-            }
-        })
-    }
+	if (req.userData.roles != 'admin') {
+		return res.status(403).json({
+			msg: 'ValidatorError',
+			errors: {
+				user: `You don't have the permission!`,
+			},
+		});
+	}
 
-    const item = {}
+	try {
+		const item = await Item.findById(_id);
+		const oldName = item.name;
 
-    for (const ops of req.body) {
-        item[ops.propName] = ops.value
+		// Avatar upload/change
+		if (req.file) {
+			const ret = await cloudinary.uploadSingleAvatar(req.file.path);
+			if (ret) {
+				await cloudinary.destroySingle(item.cloudinary_id);
+				item.thumbnail = ret.url;
+				item.cloudinary_id = ret.id;
+			}
+		}
 
-        if(ops.propName === 'saleExpiresTime'){
-            item[ops.propName] = Date.now() + +ops.value
-        }
-    }
+		const keys = Object.keys(req.body);
+		for (const key of keys) {
+			item[key] = req.body[key];
 
-    if(+item.sale > 0){
-        +item.saleExpiresTime > 0 ? item['saleExpiresTime'] = Date.now() + +item.saleExpiresTime*24*60*60*1000 : item['saleExpiresTime'] = Date.now() + 259200000
-    }
+			if (key === 'saleExpiresTime') {
+				item[key] = Date.now() + +req.body[key];
+			}
+		}
 
-    await saveHistory(req.userData._id, 'items', 'manage', `Update a item: ${_id}-${Object.keys(item).join('-')} | ${new Date()}`)
+		req.body.details ? (item.details = JSON.parse(req.body.details)) : '';
 
-    Item.updateOne({_id}, {$set: item}, {runValidators: true})
-    .then(result => {
-        res.status(200).json({
-            msg: "success",
-            request: {
-                type: 'GET',
-                url: req.hostname + '/items/' + _id
-            }
-        })
-    })
-    .catch(error => {
-        let respond = {}
-        error.errors && Object.keys(error.errors).forEach(err => respond[err] = error.errors[err].message)
+		// Check sale
+		if (+req.body.sale > 0) {
+			+item.saleExpiresTime > 0
+				? (item['saleExpiresTime'] =
+						Date.now() + +item.saleExpiresTime * 24 * 60 * 60 * 1000)
+				: (item['saleExpiresTime'] = Date.now() + 259200000);
+		}
 
-        res.status(422).json({
-            msg: 'ValidatorError',
-            errors: respond
-        })
-    })
-}
+		const history = {
+			type: 'update',
+			collection: 'item',
+			task: `Update a item: ${oldName}`,
+			date: new Date(),
+			others: {
+				id: item._id,
+				fields: keys.map((key) => `${key}: ${req.body[key]}`),
+			},
+		};
+
+		await Promise.all([
+			Item.updateOne({ _id: item._id }, { $set: item }),
+			User.updateOne(
+				{ _id: req.userData._id },
+				{
+					$push: {
+						'history.manage': history,
+					},
+				}
+			),
+		]);
+
+		res.status(200).json({
+			msg: 'success',
+			item,
+			request: {
+				type: 'GET',
+				url: req.hostname + '/items/' + _id,
+			},
+		});
+	} catch (error) {
+		console.log(error);
+		let respond = {};
+		error.errors &&
+			Object.keys(error.errors).forEach(
+				(err) => (respond[err] = error.errors[err].message)
+			);
+		res.status(202).json({
+			msg: 'ValidatorError',
+			errors: respond,
+		});
+	}
+};
 
 exports.delete = async (req, res, next) => {
-    const {itemId: _id} = req.params
+	const { itemId: _id } = req.params;
 
-    if (req.userData.roles != 'admin'){
-        return res.status(403).json({
-            msg: 'ValidatorError',
-            errors: {
-                user: `You don't have the permission!`
-            }
-        })
-    }
+	if (req.userData.roles != 'admin') {
+		return res.status(403).json({
+			msg: 'ValidatorError',
+			errors: {
+				user: `You don't have the permission!`,
+			},
+		});
+	}
 
-    const item = await Item.findById(_id)
-    const {name, type, price, sale, saleExpiresTime} = item
+	try {
+		const item = await Item.findById(_id);
 
-    await saveHistory(req.userData._id, 'items', 'manage', `Delete a item: ${_id}-${name}-${type}-${price}-${sale}-${saleExpiresTime} | ${new Date()}`)
+		const history = {
+			type: 'delete',
+			collection: 'item',
+			task: `Delete a item: ${item.name}`,
+			date: new Date(),
+			others: {
+				id: item._id,
+			},
+		};
 
-    Item.deleteOne({_id})
-    .then(result => {
-        res.status(200).json({
-            msg: 'success',
-            request: {
-                type: 'POST',
-                url: req.hostname + '/items',
-                body: {
-                    name: 'String',
-                    type: 'String',
-                    price: 'Number',
-                    thumbnail: 'File: .jpeg, .jpg, .png'
-                }
-            }
-        })
-    })
-    .catch(error => {
-        console.log(error)
-        res.status(500).json({
-            msg: 'Server error!',
-            error
-        })
-    })
-}
+		await Promise.all([
+			Item.deleteOne({ _id: item._id }),
+			User.updateOne(
+				{ _id: req.userData._id },
+				{
+					$push: {
+						'history.manage': history,
+					},
+				}
+			),
+		]);
+
+		res.status(200).json({
+			msg: 'success',
+			request: {
+				type: 'POST',
+				url: req.hostname + '/items',
+				body: {
+					name: 'String',
+					type: 'String',
+					price: 'Number',
+					detail: 'String',
+					thumbnail: 'File: .jpeg, .jpg, .png',
+				},
+			},
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({
+			msg: 'Server error!',
+			error,
+		});
+	}
+};

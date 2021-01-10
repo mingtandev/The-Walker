@@ -1,14 +1,11 @@
-const express = require('express')
+// const express = require('express')
 
-const HistoryController = require('./../controllers/histories')
-const checkAuth = require('./../middleware/checkAuth')
+// const HistoryController = require('./../controllers/histories')
+// const checkAuth = require('./../middleware/checkAuth')
 
-const router = express.Router()
+// const router = express.Router()
 
-router.get('/', checkAuth, HistoryController.getAll)
-router.get('/:userId', checkAuth, HistoryController.getOne)
-// router.post('/', HistoryController.create)
-// router.patch('/:codeId', checkAuth, HistoryController.update)
-// router.delete('/:codeId', checkAuth, HistoryController.delete)
+// router.get('/', checkAuth, HistoryController.getAll)
+// router.get('/:userId', checkAuth, HistoryController.getOne)
 
-module.exports = router
+// module.exports = router

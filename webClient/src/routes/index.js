@@ -13,15 +13,22 @@ function Routes() {
             key={i}
             path={route.path}
             exact={route.exact}
-            render={() => {
-              if (route.role === "notfound") return <route.component />;
+            render={(props) => {
               if (!route.role) return <route.component />;
               if (route.role === "noAuth") {
                 if (!localStorage.getItem("token")) return <route.component />;
                 else return <Redirect to="/" />;
               }
               if (!localStorage.getItem("token"))
-                return <Redirect to="/sign-in" />;
+                // return <Redirect to="/sign-in" />;
+                return (
+                  <Redirect
+                    to={{
+                      pathname: "/sign-in",
+                      state: { from: props.location },
+                    }}
+                  />
+                );
               return <route.component />;
             }}
           />
