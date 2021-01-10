@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Gameplay.unity
     guid: 93195e8f68a149f49a51512a91091643
+  - enabled: 1
+    path: Assets/Scenes/IntroR2WGame.unity
+    guid: 58173fb3ec56b0348bbcc413ee7815b2
   m_configObjects: {}

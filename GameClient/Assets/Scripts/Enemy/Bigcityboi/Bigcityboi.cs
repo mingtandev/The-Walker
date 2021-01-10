@@ -74,12 +74,18 @@ public class Bigcityboi : Enemy
     {
         anim.Play("Die");
         isDeath = true;
-
+        UIManager.Instance.BigboiKill.text = "Kill Bigboi 1/1";
+        GameManager.Instance.SetCoin(10000);
+        UIManager.Instance.MissionCompleteShow();
         yield return new WaitForSeconds(1f);
 
         this.enabled = false;
         GetComponent<CapsuleCollider>().enabled = false;
         GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
+
+        yield return new WaitForSeconds(4f);
+
+        StartCoroutine(GameManager.Instance.LoadAsyncChronous(0 , UIManager.Instance.LoadingScene));
 
     }
 

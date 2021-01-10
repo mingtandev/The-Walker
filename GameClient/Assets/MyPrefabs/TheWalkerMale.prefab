@@ -1709,7 +1709,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8fd6ec4164f0b247a1cf68e11c36b99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  heath: 50
+  heath: 15
   attackPoint: {fileID: 6560048870668675872}
   agent: {fileID: 2428918907394670477}
   player: {fileID: 0}

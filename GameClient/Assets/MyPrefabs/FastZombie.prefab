@@ -112,5 +112,10 @@ PrefabInstance:
       propertyPath: isFemale
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8662893833421291528, guid: d8a07ee6ae26bfc4690e09b1e1613029,
+        type: 3}
+      propertyPath: heath
+      value: 15
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d8a07ee6ae26bfc4690e09b1e1613029, type: 3}

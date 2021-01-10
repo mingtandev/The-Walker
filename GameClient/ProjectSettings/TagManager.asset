@@ -19,6 +19,12 @@ TagManager:
   - TargetFollow
   - CameraFreeLook
   - BuffAmmo
+  - PosPrimaryGun
+  - PosSecondaryGun
+  - TitleName_PGUN
+  - TitleName_SGUN
+  - Pos outfit
+  - Outfit
   layers:
   - Default
   - TransparentFX

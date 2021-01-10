@@ -6,7 +6,7 @@ public class Player : MonoBehaviour
 {
     // field
     private int heal;
-    private bool isDeath;
+    public bool isDeath;
     Animator anim;
     public int Heal
     {
@@ -54,7 +54,7 @@ public class Player : MonoBehaviour
             anim.Play("Die");
             GetComponent<MyPlayerController>().enabled = false;
             Heal = 0;
-
+            UIManager.Instance.GameOverShow();
         }
     }
 

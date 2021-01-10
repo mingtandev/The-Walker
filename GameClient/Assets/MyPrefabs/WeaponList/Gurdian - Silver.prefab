@@ -17,17 +17,23 @@ MonoBehaviour:
   bulletTrail: {fileID: 1046001694842650, guid: 9eb7304a6c9aedb40abba583aff826c5,
     type: 3}
   barrel: {fileID: 394211364918870618}
+  hitFX: {fileID: 0}
+  weaponAnimation: {fileID: 0}
   curAmmo: 0
   loadAmmo: 20
   totalAmmo: 40
-  nameGun: Gurdian
+  nameGun: Gurdian - Silver
   type: 0
   timeDelay: 0.5
   damage: 30
+  bulletSpeed: 0
+  bulletDrop: 0
+  posOfSlotGun: {x: 0, y: 0, z: 0}
   readyToUse: 0
   canShot: 0
   isReaload: 0
   canReload: 1
+  recoil: {fileID: 0}
 --- !u!1001 &6336381848789875057
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -37,7 +43,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1652972229580220, guid: d6c28b427b8bce649b57606441c2061d, type: 3}
       propertyPath: m_Name
-      value: Gurdian - Banana
+      value: Gurdian - Silver
       objectReference: {fileID: 0}
     - target: {fileID: 1652972229580220, guid: d6c28b427b8bce649b57606441c2061d, type: 3}
       propertyPath: m_IsActive

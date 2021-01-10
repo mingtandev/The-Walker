@@ -120,6 +120,14 @@ public class NormalZombie : Enemy
     IEnumerator DieAction()
     {
         anim.Play("Die");
+        GameManager.Instance.Coin += 2000;
+        GameManager.Instance.WalkerKill++;
+        GameManager.Instance.SetCoin(2000);
+
+        if (ZombieType == TypeOfZombie.Malaise)
+        {
+            UIManager.Instance.MalaiseKill.text = "Kill Malaise 1/1";
+        }
         isDeath = true;
         AudioClip clipDie;
         if (isFemale)

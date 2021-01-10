@@ -65,7 +65,7 @@ public class MyPlayerController : MonoBehaviour
     {
         MakeSigleton();
         cameraMain = Camera.main;
-        Cursor.visible = false;
+        //  Cursor.visible = false;
         ground = LayerMask.GetMask("GroundLayer");
         rid = GetComponent<Rigidbody>();
         anim = GetComponent<Animator>();
@@ -350,10 +350,20 @@ public class MyPlayerController : MonoBehaviour
     {
         if (other.transform.tag == "BuffAmmo")
         {
+            UIManager.Instance.ShowGetAmmo();
             if (Input.GetKeyDown(KeyCode.E))
             {
                 MyGun.AddTotalAmmo();
             }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.transform.tag == "BuffAmmo")
+        {
+            UIManager.Instance.HideGetAmmo();
+            
         }
     }
 

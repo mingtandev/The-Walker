@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public struct OwnGun 
+public struct OwnGun
 {
-     public GameObject gun;
-     public bool isOwn;
+    public GameObject gun;
+    public bool isOwn;
 }
 
 [System.Serializable]
@@ -31,7 +31,7 @@ public class GameScene_SaveLoadManager : MonoBehaviour
 {
 
 
-    public static GameScene_SaveLoadManager instance; 
+    public static GameScene_SaveLoadManager instance;
     public OwnGun[] InventoryGun;
     public static OwnGun[] chooseGun = new OwnGun[2];
 
@@ -43,7 +43,8 @@ public class GameScene_SaveLoadManager : MonoBehaviour
     public OwnOutfit[] Outfits;
 
 
-    private void Awake() {
+    private void Awake()
+    {
         MakeSingleton();
         LoadGun();
         LoadSkin();
@@ -51,25 +52,62 @@ public class GameScene_SaveLoadManager : MonoBehaviour
 
     void LoadGun()
     {
-        int length = 0 ;
-        for(int i = 0 ;  i<InventoryGun.Length ; i++)
+        int length = 0;
+        //LOAD PRIMARY
+        for (int i = 0; i < InventoryGun.Length; i++)
         {
-            if(InventoryGun[i].isOwn)
+            if (InventoryGun[i].gun.name.Equals(GunInventory.PRIMARY_GUN))
+            {
+                chooseGun[length] = InventoryGun[i];
+                InventoryGun[i].gun.SetActive(true);
+                length++;
+                if (length == 2)
+                {
+                    return;
+                }
+                break;
+            }
+        }
+        //LOAD SECONDARY`
+        for (int i = 0; i < InventoryGun.Length; i++)
+        {
+            if (InventoryGun[i].gun.name.Equals(GunInventory.SECONDARY_GUN))
+            {
+                chooseGun[length] = InventoryGun[i];
+                InventoryGun[i].gun.SetActive(true);
+                length++;
+                if (length == 2)
+                {
+                    return;
+                }
+                break;
+            }
+        }
+
+        //IF LENGTH == 0 (because player not choose gun)
+        if (length == 0 || length ==1)
+        {
+            //LOAD SECONDARY`
+            for (int i = 0; i < InventoryGun.Length; i++)
+            {
+                if (InventoryGun[i].isOwn)
                 {
                     chooseGun[length] = InventoryGun[i];
                     InventoryGun[i].gun.SetActive(true);
                     length++;
-                    if(length==2)
+                    if (length == 2)
                     {
                         return;
                     }
                 }
+            }
         }
     }
 
+
     void MakeSingleton()
     {
-        if(instance==null)
+        if (instance == null)
         {
             instance = this;
         }
@@ -80,25 +118,59 @@ public class GameScene_SaveLoadManager : MonoBehaviour
     }
     void LoadSkin()
     {
-        for(int i = 0 ;  i<Hats.Length ; i++)
+        int length = 0;
+        // for (int i = 0; i < Hats.Length; i++)
+        // {
+        //     if (Hats[i].isOwn)
+        //     {
+        //         Hats[i].hat.SetActive(true);
+        //         length++;
+        //         break;
+        //     }
+        // }
+
+        // if (length == 0)
+        // {
+        //     for (int i = 0; i < Hats.Length; i++)
+        //     {
+        //         if (Hats[i].isOwn)
+        //         {
+        //             Hats[i].hat.SetActive(true);
+        //             break;
+        //         }
+        //     }
+        // }
+
+
+        if (OutfitInventory.MainOutfit != null)
         {
-            if(Hats[i].isOwn)
+            for (int i = 0; i < Outfits.Length; i++)
             {
-                Hats[i].hat.SetActive(true);
-                break;
+                if (Outfits[i].outfit.name.Equals(OutfitInventory.MainOutfit))
+                {
+                    Outfits[i].outfit.SetActive(true);
+                    length++;
+                    break;
+                }
             }
+        }
+        else
+        {
+
+            for (int i = 0; i < Outfits.Length; i++)
+            {
+                if (Outfits[i].isOwn)
+                {
+                    Outfits[i].outfit.SetActive(true);
+                    break;
+                }
+            }
+
         }
 
 
-        for(int i = 0 ;  i<Outfits.Length ; i++)
-        {
-            if(Outfits[i].isOwn)
-            {
-                Outfits[i].outfit.SetActive(true);
-                break;
-            }
-        }
 
-        
+
+
     }
 }

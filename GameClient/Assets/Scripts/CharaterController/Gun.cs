@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Gun : MonoBehaviour
 {
@@ -68,17 +69,22 @@ public class Gun : MonoBehaviour
     public GunRecoil recoil;
 
     List<BulletGravity> bullets = new List<BulletGravity>();
-
-
+    Scene currentScene;
+    const string GAMEPLAY = "Gameplay";
     private void Awake()
     {
-        // muzzle.Stop();
-        curAmmo = loadAmmo;
-        myUI = GameObject.FindGameObjectWithTag("UIManager").GetComponent<UIManager>();
-        crossHairTarget = GameObject.FindGameObjectWithTag("Player").GetComponent<MyPlayerController>().CrossHairTarget;
-        recoil = GetComponent<GunRecoil>();
-        originTotalAmmo = totalAmmo;
-        // readyToUse = true;
+        currentScene = SceneManager.GetActiveScene();
+        if (currentScene.name == "Gameplay")
+        {
+            // muzzle.Stop();
+            curAmmo = loadAmmo;
+            myUI = GameObject.FindGameObjectWithTag("UIManager").GetComponent<UIManager>();
+            crossHairTarget = GameObject.FindGameObjectWithTag("Player").GetComponent<MyPlayerController>().CrossHairTarget;
+            recoil = GetComponent<GunRecoil>();
+            Debug.Log(transform.name);
+            originTotalAmmo = totalAmmo;
+            // readyToUse = true;
+        }
 
     }
 
@@ -90,13 +96,21 @@ public class Gun : MonoBehaviour
 
     void Start()
     {
-        currenTime = timeDelay;
-        StartCoroutine(LockRotation());
+        if(currentScene.name == "Gameplay")
+        {
+            currenTime = timeDelay;
+            //StartCoroutine(LockRotation());
+        }
+        
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (currentScene.name == GAMEPLAY)
+        {
+            transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+        }
         currenTime += Time.deltaTime;
         if (currenTime > timeDelay)
         {
