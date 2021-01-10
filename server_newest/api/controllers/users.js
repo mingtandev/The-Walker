@@ -83,8 +83,10 @@ exports.getOne = (req, res, next) => {
 	let selectStr = '';
 
 	if (_id !== req.userData._id && req.userData.roles === 'user')
-		selectStr = 'name email roles slugName';
-	else selectStr = 'name email roles cash isVerified history items slugName';
+		selectStr = 'name email roles slugName thumbnail cloudinary_id';
+	else
+		selectStr =
+			'name email roles cash isVerified history items slugName thumbnail cloudinary_id';
 
 	User.findById(_id)
 		.select(selectStr)
@@ -124,7 +126,8 @@ exports.create = (req, res, next) => {
 					error,
 				});
 			} else {
-				let avatar = '';
+				let avatar =
+					'https://res.cloudinary.com/dghvjalhh/image/upload/v1607164319/avatars/avatar-icon-images-4_zghnyv.png';
 				let cloudinary_id = '';
 
 				if (req.file) {
@@ -142,7 +145,7 @@ exports.create = (req, res, next) => {
 					email,
 					password: encryptedPassword,
 					passwordResetToken,
-					avatar,
+					thumbnail: avatar,
 					cloudinary_id,
 				});
 
@@ -166,7 +169,7 @@ exports.create = (req, res, next) => {
 						sendMail(req, user.email, token, 'confirm'),
 							res.status(201).json({
 								msg: 'success',
-								user: user,
+								user,
 							});
 					})
 					.catch((error) => {
@@ -243,9 +246,9 @@ exports.update = async (req, res, next) => {
 					(key) =>
 						`${key}: ${
 							key === 'password'
-								? `********
-									${req.body.password[req.body.password.length - 1]}
-									${req.body.password[req.body.password.length - 2]}`
+								? '********' +
+								  `${req.body.password[req.body.password.length - 1]}` +
+								  `${req.body.password[req.body.password.length - 2]}`
 								: req.body[key]
 						}`
 				),
@@ -518,7 +521,16 @@ exports.login = (req, res, next) => {
 				}
 
 				if (matched) {
-					const { email, _id, isVerified, name, cash, slugName, roles } = user;
+					const {
+						email,
+						_id,
+						isVerified,
+						name,
+						cash,
+						slugName,
+						roles,
+						thumbnail,
+					} = user;
 
 					const payloadToken = {
 						_id,
@@ -527,6 +539,7 @@ exports.login = (req, res, next) => {
 						cash,
 						slugName,
 						email,
+						thumbnail,
 					};
 
 					const token = jwt.sign(payloadToken, JWT_KEY, {

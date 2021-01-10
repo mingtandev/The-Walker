@@ -12,8 +12,8 @@ router.post('/:itemId', checkAuth, ItemsController.buyOne);
 router.post('/', checkAuth, upload.single('thumbnail'), ItemsController.create);
 router.patch(
 	'/:itemId',
-	upload.single('thumbnail'),
 	checkAuth,
+	upload.single('thumbnail'),
 	ItemsController.update
 );
 router.delete('/:itemId', checkAuth, ItemsController.delete);

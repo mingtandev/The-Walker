@@ -220,8 +220,8 @@ exports.update = async (req, res, next) => {
 			},
 		};
 
-		const [newBlog] = await Promise.all([
-			blog.save(),
+		await Promise.all([
+			Blog.updateOne({ _id: blog._id }, { $set: blog }),
 			User.updateOne(
 				{ _id: req.userData._id },
 				{
@@ -234,7 +234,7 @@ exports.update = async (req, res, next) => {
 
 		res.status(200).json({
 			msg: 'success',
-			blog: newBlog,
+			blog,
 			request: {
 				type: 'GET',
 				url: req.hostname + '/blogs/' + _id,
